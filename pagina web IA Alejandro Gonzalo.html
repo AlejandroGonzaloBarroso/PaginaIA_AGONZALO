@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contador de Personas</title>
+    <!-- Importando Tailwind CSS para un diseño moderno -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Importando Google Fonts para una tipografía HD -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Importando Tone.js para efectos de sonido -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+    <style>
+        /* Estilos personalizados y configuración de tema */
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow: hidden; /* Previene scroll y barras de desplazamiento */
+            position: relative;
+            color: #222; /* Color de texto para modo claro */
+        }
+
+        /* Capa para la imagen de fondo del usuario */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: -2;
+            /* Se ha actualizado el nombre de la imagen */
+            background-image: url('fondo.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        /* Capa de superposición para los modos de iluminación */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: -1;
+            background-color: rgba(255, 255, 255, 0.7); /* Tinte claro */
+            transition: background-color 0.5s ease;
+        }
+
+        .dark body {
+            color: #ccc; /* Color de texto para modo oscuro */
+        }
+
+        .dark body::after {
+            background-color: rgba(17, 17, 17, 0.8); /* Tinte oscuro */
+        }
+
+
+        /* Animación suave para el cambio de color */
+        #counter-card, button, hr {
+            transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease, transform 0.2s ease;
+        }
+        
+        button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            filter: grayscale(0.8);
+        }
+
+        @keyframes score-jump {
+            0% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-5px) scale(1.05); }
+            100% { transform: translateY(0) scale(1); }
+        }
+
+        .score-jumping {
+            animation: score-jump 0.3s ease-out;
+        }
+        
+        #wave-canvas, #sparkle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        #sparkle-canvas {
+            z-index: 1; /* Por encima de la onda */
+        }
+
+        /* --- ESTILOS DE CRÉDITOS --- */
+        #credit-trigger-zone {
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            width: 320px;
+            height: 60px;
+            z-index: 50;
+        }
+
+        #credit-slider {
+            position: fixed;
+            bottom: 10px;
+            right: 15px;
+            transform: translateY(150%);
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 40;
+            pointer-events: none;
+        }
+
+        #credit-trigger-zone:hover ~ #credit-slider {
+            transform: translateY(0);
+        }
+
+        #credit-text {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #ccc;
+            text-shadow: 1px 1px 3px #000;
+        }
+
+        .dark #credit-text {
+            color: #ccc;
+        }
+        
+        /* Estilo PlayStation 3 */
+        .ps3-card {
+            background: rgba(255, 255, 255, 0.4); /* Fondo claro */
+            border-radius: 12px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(12px);
+        }
+        
+        .dark .ps3-card {
+            background: rgba(20, 20, 20, 0.5); /* Fondo oscuro */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .ps3-inner-card {
+             background: rgba(255, 255, 255, 0.2);
+             border-radius: 8px;
+             border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .dark .ps3-inner-card {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .ps3-button {
+            background: linear-gradient(145deg, #e1e1e1, #ffffff);
+            border-radius: 8px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1), inset 0 1px 1px rgba(255,255,255,0.8);
+        }
+
+        .dark .ps3-button {
+            background: linear-gradient(145deg, #2a2a2e, #1e1e21);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.1);
+        }
+
+        .ps3-button:hover:not(:disabled) {
+            transform: scale(1.05);
+            filter: brightness(1.1);
+        }
+
+        .ps3-button:active:not(:disabled) {
+            transform: translateY(2px) scale(1.02);
+            filter: brightness(0.95);
+            box-shadow: 0 2px 3px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.1);
+        }
+
+    </style>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+</head>
+<body class="dark">
+
+    <!-- Fondos Animados -->
+    <canvas id="wave-canvas"></canvas>
+    <canvas id="sparkle-canvas"></canvas>
+
+    <!-- Contenedor principal de la aplicación -->
+    <div id="main-container" class="min-h-screen flex flex-col items-center justify-center p-4 relative z-10">
+
+        <!-- Controles Superiores -->
+        <div class="absolute top-4 left-4 right-4 z-10 flex justify-between items-center">
+             <!-- Botón de Sonido -->
+             <button id="sound-toggle" class="p-2 ps3-button text-gray-800 dark:text-gray-200">
+                <svg id="sound-on-icon" class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M7 3a1 1 0 000 2v6a1 1 0 100 2h0a1 1 0 001-1V4a1 1 0 00-1-1z"/><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v8a1 1 0 11-2 0V4a1 1 0 011-1zM3 5a1 1 0 011-1h1a1 1 0 110 2H4a1 1 0 01-1-1zm12 0a1 1 0 011-1h1a1 1 0 110 2h-1a1 1 0 01-1-1z" clip-rule="evenodd"/></svg>
+                <svg id="sound-off-icon" class="w-6 h-6 hidden" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM12.293 7.293a1 1 0 011.414 0L15 8.586l1.293-1.293a1 1 0 111.414 1.414L16.414 10l1.293 1.293a1 1 0 01-1.414 1.414L15 11.414l-1.293 1.293a1 1 0 01-1.414-1.414L13.586 10l-1.293-1.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+            </button>
+            <!-- Botón para cambiar el tema -->
+            <button id="theme-toggle" class="p-2 ps3-button text-gray-800 dark:text-gray-200">
+                <svg id="sun-icon" class="w-6 h-6 " fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 14.95a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414l-.707.707zm-2.121-2.121a1 1 0 011.414 0l.707.707a1 1 0 01-1.414 1.414l-.707-.707zM4 11a1 1 0 100-2H3a1 1 0 100 2h1z" clip-rule="evenodd"/></svg>
+                <svg id="moon-icon" class="w-6 h-6 hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
+            </button>
+        </div>
+
+        <!-- Tarjeta del contador -->
+        <div id="counter-card" class="w-full max-w-2xl p-6 sm:p-8 text-center ps3-card">
+            <!-- Sección del Total -->
+            <div class="mb-6">
+                <h1 class="text-7xl sm:text-8xl font-bold" id="total-count-display">0</h1>
+                <p class="text-xl sm:text-2xl mt-2 tracking-widest" id="total-label-display">personas</p>
+            </div>
+            
+            <hr id="divider-line" class="h-[1px] border-0">
+
+            <!-- Contenedor para contadores por sexo -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                <!-- Contador de Hombres -->
+                <div class="p-4 ps3-inner-card">
+                    <h2 class="text-xl text-blue-400 dark:text-blue-300 mb-2 font-semibold">Hombres</h2>
+                    <p class="text-6xl mb-4 font-bold" id="male-count-display">0</p>
+                    <div class="grid grid-cols-2 gap-4">
+                        <button id="decrease-male-btn" class="py-3 text-3xl text-gray-800 dark:text-white ps3-button">-</button>
+                        <button id="increase-male-btn" class="py-3 text-3xl text-gray-800 dark:text-white ps3-button">+</button>
+                    </div>
+                </div>
+
+                <!-- Contador de Mujeres -->
+                <div class="p-4 ps3-inner-card">
+                    <h2 class="text-xl text-pink-500 dark:text-pink-300 mb-2 font-semibold">Mujeres</h2>
+                    <p class="text-6xl mb-4 font-bold" id="female-count-display">0</p>
+                    <div class="grid grid-cols-2 gap-4">
+                        <button id="decrease-female-btn" class="py-3 text-3xl text-gray-800 dark:text-white ps3-button">-</button>
+                        <button id="increase-female-btn" class="py-3 text-3xl text-gray-800 dark:text-white ps3-button">+</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botón de Borrar Todo -->
+            <button id="reset-btn" class="w-full mt-6 py-3 text-xl font-semibold text-gray-800 dark:text-white ps3-button">Borrar Todo</button>
+        </div>
+        
+    </div>
+
+    <!-- Créditos -->
+    <div id="credit-trigger-zone"></div>
+    <div id="credit-slider">
+        <p id="credit-text" class="dark:text-gray-400">Hecho por Alejandro Gonzalo</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- SELECCIÓN DE ELEMENTOS DEL DOM ---
+            const totalCountDisplay = document.getElementById('total-count-display');
+            const totalLabelDisplay = document.getElementById('total-label-display');
+            const maleCountDisplay = document.getElementById('male-count-display');
+            const femaleCountDisplay = document.getElementById('female-count-display');
+            
+            const increaseMaleBtn = document.getElementById('increase-male-btn');
+            const decreaseMaleBtn = document.getElementById('decrease-male-btn');
+            const increaseFemaleBtn = document.getElementById('increase-female-btn');
+            const decreaseFemaleBtn = document.getElementById('decrease-female-btn');
+            const resetBtn = document.getElementById('reset-btn');
+
+            const themeToggle = document.getElementById('theme-toggle');
+            const sunIcon = document.getElementById('sun-icon');
+            const moonIcon = document.getElementById('moon-icon');
+            const soundToggle = document.getElementById('sound-toggle');
+            const soundOnIcon = document.getElementById('sound-on-icon');
+            const soundOffIcon = document.getElementById('sound-off-icon');
+            const counterCard = document.getElementById('counter-card');
+            const dividerLine = document.getElementById('divider-line');
+
+            // --- ESTADO INICIAL ---
+            let maleCount = 0;
+            let femaleCount = 0;
+            let isMuted = true;
+
+            // --- LÓGICA DE SONIDO ---
+            let fmSynth, pluckSynth, noiseSynth;
+            
+            function setupAudio() {
+                if (Tone.context.state !== 'running') { Tone.start(); }
+                fmSynth = new Tone.FMSynth({ modulationIndex: 10, envelope: { attack: 0.01, decay: 0.2 } }).toDestination();
+                pluckSynth = new Tone.PluckSynth({ attackNoise: 0.5, dampening: 4000, resonance: 0.7 }).toDestination();
+                noiseSynth = new Tone.NoiseSynth({ noise: { type: 'white' }, envelope: { attack: 0.005, decay: 0.1, sustain: 0 } }).toDestination();
+                isMuted = false;
+                soundOnIcon.classList.remove('hidden');
+                soundOffIcon.classList.add('hidden');
+            }
+
+            const playIncreaseSound = () => { if (!isMuted) fmSynth.triggerAttackRelease("C5", "32n"); };
+            const playDecreaseSound = () => { if (!isMuted) fmSynth.triggerAttackRelease("G4", "32n"); };
+            const playSwitchSound = () => { if (!isMuted) pluckSynth.triggerAttackRelease("C4", "4n"); };
+            const playResetSound = () => { if (!isMuted) noiseSynth.triggerAttackRelease("8n"); };
+
+            // --- FUNCIONES DE UI ---
+            function applyGameAnimation(element) {
+                element.classList.add('score-jumping');
+                element.addEventListener('animationend', () => {
+                    element.classList.remove('score-jumping');
+                }, { once: true });
+            }
+
+            function updateUI() {
+                const totalCount = maleCount + femaleCount;
+                totalCountDisplay.textContent = totalCount;
+                maleCountDisplay.textContent = maleCount;
+                femaleCountDisplay.textContent = femaleCount;
+                totalLabelDisplay.textContent = (totalCount === 1) ? 'persona' : 'personas';
+                decreaseMaleBtn.disabled = maleCount === 0;
+                decreaseFemaleBtn.disabled = femaleCount === 0;
+
+                // --- LÓGICA DE COLOR DINÁMICO PARA BORDES ---
+                const maleColor = { r: 59, g: 130, b: 246 }; // Blue
+                const femaleColor = { r: 236, g: 72, b: 153 }; // Pink
+                const neutralColor = { r: 255, g: 255, b: 255 }; // Neutral White/Grey
+
+                let finalColor;
+
+                if (totalCount === 0) {
+                    finalColor = `rgba(${neutralColor.r}, ${neutralColor.g}, ${neutralColor.b}, 0.1)`;
+                } else {
+                    const maleRatio = maleCount / totalCount;
+                    const femaleRatio = femaleCount / totalCount;
+                    const r = (maleColor.r * maleRatio) + (femaleColor.r * femaleRatio);
+                    const g = (maleColor.g * maleRatio) + (femaleColor.g * femaleRatio);
+                    const b = (maleColor.b * maleRatio) + (femaleColor.b * femaleRatio);
+                    finalColor = `rgb(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)})`;
+                }
+
+                counterCard.style.borderColor = finalColor;
+                dividerLine.style.backgroundColor = finalColor;
+            }
+
+            function toggleTheme() {
+                if(Tone.context.state !== 'running') setupAudio();
+                playSwitchSound();
+                document.body.classList.toggle('dark');
+                sunIcon.classList.toggle('hidden');
+                moonIcon.classList.toggle('hidden');
+            }
+            
+            function toggleSound() {
+                if(Tone.context.state !== 'running') { setupAudio(); return; }
+                isMuted = !isMuted;
+                playSwitchSound();
+                soundOnIcon.classList.toggle('hidden', isMuted);
+                soundOffIcon.classList.toggle('hidden', !isMuted);
+            }
+
+            function setupHoldableButton(button, action, soundAction) {
+                let intervalId = null;
+
+                const stopAction = () => {
+                    clearInterval(intervalId);
+                    intervalId = null;
+                    window.removeEventListener('mouseup', stopAction);
+                    window.removeEventListener('touchend', stopAction);
+                    window.removeEventListener('touchcancel', stopAction);
+                };
+
+                const startAction = (e) => {
+                    e.preventDefault();
+                    if(Tone.context.state !== 'running') setupAudio();
+                    if (button.disabled) return;
+                    
+                    const coords = e.touches ? e.touches[0] : e;
+                    triggerSparkles(coords.clientX, coords.clientY);
+                    
+                    action();
+                    soundAction();
+
+                    window.addEventListener('mouseup', stopAction);
+                    window.addEventListener('touchend', stopAction);
+                    window.addEventListener('touchcancel', stopAction);
+
+                    intervalId = setInterval(() => {
+                        if (button.disabled) {
+                            stopAction();
+                        } else {
+                            action();
+                            soundAction();
+                        }
+                    }, 120);
+                };
+                
+                button.addEventListener('mousedown', startAction);
+                button.addEventListener('touchstart', startAction, { passive: false });
+            }
+
+            function animateReset() {
+                const startMale = maleCount;
+                const startFemale = femaleCount;
+                const duration = 500;
+                let startTime = null;
+
+                if (startMale === 0 && startFemale === 0) return;
+
+                const buttonsToDisable = [increaseMaleBtn, decreaseMaleBtn, increaseFemaleBtn, decreaseFemaleBtn, resetBtn];
+                buttonsToDisable.forEach(btn => btn.disabled = true);
+
+                function step(timestamp) {
+                    if (!startTime) startTime = timestamp;
+                    const elapsed = timestamp - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    const easeOutProgress = 1 - Math.pow(1 - progress, 3); // Ease-out cubic
+
+                    maleCount = Math.round(startMale * (1 - easeOutProgress));
+                    femaleCount = Math.round(startFemale * (1 - easeOutProgress));
+
+                    updateUI();
+                    setWaveProperties();
+
+                    if (progress < 1) {
+                        requestAnimationFrame(step);
+                    } else {
+                        maleCount = 0;
+                        femaleCount = 0;
+                        updateUI();
+                        setWaveProperties();
+                        
+                        increaseMaleBtn.disabled = false;
+                        increaseFemaleBtn.disabled = false;
+                        resetBtn.disabled = false;
+                    }
+                }
+
+                requestAnimationFrame(step);
+            }
+
+            // --- ASIGNACIÓN DE EVENTOS ---
+            const increaseMale = () => { maleCount++; applyGameAnimation(totalCountDisplay); updateUI(); setWaveProperties(); };
+            const decreaseMale = () => { if (maleCount > 0) { maleCount--; updateUI(); } setWaveProperties(); };
+            const increaseFemale = () => { femaleCount++; applyGameAnimation(totalCountDisplay); updateUI(); setWaveProperties(); };
+            const decreaseFemale = () => { if (femaleCount > 0) { femaleCount--; updateUI(); } setWaveProperties(); };
+
+            setupHoldableButton(increaseMaleBtn, increaseMale, playIncreaseSound);
+            setupHoldableButton(decreaseMaleBtn, decreaseMale, playDecreaseSound);
+            setupHoldableButton(increaseFemaleBtn, increaseFemale, playIncreaseSound);
+            setupHoldableButton(decreaseFemaleBtn, decreaseFemale, playDecreaseSound);
+
+            themeToggle.addEventListener('click', (e) => {
+                triggerSparkles(e.clientX, e.clientY);
+                toggleTheme();
+            });
+            soundToggle.addEventListener('click', (e) => {
+                triggerSparkles(e.clientX, e.clientY);
+                toggleSound();
+            });
+            resetBtn.addEventListener('click', (e) => {
+                if(Tone.context.state !== 'running') setupAudio();
+                triggerSparkles(e.clientX, e.clientY);
+                playResetSound();
+                animateReset();
+            });
+
+            // --- INICIALIZACIÓN ---
+            updateUI();
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+                document.body.classList.remove('dark');
+                sunIcon.classList.remove('hidden');
+                moonIcon.classList.add('hidden');
+            } else {
+                document.body.classList.add('dark');
+                sunIcon.classList.add('hidden');
+                moonIcon.classList.remove('hidden');
+            }
+            soundOnIcon.classList.add('hidden');
+            soundOffIcon.classList.remove('hidden');
+            
+            // --- PS3 WAVE BACKGROUND ---
+            const waveCanvas = document.getElementById('wave-canvas');
+            const ctx = waveCanvas.getContext('2d');
+            let time = 0;
+            
+            const maleColor = { r: 59, g: 130, b: 246 }; // Blue
+            const femaleColor = { r: 236, g: 72, b: 153 }; // Pink
+            const neutralColor = { r: 120, g: 120, b: 200 }; // Neutral purple-ish
+
+            let targetColor = { ...neutralColor };
+            let currentColor = { ...neutralColor };
+            let targetAmplitude = 1.0;
+            let currentAmplitude = 1.0;
+            let targetFrequency = 1.0;
+            let currentFrequency = 1.0;
+
+            function setWaveProperties() {
+                const totalCount = maleCount + femaleCount;
+                if (totalCount === 0) {
+                    targetColor = { ...neutralColor };
+                    targetAmplitude = 1.0;
+                    targetFrequency = 1.0;
+                } else {
+                    const maleRatio = maleCount / totalCount;
+                    const femaleRatio = femaleCount / totalCount;
+                    targetColor = {
+                        r: (maleColor.r * maleRatio) + (femaleColor.r * femaleRatio),
+                        g: (maleColor.g * maleRatio) + (femaleColor.g * femaleRatio),
+                        b: (maleColor.b * maleRatio) + (femaleColor.b * femaleRatio)
+                    };
+                    targetAmplitude = ((1.2 * maleRatio) + (0.8 * femaleRatio));
+                    targetFrequency = ((1.3 * maleRatio) + (0.9 * femaleRatio));
+                }
+            }
+            
+            function drawWave() {
+                const easing = 0.05;
+                currentColor.r += (targetColor.r - currentColor.r) * easing;
+                currentColor.g += (targetColor.g - currentColor.g) * easing;
+                currentColor.b += (targetColor.b - currentColor.b) * easing;
+                currentAmplitude += (targetAmplitude - currentAmplitude) * easing;
+                currentFrequency += (targetFrequency - currentFrequency) * easing;
+
+                const width = waveCanvas.width;
+                const height = waveCanvas.height;
+                ctx.clearRect(0, 0, width, height);
+                time += (0.02 * currentFrequency);
+
+                const gradient = ctx.createLinearGradient(0, 0, width, height);
+                gradient.addColorStop(0, `rgba(${Math.round(currentColor.r)}, ${Math.round(currentColor.g)}, ${Math.round(currentColor.b)}, 0.7)`);
+                gradient.addColorStop(1, `rgba(${Math.round(currentColor.r)}, ${Math.round(currentColor.g)}, ${Math.round(currentColor.b)}, 0.2)`);
+                ctx.fillStyle = gradient;
+                
+                ctx.beginPath();
+                ctx.moveTo(0, height);
+
+                const segments = 100;
+                for (let i = 0; i <= segments; i++) {
+                    const x = (width / segments) * i;
+                    const sin1 = Math.sin(time + (i / 15)) * 20 * currentAmplitude;
+                    const sin2 = Math.sin(time * 1.5 + (i / 25)) * 30 * currentAmplitude;
+                    const sin3 = Math.cos(time * 0.5 + (i / 35)) * 25 * currentAmplitude;
+                    const y = height / 2 + sin1 + sin2 + sin3;
+                    ctx.lineTo(x, y);
+                }
+
+                ctx.lineTo(width, height);
+                ctx.closePath();
+                ctx.fill();
+
+                requestAnimationFrame(drawWave);
+            }
+
+            // --- SPARKLE EFFECT ---
+            const sparkleCanvas = document.getElementById('sparkle-canvas');
+            const sparkleCtx = sparkleCanvas.getContext('2d');
+            let sparkles = [];
+
+            function triggerSparkles(x, y) {
+                for (let i = 0; i < 20; i++) {
+                    sparkles.push({
+                        x: x,
+                        y: y,
+                        life: 1,
+                        size: Math.random() * 4 + 1,
+                        vx: (Math.random() - 0.5) * 4,
+                        vy: (Math.random() - 0.5) * 4,
+                    });
+                }
+            }
+
+            function drawSparkles() {
+                sparkleCtx.clearRect(0, 0, sparkleCanvas.width, sparkleCanvas.height);
+                sparkles.forEach((s, i) => {
+                    s.life -= 0.03;
+                    if (s.life <= 0) {
+                        sparkles.splice(i, 1);
+                    }
+                    s.x += s.vx;
+                    s.y += s.vy;
+
+                    sparkleCtx.fillStyle = `rgba(255, 255, 255, ${s.life})`;
+                    sparkleCtx.beginPath();
+                    sparkleCtx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+                    sparkleCtx.fill();
+                });
+                requestAnimationFrame(drawSparkles);
+            }
+            
+            function resizeCanvases() {
+                waveCanvas.width = window.innerWidth;
+                waveCanvas.height = window.innerHeight;
+                sparkleCanvas.width = window.innerWidth;
+                sparkleCanvas.height = window.innerHeight;
+            }
+
+            window.addEventListener('resize', resizeCanvases);
+            resizeCanvases();
+            drawWave();
+            drawSparkles();
+
+        });
+    </script>
+</body>
+</html>
