@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cronología del Proyecto Pomodoro</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Fuentes de Google -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'VT323', monospace;
+            background-color: #0d0221;
+            background-image:
+                linear-gradient(rgba(255, 0, 222, 0.4) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 0, 222, 0.4) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+        h1, h2 {
+            font-family: 'Press-Start-2P', cursive;
+        }
+        .timeline-item {
+            position: relative;
+            padding-bottom: 2.5rem;
+            padding-left: 2.5rem;
+        }
+        .timeline-item:last-child {
+            padding-bottom: 0;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 0.5rem;
+            top: 0.5rem;
+            bottom: -0.5rem;
+            width: 2px;
+            background-color: #ff00de;
+        }
+        .timeline-item:last-child::before {
+            display: none;
+        }
+        .timeline-icon {
+            position: absolute;
+            left: 0;
+            top: 0.25rem;
+            transform: translateX(-50%);
+            background-color: #0d0221;
+            border: 2px solid #ff00de;
+            box-shadow: 0 0 10px #ff00de;
+        }
+        .preview-frame {
+            border: 1px solid #ff00de;
+            box-shadow: 0 0 10px #ff00de;
+            transform: scale(0.75);
+            transform-origin: top left;
+            width: 134%;
+            height: 134%;
+        }
+    </style>
+</head>
+<body class="text-white p-4 sm:p-8">
+
+    <div class="max-w-4xl mx-auto">
+        <header class="text-center mb-12">
+            <h1 class="text-3xl sm:text-4xl text-white mb-2" style="text-shadow: 0 0 8px #ff00de;">Cronología del Proyecto</h1>
+            <p class="text-lg text-gray-400">La evolución de la App Pomodoro, prompt por prompt.</p>
+        </header>
+
+        <div class="relative">
+            <!-- Timeline Item 1 -->
+            <div class="timeline-item">
+                <div class="timeline-icon w-8 h-8 rounded-full flex items-center justify-center">1</div>
+                <h2 class="text-xl mb-2 text-pink-400">El Comienzo</h2>
+                <div class="bg-black/50 border border-pink-500/50 rounded-lg p-4">
+                    <p class="italic text-gray-300 mb-2">"hazme una app pomodoro con varios modos de pomodoro en html js y css..."</p>
+                    <p class="text-gray-400 mb-4 text-lg"><strong>Mi acción:</strong> Creé la estructura básica de la aplicación con HTML, CSS y JavaScript. Implementé los modos de temporizador y los controles de inicio/pausa/reinicio.</p>
+                    <div class="w-full h-[500px] bg-gray-900 rounded-md overflow-hidden relative">
+                         <div class="preview-frame">
+                            <div class="w-full h-full bg-gray-100 flex flex-col items-center justify-center p-8 text-black">
+                                <h1 class="text-4xl font-bold mb-4">Pomodoro</h1>
+                                <div class="text-6xl font-mono mb-6">25:00</div>
+                                <div class="flex gap-4"><button class="bg-blue-500 text-white px-4 py-2 rounded">Pomodoro</button></div>
+                                <div class="flex gap-4 mt-4"><button class="bg-green-500 text-white px-6 py-3 rounded-lg text-xl">Iniciar</button></div>
+                            </div>
+                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timeline Item 2 -->
+            <div class="timeline-item">
+                <div class="timeline-icon w-8 h-8 rounded-full flex items-center justify-center">2</div>
+                <h2 class="text-xl mb-2 text-cyan-400">Estética Apple</h2>
+                <div class="bg-black/50 border border-cyan-500/50 rounded-lg p-4">
+                    <p class="italic text-gray-300 mb-2">"hazlo con la estetica apple"</p>
+                    <p class="text-gray-400 mb-4 text-lg"><strong>Mi acción:</strong> Rediseñé la interfaz inspirándome en Apple, utilizando una paleta de colores clara, tipografía del sistema y botones con un estilo minimalista.</p>
+                     <div class="w-full h-[500px] bg-gray-900 rounded-md overflow-hidden relative">
+                         <div class="preview-frame">
+                            <div class="w-full h-full bg-white flex flex-col items-center justify-center text-black">
+                                <div class="text-6xl font-thin mb-6">25:00</div>
+                                 <div class="flex bg-gray-200 rounded-full p-1 mb-4"><button class="px-4 py-1 bg-white rounded-full shadow">Pomodoro</button><button class="px-4 py-1">Descanso</button></div>
+                                 <button class="bg-blue-500 text-white w-20 h-20 rounded-full text-lg flex items-center justify-center">▶</button>
+                            </div>
+                         </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Timeline Item 3 -->
+            <div class="timeline-item">
+                <div class="timeline-icon w-8 h-8 rounded-full flex items-center justify-center">3</div>
+                <h2 class="text-xl mb-2 text-pink-400">Anillo de Progreso</h2>
+                <div class="bg-black/50 border border-pink-500/50 rounded-lg p-4">
+                    <p class="italic text-gray-300 mb-2">"dale mas estetica y en vez de para la concentracion pon por Alejandro Gonzalo"</p>
+                    <p class="text-gray-400 mb-4 text-lg"><strong>Mi acción:</strong> Añadí un anillo de progreso circular que se anima con el tiempo y actualicé el pie de página con el nombre solicitado.</p>
+                     <div class="w-full h-[500px] bg-gray-900 rounded-md overflow-hidden relative">
+                         <div class="preview-frame">
+                            <div class="w-full h-full bg-white flex flex-col items-center justify-center text-black">
+                                <div class="relative w-48 h-48 mb-4">
+                                    <svg class="w-full h-full" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" stroke="#e5e7eb" stroke-width="4" fill="none"></circle><circle cx="50" cy="50" r="45" stroke="#ef4444" stroke-width="4" fill="none" stroke-dasharray="283" stroke-dashoffset="70" transform="rotate(-90 50 50)"></circle></svg>
+                                    <div class="absolute inset-0 flex items-center justify-center text-4xl font-light">25:00</div>
+                                </div>
+                                <p>por Alejandro Gonzalo</p>
+                            </div>
+                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timeline Item 4 -->
+            <div class="timeline-item">
+                 <div class="timeline-icon w-8 h-8 rounded-full flex items-center justify-center">4</div>
+                 <h2 class="text-xl mb-2 text-cyan-400">Tiempos Personalizables</h2>
+                 <div class="bg-black/50 border border-cyan-500/50 rounded-lg p-4">
+                     <p class="italic text-gray-300 mb-2">"tiene que pasar automaticamente a un decanso tras el tiempo establecido que se podra decidir entre 20 25 y 30 min..."</p>
+                     <p class="text-gray-400 mb-4 text-lg"><strong>Mi acción:</strong> Implementé la transición automática entre trabajo y descanso, y añadí selectores para personalizar la duración de los ciclos.</p>
+                      <div class="w-full h-[500px] bg-gray-900 rounded-md overflow-hidden relative">
+                         <div class="preview-frame">
+                            <div class="w-full h-full bg-white flex flex-col items-center justify-center text-black p-4">
+                               <div class="text-4xl font-light mb-4">25:00</div>
+                               <div>
+                                 <p class="mb-1 text-sm">Tiempo de Trabajo</p>
+                                 <div class="flex bg-gray-200 rounded-full p-1"><button class="px-3 py-1">20</button><button class="px-3 py-1 bg-white rounded-full shadow">25</button><button class="px-3 py-1">30</button></div>
+                               </div>
+                            </div>
+                         </div>
+                    </div>
+                 </div>
+            </div>
+
+            <!-- Timeline Item 5 -->
+            <div class="timeline-item">
+                 <div class="timeline-icon w-8 h-8 rounded-full flex items-center justify-center">5</div>
+                 <h2 class="text-xl mb-2 text-pink-400">Diseño Horizontal y Modo Oscuro</h2>
+                 <div class="bg-black/50 border border-pink-500/50 rounded-lg p-4">
+                     <p class="italic text-gray-300 mb-2">"Quiero que sea mas dinamico y estilo horizontal con modo claro y oscuro"</p>
+                     <p class="text-gray-400 mb-4 text-lg"><strong>Mi acción:</strong> Reestructuré el layout para que fuera responsive (horizontal en escritorio, vertical en móvil) y añadí un interruptor para tema claro/oscuro.</p>
+                      <div class="w-full h-[500px] bg-gray-900 rounded-md overflow-hidden relative">
+                         <div class="preview-frame">
+                            <div class="w-full h-full bg-black flex items-center justify-center text-white p-4">
+                                <div class="text-6xl font-thin">25:00</div>
+                                <div class="ml-8 border-l border-gray-600 pl-8">
+                                    <p class="text-sm">TIEMPO TRABAJO</p>
+                                    <div class="flex bg-gray-700 p-1 rounded-full"><button class="px-3 py-1 bg-gray-500 rounded-full">25</button></div>
+                                </div>
+                            </div>
+                         </div>
+                    </div>
+                 </div>
+            </div>
+            
+             <!-- Timeline Item 6 -->
+            <div class="timeline-item">
+                 <div class="timeline-icon w-8 h-8 rounded-full flex items-center justify-center">6</div>
+                 <h2 class="text-xl mb-2 text-cyan-400">Botón de Salto Proporcional</h2>
+                 <div class="bg-black/50 border border-cyan-500/50 rounded-lg p-4">
+                     <p class="italic text-gray-300 mb-2">"...quiero que haya un boton para que pase al descanso... descontando el proporcion de lo que has estado trabajando"</p>
+                     <p class="text-gray-400 mb-4 text-lg"><strong>Mi acción:</strong> Introduje el botón "Saltar", que calcula un tiempo de pausa proporcional al trabajo ya completado.</p>
+                     <div class="w-full h-[500px] bg-gray-900 rounded-md overflow-hidden relative">
+                         <div class="preview-frame">
+                            <div class="w-full h-full bg-black flex flex-col items-center justify-center text-white p-4">
+                                <div class="text-5xl font-thin mb-4">12:30</div>
+                                <div class="flex items-center gap-4">
+                                    <button class="w-12 h-12 flex items-center justify-center bg-gray-700 rounded-full">⟲</button>
+                                    <button class="w-20 h-20 flex items-center justify-center bg-red-500 rounded-full">❚❚</button>
+                                    <button class="w-12 h-12 flex items-center justify-center bg-gray-700 rounded-full">»</button>
+                                </div>
+                            </div>
+                         </div>
+                    </div>
+                 </div>
+            </div>
+            
+            <!-- Timeline Item 7 -->
+            <div class="timeline-item">
+                 <div class="timeline-icon w-8 h-8 rounded-full flex items-center justify-center">7</div>
+                 <h2 class="text-xl mb-2 text-pink-400">Estilo Ochentero</h2>
+                 <div class="bg-black/50 border border-pink-500/50 rounded-lg p-4">
+                     <p class="italic text-gray-300 mb-2">"dale estetica ochentera mejor"</p>
+                     <p class="text-gray-400 mb-4 text-lg"><strong>Mi acción:</strong> Transformé el diseño a una estética retro de los 80, con colores neón, efectos de brillo y tipografías de estilo arcade.</p>
+                     <div class="w-full h-[500px] bg-gray-900 rounded-md overflow-hidden relative">
+                         <div class="preview-frame">
+                            <div class="w-full h-full p-8 flex flex-col items-center justify-center" style="background-color: #0d0221; background-image: linear-gradient(rgba(255, 0, 222, 0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 0, 222, 0.4) 1px, transparent 1px); background-size: 20px 20px; font-family: 'VT323', monospace; color: white;">
+                                <p class="my-2 text-4xl" style="font-family: 'Press-Start-2P'; text-shadow: 0 0 8px #ff00de;">25:00</p>
+                                <div class="flex gap-4 mt-4"><button class="w-20 h-20 rounded-lg" style="border: 1px solid #ff00de; background: rgba(255,0,222,0.1)">INICIAR</button></div>
+                            </div>
+                         </div>
+                    </div>
+                 </div>
+            </div>
+            
+             <!-- Timeline Item 8 -->
+            <div class="timeline-item">
+                 <div class="timeline-icon w-8 h-8 rounded-full flex items-center justify-center">8</div>
+                 <h2 class="text-xl mb-2 text-cyan-400">Selector de Formas</h2>
+                 <div class="bg-black/50 border border-cyan-500/50 rounded-lg p-4">
+                     <p class="italic text-gray-300 mb-2">"dale varias formas a seleccionar de el contador del pomodoro"</p>
+                     <p class="text-gray-400 mb-4 text-lg"><strong>Mi acción:</strong> Añadí una opción para que el usuario pudiera elegir entre diferentes formas geométricas para el contorno del temporizador.</p>
+                      <div class="w-full h-[500px] bg-gray-900 rounded-md overflow-hidden relative">
+                         <div class="preview-frame">
+                             <div class="w-full h-full p-8 flex" style="background-color: #0d0221; font-family: 'VT323', monospace; color: white;">
+                                <div class="w-1/2 flex flex-col items-center">
+                                    <div class="relative h-24 w-24">
+                                         <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" stroke="#ff00de" stroke-width="3" fill="none"></circle></svg>
+                                    </div>
+                                    <p class="my-2 text-3xl" style="font-family: 'Press-Start-2P';">25:00</p>
+                                </div>
+                                <div class="w-1/2">
+                                    <p class="mb-2 tracking-widest">FORMA CONTADOR</p>
+                                    <div class="flex flex-col gap-2">
+                                        <button style="border: 1px solid #ff00de; background: rgba(255,0,222,0.1)">Círculo</button>
+                                        <button style="border: 1px solid #ff00de; background: rgba(255,0,222,0.1)">Cuadrado</button>
+                                    </div>
+                                </div>
+                            </div>
+                         </div>
+                    </div>
+                 </div>
+            </div>
+
+            <!-- Timeline Item 9 -->
+            <div class="timeline-item">
+                <div class="timeline-icon w-8 h-8 rounded-full flex items-center justify-center">9</div>
+                <h2 class="text-xl mb-2 text-pink-400">El Reloj de Arena</h2>
+                <div class="bg-black/50 border border-pink-500/50 rounded-lg p-4">
+                    <p class="italic text-gray-300 mb-2">"...solo me quedo con la del reloj de arena"</p>
+                    <p class="text-gray-400 mb-4 text-lg"><strong>Mi acción:</strong> Simplifiqué la interfaz para centrarme en el reloj de arena, mejorando su diseño e implementando la animación de partículas de "arena" cayendo.</p>
+                     <div class="w-full h-[500px] bg-gray-900 rounded-md overflow-hidden relative">
+                         <div class="preview-frame">
+                            <div class="w-full h-full p-8 flex flex-col items-center justify-center" style="background-color: #0d0221; font-family: 'VT323', monospace; color: white;">
+                                <div class="relative h-24 w-24">
+                                     <svg viewBox="0 0 100 100"><path stroke="#ff00de" stroke-width="3" d="M20,15 h60 q-10,17.5 -30,35 q20,17.5 30,35 h-60 q10,-17.5 30,-35 q-20,-17.5 -30,-35 Z" fill="none"></path></svg>
+                                </div>
+                                <p class="my-2 text-4xl" style="font-family: 'Press-Start-2P';">25:00</p>
+                            </div>
+                         </div>
+                    </div>
+                </div>
+            </div>
+            
+             <!-- Timeline Item 10 -->
+            <div class="timeline-item">
+                <div class="timeline-icon w-8 h-8 rounded-full flex items-center justify-center">10</div>
+                <h2 class="text-xl mb-2 text-cyan-400">Nuevas Funciones</h2>
+                <div class="bg-black/50 border border-cyan-500/50 rounded-lg p-4">
+                    <p class="italic text-gray-300 mb-2">"añade funciones" ... "Mete la lista de tareaas opciones de accesibilidad diferentes temas modo zen"</p>
+                    <p class="text-gray-400 mb-4 text-lg"><strong>Mi acción:</strong> Integré un panel de ajustes, una lista de tareas, un selector de temas, el modo Zen y mejoras de accesibilidad como la fuente para dislexia.</p>
+                     <div class="w-full h-[500px] bg-gray-900 rounded-md overflow-hidden relative">
+                         <div class="preview-frame">
+                            <div class="w-full h-full p-4 flex gap-4 items-center" style="background-color: #0d0221; font-family: 'VT323', monospace; color: white;">
+                                <div class="w-1/3"><p class="text-xs">CONTROLES...</p></div>
+                                <div class="w-1/3 flex flex-col items-center">
+                                    <div class="relative h-20 w-20"><svg viewBox="0 0 100 100"><path stroke="#ff00de" stroke-width="3" d="M20,15 h60 q-10,17.5 -30,35 q20,17.5 30,35 h-60 q10,-17.5 30,-35 q-20,-17.5 -30,-35 Z" fill="none"></path></svg></div>
+                                    <p class="my-1 text-2xl" style="font-family: 'Press-Start-2P';">25:00</p>
+                                </div>
+                                <div class="w-1/3"><p class="text-xs">TAREAS...</p></div>
+                                <div class="absolute bottom-2 right-2"><button class="w-6 h-6 rounded-full border border-pink-500/50 flex items-center justify-center">⚙️</button></div>
+                            </div>
+                         </div>
+                    </div>
+                </div>
+            </div>
+            
+             <!-- Timeline Item 11 -->
+            <div class="timeline-item">
+                <div class="timeline-icon w-8 h-8 rounded-full flex items-center justify-center">11</div>
+                <h2 class="text-xl mb-2 text-pink-400">Integración con IA Gemini</h2>
+                <div class="bg-black/50 border border-pink-500/50 rounded-lg p-4">
+                    <p class="italic text-gray-300 mb-2">"Add features to this app that use the Gemini API to call LLMs."</p>
+                    <p class="text-gray-400 mb-4 text-lg"><strong>Mi acción:</strong> Conecté la app con la API de Gemini para añadir un botón ✨ en la lista de tareas que desglosa automáticamente una tarea compleja en sub-tareas.</p>
+                     <div class="w-full h-[500px] bg-gray-900 rounded-md overflow-hidden relative">
+                         <div class="preview-frame">
+                             <div class="w-full h-full p-4 flex justify-end items-center" style="background-color: #0d0221; font-family: 'VT323', monospace; color: white;">
+                                <div class="w-1/2">
+                                    <p class="tracking-widest text-lg">LISTA DE TAREAS</p>
+                                    <div class="p-2 border border-pink-500/50 rounded-lg h-48 mt-1 text-left text-sm">
+                                        <div class="flex items-center"><span>Preparar presentación</span> <button class="ml-auto text-2xl">✨</button></div>
+                                    </div>
+                                </div>
+                             </div>
+                         </div>
+                    </div>
+                </div>
+            </div>
+            
+             <!-- Timeline Item 12 -->
+            <div class="timeline-item">
+                <div class="timeline-icon w-8 h-8 rounded-full flex items-center justify-center">12</div>
+                <h2 class="text-xl mb-2 text-cyan-400">Todas las Funciones</h2>
+                <div class="bg-black/50 border border-cyan-500/50 rounded-lg p-4">
+                    <p class="italic text-gray-300 mb-2">"haz todas las que me has dicho"</p>
+                    <p class="text-gray-400 mb-4 text-lg"><strong>Mi acción:</strong> Implementé el resto de funciones propuestas: estadísticas, sonidos ambientales, frases motivacionales con IA, gamificación y notificaciones de escritorio.</p>
+                     <div class="w-full h-[500px] bg-gray-900 rounded-md overflow-hidden relative">
+                         <div class="preview-frame">
+                              <div class="w-full h-full p-4 flex justify-center items-center" style="background-color: #0d0221; font-family: 'VT323', monospace; color: white; position: relative;">
+                                <div class="text-center">
+                                    <div class="relative h-24 w-24 mx-auto"><svg viewBox="0 0 100 100"><path stroke="#ff00de" stroke-width="3" d="M20,15 h60 q-10,17.5 -30,35 q20,17.5 30,35 h-60 q10,-17.5 30,-35 q-20,-17.5 -30,-35 Z" fill="none"></path></svg></div>
+                                    <p class="my-2 text-3xl" style="font-family: 'Press-Start-2P';">25:00</p>
+                                </div>
+                                <div class="absolute bottom-2 right-2 flex flex-col gap-2">
+                                    <button class="w-8 h-8 rounded-full border border-pink-500/50 flex items-center justify-center text-lg">📊</button>
+                                    <button class="w-8 h-8 rounded-full border border-pink-500/50 flex items-center justify-center text-lg">⚙️</button>
+                                </div>
+                            </div>
+                         </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Timeline Item FINAL -->
+            <div class="timeline-item">
+                <div class="timeline-icon w-8 h-8 rounded-full flex items-center justify-center">
+                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-12v4m-2-2h4m5 4v4m-2-2h4M5 3l14 18"></path></svg>
+                </div>
+                <h2 class="text-xl mb-2 text-green-400">Versión Final y Correcciones</h2>
+                <div class="bg-black/50 border border-green-500/50 rounded-lg p-4">
+                    <p class="italic text-gray-300 mb-2">Correcciones de bugs en temas, centrado y modo Zen.</p>
+                    <p class="text-gray-400 mb-4 text-lg"><strong>Mi acción:</strong> Corregí errores de alineación, solucioné bugs visuales al cambiar de tema y mejoré la usabilidad, asegurando que la aplicación final fuera estable y pulida.</p>
+                     <div id="mini-app-container" class="w-full h-[700px] bg-gray-900 rounded-md overflow-hidden relative transition-all duration-500">
+                         <iframe id="final-app-iframe" src="Pomodoro AGonzalo.html" class="w-full h-full border-0"></iframe>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>
+

@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reloj Pomodoro '80s</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tone.js para notificación sonora -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+    <!-- Fuentes de Google -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <!-- OpenDyslexic Font -->
+    <link href="https://cdn.jsdelivr.net/npm/opendyslexic@latest/build/css/opendyslexic.min.css" rel="stylesheet">
+    
+    <style>
+        /* Estilos base y variables de tema */
+        :root {
+            --bg-color: #0d0221;
+            --bg-image: linear-gradient(rgba(255, 0, 222, 0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 0, 222, 0.4) 1px, transparent 1px);
+            --bg-size: 40px 40px;
+            --font-body: 'VT323', monospace;
+            --font-header: 'Press-Start-2P', cursive;
+            --text-color: #fff;
+            --text-muted-color: #9ca3af;
+            --panel-bg: rgba(0,0,0,0.7);
+            --control-bg: rgba(17, 24, 39, 0.5);
+            --control-border: #4b5563;
+            --glow-pomodoro: 0 0 20px #ff00de, inset 0 0 10px #ff00de;
+            --glow-shortBreak: 0 0 20px #00f6ff, inset 0 0 10px #00f6ff;
+            --glow-longBreak: 0 0 20px #9f50ff, inset 0 0 10px #9f50ff;
+            --accent-pomodoro: #ff00de;
+            --accent-shortBreak: #00f6ff;
+            --accent-longBreak: #9f50ff;
+            --current-accent: var(--accent-pomodoro);
+        }
+
+        .theme-minimalist {
+            --bg-color: #ffffff;
+            --bg-image: none;
+            --font-body: 'Inter', sans-serif;
+            --font-header: 'Inter', sans-serif;
+            --text-color: #000;
+            --text-muted-color: #6b7280;
+            --panel-bg: rgba(243, 244, 246, 0.9);
+            --control-bg: #e5e7eb;
+            --control-border: #d1d5db;
+            --glow-pomodoro: 0 10px 15px -3px rgba(0,0,0,0.1);
+            --glow-shortBreak: 0 10px 15px -3px rgba(0,0,0,0.1);
+            --glow-longBreak: 0 10px 15px -3px rgba(0,0,0,0.1);
+            --accent-pomodoro: #ef4444;
+            --accent-shortBreak: #22c55e;
+            --accent-longBreak: #3b82f6;
+        }
+        
+        .theme-nature {
+             --bg-color: #3d4a40;
+             --bg-image: url("data:image/svg+xml,%3Csvg width='52' height='26' viewBox='0 0 52 26' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%235c7062' fill-opacity='0.4'%3E%3Cpath d='M10 10c0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6h2c0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4v2c-3.314 0-6-2.686-6-6 0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6zm25.464-1.95l8.486 8.486-1.414 1.414-8.486-8.486 1.414-1.414z' /%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+             --font-body: 'Inter', sans-serif;
+             --font-header: 'Inter', sans-serif;
+             --text-color: #f0fdf4;
+             --text-muted-color: #a3b8a9;
+             --panel-bg: rgba(40, 52, 44, 0.8);
+             --control-bg: #28342c;
+             --control-border: #5c7062;
+             --glow-pomodoro: 0 0 20px #ffb703, inset 0 0 10px #ffb703;
+             --glow-shortBreak: 0 0 20px #8ecae6, inset 0 0 10px #8ecae6;
+             --glow-longBreak: 0 0 20px #219ebc, inset 0 0 10px #219ebc;
+             --accent-pomodoro: #ffb703;
+             --accent-shortBreak: #8ecae6;
+             --accent-longBreak: #219ebc;
+        }
+
+        .dyslexia-friendly * {
+            font-family: 'OpenDyslexic', sans-serif !important;
+        }
+        
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            background-color: var(--bg-color);
+            background-image: var(--bg-image);
+            background-size: var(--bg-size, auto);
+            font-family: var(--font-body);
+            color: var(--text-color);
+        }
+
+        #timer-display { font-family: var(--font-header); }
+        .main-container { background-color: var(--panel-bg); }
+        .control-panel { background-color: var(--control-bg); border-color: var(--control-border); }
+        .text-muted { color: var(--text-muted-color); }
+        
+        .container-glow-pomodoro { border: 1px solid var(--accent-pomodoro); box-shadow: var(--glow-pomodoro); }
+        .container-glow-shortBreak { border: 1px solid var(--accent-shortBreak); box-shadow: var(--glow-shortBreak); }
+        .container-glow-longBreak { border: 1px solid var(--accent-longBreak); box-shadow: var(--glow-longBreak); }
+
+        .text-glow-pomodoro { text-shadow: 0 0 4px var(--accent-pomodoro); }
+        .text-glow-shortBreak { text-shadow: 0 0 4px var(--accent-shortBreak); }
+        .text-glow-longBreak { text-shadow: 0 0 4px var(--accent-longBreak); }
+
+        .time-btn.selected, .theme-btn.selected, .sound-btn.selected {
+            color: var(--bg-color) !important;
+            background-color: var(--current-accent);
+            box-shadow: 0 0 8px var(--current-accent);
+        }
+        
+        #pomodoro.selected { background-color: var(--accent-pomodoro); box-shadow: 0 0 8px var(--accent-pomodoro); color: var(--bg-color) !important; }
+        #shortBreak.selected { background-color: var(--accent-shortBreak); box-shadow: 0 0 8px var(--accent-shortBreak); color: var(--bg-color) !important; }
+        #longBreak.selected { background-color: var(--accent-longBreak); box-shadow: 0 0 8px var(--accent-longBreak); color: var(--bg-color) !important; }
+
+        .button-glow-pomodoro { border: 1px solid var(--accent-pomodoro); background-color: color-mix(in srgb, var(--accent-pomodoro) 10%, transparent); }
+        .button-glow-shortBreak { border: 1px solid var(--accent-shortBreak); background-color: color-mix(in srgb, var(--accent-shortBreak) 10%, transparent); }
+        .button-glow-longBreak { border: 1px solid var(--accent-longBreak); background-color: color-mix(in srgb, var(--accent-longBreak) 10%, transparent); }
+
+        /* Zen Mode */
+        .zen-mode #controls-column, .zen-mode #todo-column, .zen-mode #settings-btn, .zen-mode #stats-btn, .zen-mode footer {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .zen-mode .main-container {
+            background-color: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+        .zen-mode #timer-column {
+             transform: scale(1.2);
+        }
+        #zen-exit-hint.show {
+            opacity: 1;
+        }
+        
+        .transition-all-smooth { transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .progress-ring { transition: stroke-dashoffset 1s linear, color 0.5s; }
+        #sand-fill { transition: y 1s linear, height 1s linear, fill 0.5s; }
+        
+        /* Media Queries para pantallas pequeñas */
+        @media (max-width: 767px) {
+            body { display: block; padding-top: 2rem; }
+            #timer-column .relative { height: 180px; width: 180px; }
+            #timer-display { font-size: 2.25rem; margin-top: 0.5rem; margin-bottom: 0.5rem; }
+            #start-pause-btn { width: 80px; height: 80px; }
+            #start-pause-btn svg { width: 32px; height: 32px; }
+            #reset-btn, #skip-btn-container > button { width: 56px; height: 56px; }
+            #skip-btn-container { width: 56px; height: 56px; }
+            #main-container > div { gap: 1.5rem; }
+        }
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+    </style>
+</head>
+<body class="transition-all-smooth flex items-center justify-center min-h-screen">
+    <div id="aria-announcer" class="sr-only" aria-live="assertive" aria-atomic="true"></div>
+
+    <!-- Botones de Acción -->
+    <div class="fixed bottom-4 right-4 z-20 flex flex-col gap-2">
+        <button id="stats-btn" aria-label="Abrir estadísticas" class="p-3 rounded-full bg-black/50 hover:bg-white/20 transition-all-smooth">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+        </button>
+        <button id="settings-btn" aria-label="Abrir ajustes" class="p-3 rounded-full bg-black/50 hover:bg-white/20 transition-all-smooth">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+        </button>
+    </div>
+
+    <!-- Panel de Ajustes -->
+    <div id="settings-panel" class="fixed inset-0 z-10 bg-black/80 flex items-center justify-center hidden backdrop-blur-sm">
+        <div class="main-container p-8 rounded-lg w-full max-w-md relative">
+            <h2 class="text-3xl mb-6 text-center" style="font-family: var(--font-header)">Ajustes</h2>
+            <!-- Temas -->
+            <div class="mb-6">
+                <h3 class="mb-2 font-medium tracking-widest">TEMA VISUAL</h3>
+                <div class="control-panel flex justify-center rounded-lg p-1 space-x-1 border">
+                    <button class="theme-btn time-btn flex-grow py-1.5 rounded-md" data-theme="theme-80s">80s</button>
+                    <button class="theme-btn time-btn flex-grow py-1.5 rounded-md" data-theme="theme-minimalist">Minimalista</button>
+                    <button class="theme-btn time-btn flex-grow py-1.5 rounded-md" data-theme="theme-nature">Naturaleza</button>
+                </div>
+            </div>
+             <!-- Accesibilidad -->
+            <div class="mb-6">
+                <h3 class="mb-2 font-medium tracking-widest">ACCESIBILIDAD</h3>
+                <div class="control-panel flex justify-between items-center rounded-lg p-2 px-3 border mb-2">
+                    <label for="dyslexia-toggle">Modo para Dislexia</label>
+                    <button id="dyslexia-toggle" role="switch" aria-checked="false" class="relative inline-flex items-center h-6 rounded-full w-11 transition-colors bg-gray-600">
+                        <span class="inline-block w-4 h-4 transform bg-white rounded-full transition-transform"></span>
+                    </button>
+                </div>
+                <div class="control-panel flex justify-between items-center rounded-lg p-2 px-3 border">
+                    <label for="notifications-toggle">Notificaciones de Escritorio</label>
+                    <button id="notifications-toggle" role="switch" aria-checked="false" class="relative inline-flex items-center h-6 rounded-full w-11 transition-colors bg-gray-600">
+                        <span class="inline-block w-4 h-4 transform bg-white rounded-full transition-transform"></span>
+                    </button>
+                </div>
+            </div>
+             <!-- Sonidos -->
+            <div class="mb-6">
+                 <h3 class="mb-2 font-medium tracking-widest">SONIDOS AMBIENTALES</h3>
+                 <div class="control-panel flex justify-center rounded-lg p-1 space-x-1 border">
+                    <button class="sound-btn time-btn flex-grow py-1.5 rounded-md" data-sound="rain">Lluvia</button>
+                    <button class="sound-btn time-btn flex-grow py-1.5 rounded-md" data-sound="cafe">Cafetería</button>
+                    <button class="sound-btn time-btn flex-grow py-1.5 rounded-md" data-sound="none">Ninguno</button>
+                </div>
+            </div>
+             <!-- Modo Zen -->
+            <div>
+                 <h3 class="mb-2 font-medium tracking-widest">CONCENTRACIÓN</h3>
+                 <button id="zen-mode-btn" class="control-panel w-full py-2 rounded-lg border">Activar Modo Zen</button>
+            </div>
+            <button id="close-settings-btn" aria-label="Cerrar ajustes" class="absolute top-4 right-4 text-muted">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+        </div>
+    </div>
+    
+     <!-- Panel de Estadísticas -->
+    <div id="stats-panel" class="fixed inset-0 z-10 bg-black/80 flex items-center justify-center hidden backdrop-blur-sm">
+        <div class="main-container p-8 rounded-lg w-full max-w-md relative">
+            <h2 class="text-3xl mb-6 text-center" style="font-family: var(--font-header)">Estadísticas</h2>
+            <div class="space-y-4">
+                <div>
+                    <h3 class="mb-2 font-medium tracking-widest">PUNTOS DE ENFOQUE</h3>
+                    <p id="focus-points" class="text-4xl" style="font-family: var(--font-header); color: var(--current-accent)">0</p>
+                </div>
+                 <div>
+                    <h3 class="mb-2 font-medium tracking-widest">POMODOROS HOY</h3>
+                    <p id="pomodoros-today" class="text-2xl font-bold">0</p>
+                </div>
+                 <div>
+                    <h3 class="mb-2 font-medium tracking-widest">POMODOROS ESTA SEMANA</h3>
+                    <p id="pomodoros-week" class="text-2xl font-bold">0</p>
+                </div>
+            </div>
+            <button id="close-stats-btn" aria-label="Cerrar estadísticas" class="absolute top-4 right-4 text-muted">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+        </div>
+    </div>
+
+
+    <div class="w-full max-w-sm md:max-w-7xl mx-auto p-4">
+        <div id="main-container" class="main-container p-6 md:p-8 rounded-lg shadow-2xl text-center transition-all-smooth">
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 md:gap-12 md:items-center">
+                <!-- Columna Izquierda: Controles -->
+                <div id="controls-column" class="md:w-full transition-all-smooth">
+                    <div class="control-panel p-1.5 rounded-lg flex items-center mb-6 space-x-1 border text-xs sm:text-sm">
+                        <button id="pomodoro" class="mode-btn w-full py-2 px-2 rounded-md font-semibold">Pomodoro</button>
+                        <button id="shortBreak" class="mode-btn w-full py-2 px-2 rounded-md font-semibold">Descanso Corto</button>
+                        <button id="longBreak" class="mode-btn w-full py-2 px-2 rounded-md font-semibold">Descanso Largo</button>
+                    </div>
+
+                    <div class="space-y-4 text-sm">
+                        <div>
+                            <p class="mb-2 font-medium tracking-widest">TIEMPO TRABAJO</p>
+                            <div class="control-panel flex justify-center rounded-lg p-1 space-x-1 border">
+                                <button class="time-btn work-time-btn w-full py-1.5 rounded-md" data-time="20">20</button>
+                                <button class="time-btn work-time-btn w-full py-1.5 rounded-md" data-time="25">25</button>
+                                <button class="time-btn work-time-btn w-full py-1.5 rounded-md" data-time="30">30</button>
+                            </div>
+                        </div>
+                         <div>
+                            <p class="mb-2 font-medium tracking-widest">TIEMPO DESC. CORTO</p>
+                            <div class="control-panel flex justify-center rounded-lg p-1 space-x-1 border">
+                                <button class="time-btn short-break-time-btn w-full py-1.5 rounded-md" data-time="2">2</button>
+                                <button class="time-btn short-break-time-btn w-full py-1.5 rounded-md" data-time="5">5</button>
+                                <button class="time-btn short-break-time-btn w-full py-1.5 rounded-md" data-time="10">10</button>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="mb-2 font-medium tracking-widest">TIEMPO DESC. LARGO</p>
+                            <div class="control-panel flex justify-center rounded-lg p-1 space-x-1 border">
+                                <button class="time-btn long-break-time-btn w-full py-1.5 rounded-md" data-time="15">15</button>
+                                <button class="time-btn long-break-time-btn w-full py-1.5 rounded-md" data-time="20">20</button>
+                                <button class="time-btn long-break-time-btn w-full py-1.5 rounded-md" data-time="30">30</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Columna Central: Temporizador -->
+                <div id="timer-column" class="flex-shrink-0 md:w-full flex flex-col items-center justify-center transition-all-smooth">
+                    <div class="relative h-52 w-52">
+                        <svg id="hourglass-shape" class="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
+                             <defs>
+                                <clipPath id="hourglass-clip"> <path d="M20,15 h60 q-10,17.5 -30,35 q20,17.5 30,35 h-60 q10,-17.5 30,-35 q-20,-17.5 -30,-35 Z" /> </clipPath>
+                                <clipPath id="bottom-bulb-clip"> <path d="M20,85 h60 q-10,-17.5 -30,-35 q-20,17.5 -30,35 Z" /> </clipPath>
+                            </defs>
+                             <g id="sand-particles" clip-path="url(#hourglass-clip)"></g>
+                             <rect id="sand-fill" x="20" y="85" width="60" height="0" clip-path="url(#bottom-bulb-clip)"></rect>
+                             <path class="stroke-current text-gray-800" stroke-width="2" d="M20,15 h60 q-10,17.5 -30,35 q20,17.5 30,35 h-60 q10,-17.5 30,-35 q-20,-17.5 -30,-35 Z" fill="transparent"></path>
+                             <path id="progress-ring-hourglass" class="progress-ring stroke-current" stroke-width="3" d="M20,15 h60 q-10,17.5 -30,35 q20,17.5 30,35 h-60 q10,-17.5 30,-35 q-20,-17.5 -30,-35 Z" fill="transparent" stroke-linecap="round"></path>
+                        </svg>
+                    </div>
+                    <p id="motivational-quote" class="text-center h-10 text-muted transition-opacity duration-500 opacity-0"></p>
+                    <p id="timer-display" class="my-4 text-4xl md:text-5xl font-thin tracking-tighter" aria-live="polite" aria-atomic="true">25:00</p>
+                    <div class="flex justify-center items-center gap-6 mb-2 md:mb-0">
+                        <button id="reset-btn" aria-label="Reiniciar temporizador" class="w-16 h-16 flex items-center justify-center control-panel border rounded-md hover:border-white transition-all-smooth"> <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h5M20 20v-5h-5M4 4l1.5 1.5A9 9 0 0120.5 15" /><path stroke-linecap="round" stroke-linejoin="round" d="M20 20l-1.5-1.5A9 9 0 003.5 9" /></svg> </button>
+                        <button id="start-pause-btn" aria-label="Iniciar temporizador" class="w-24 h-24 flex items-center justify-center font-bold rounded-lg transition-all-smooth transform hover:scale-105"> <svg id="play-icon" xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" /></svg> <svg id="pause-icon" xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 hidden" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z" clip-rule="evenodd" /></svg> </button>
+                        <div id="skip-btn-container" class="w-16 h-16"> <button id="skip-btn" aria-label="Saltar al descanso" class="w-full h-full flex items-center justify-center control-panel border rounded-md hover:border-white transition-all-smooth hidden"> <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"> <path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7" /> </svg> </button> </div>
+                    </div>
+                    <div id="cycle-display" class="mt-4 text-lg tracking-widest text-muted">Ciclo: 0 / 4</div>
+                </div>
+
+                <!-- Columna Derecha: Lista de Tareas -->
+                <div id="todo-column" class="md:w-full mt-8 md:mt-0 transition-all-smooth">
+                    <h2 class="mb-4 font-medium tracking-widest text-lg">LISTA DE TAREAS</h2>
+                    <div class="control-panel p-4 rounded-lg border h-80 flex flex-col">
+                        <form id="todo-form" class="flex mb-4">
+                            <input type="text" id="todo-input" placeholder="Añadir nueva tarea..." class="w-full bg-transparent border-b-2 border-gray-500 focus:border-white focus:outline-none transition-all-smooth mr-2">
+                            <button type="submit" aria-label="Añadir tarea" class="p-2 rounded-md hover:bg-white/10 transition-colors">+</button>
+                        </form>
+                        <ul id="todo-list" class="flex-grow overflow-y-auto pr-2">
+                           <!-- Las tareas se añadirán aquí -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <footer class="text-center mt-8 text-lg tracking-widest transition-all-smooth text-muted"><p>Por Alejandro Gonzalo</p></footer>
+    </div>
+    
+    <div id="zen-exit-hint" class="fixed bottom-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-lg p-4 rounded-lg bg-black/50 opacity-0 transition-opacity duration-500 pointer-events-none">
+        Pulsa 'Esc' para salir
+    </div>
+
+    <script>
+        // --- Referencias a elementos del DOM ---
+        const body = document.body;
+        const mainContainer = document.getElementById('main-container');
+        const timerDisplay = document.getElementById('timer-display');
+        const startPauseBtn = document.getElementById('start-pause-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const skipBtn = document.getElementById('skip-btn');
+        const playIcon = document.getElementById('play-icon');
+        const pauseIcon = document.getElementById('pause-icon');
+        const workTimeButtons = document.querySelectorAll('.work-time-btn');
+        const shortBreakTimeButtons = document.querySelectorAll('.short-break-time-btn');
+        const longBreakTimeButtons = document.querySelectorAll('.long-break-time-btn');
+        const progressRing = document.getElementById('progress-ring-hourglass');
+        const sandContainer = document.getElementById('sand-particles');
+        const sandFill = document.getElementById('sand-fill');
+        const cycleDisplay = document.getElementById('cycle-display');
+        const settingsBtn = document.getElementById('settings-btn');
+        const closeSettingsBtn = document.getElementById('close-settings-btn');
+        const settingsPanel = document.getElementById('settings-panel');
+        const themeButtons = document.querySelectorAll('.theme-btn');
+        const zenModeBtn = document.getElementById('zen-mode-btn');
+        const todoForm = document.getElementById('todo-form');
+        const todoInput = document.getElementById('todo-input');
+        const todoList = document.getElementById('todo-list');
+        const dyslexiaToggle = document.getElementById('dyslexia-toggle');
+        const ariaAnnouncer = document.getElementById('aria-announcer');
+        const notificationsToggle = document.getElementById('notifications-toggle');
+        const soundButtons = document.querySelectorAll('.sound-btn');
+        const statsBtn = document.getElementById('stats-btn');
+        const statsPanel = document.getElementById('stats-panel');
+        const closeStatsBtn = document.getElementById('close-stats-btn');
+        const focusPointsDisplay = document.getElementById('focus-points');
+        const pomodorosTodayDisplay = document.getElementById('pomodoros-today');
+        const pomodorosWeekDisplay = document.getElementById('pomodoros-week');
+        const motivationalQuoteDisplay = document.getElementById('motivational-quote');
+
+        const modeButtons = {
+            pomodoro: document.getElementById('pomodoro'),
+            shortBreak: document.getElementById('shortBreak'),
+            longBreak: document.getElementById('longBreak'),
+        };
+
+        // --- Configuración de tiempo (en segundos) ---
+        let DURATION = { pomodoro: 25 * 60, shortBreak: 5 * 60, longBreak: 15 * 60 };
+        
+        // --- Estado de la aplicación ---
+        let timer = null;
+        let currentMode = 'pomodoro';
+        let timeLeft = DURATION.pomodoro;
+        let isRunning = false;
+        let pomodoroCycle = 0;
+        const CYCLES_BEFORE_LONG_BREAK = 4;
+        let todos = [];
+        let stats = { history: [], points: 0 };
+        
+        // --- Sonidos Ambientales ---
+        const ambientSounds = {
+            rain: new Tone.Noise("pink").toDestination(),
+            cafe: new Tone.Noise("brown").toDestination()
+        };
+        let currentSound = null;
+
+        // --- Configuración de animación de arena ---
+        let particles = [];
+        const NUM_PARTICLES = 150;
+        let animationFrameId = null;
+
+        // --- Configuración del progreso ---
+        let ringCircumference;
+        
+        // --- Funciones de Anuncio para Accesibilidad ---
+        function announce(message) {
+            ariaAnnouncer.textContent = message;
+        }
+
+        // --- Funciones de Gemini API ---
+        function showToast(message, isError = true) {
+            const toast = document.createElement('div');
+            toast.className = `fixed bottom-4 left-1/2 -translate-x-1/2 text-white px-4 py-2 rounded-lg shadow-lg transition-opacity duration-300 ${isError ? 'bg-red-500' : 'bg-blue-500'}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        async function getGeminiResponse(prompt) {
+             const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+            const payload = { contents: [{ parts: [{ text: prompt }] }] };
+            try {
+                const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                if (!response.ok) throw new Error(`API request failed with status ${response.status}`);
+                const result = await response.json();
+                return result.candidates[0].content.parts[0].text;
+            } catch (error) {
+                console.error("Gemini API call failed:", error);
+                return null;
+            }
+        }
+
+        async function getTaskBreakdown(taskText) {
+            const prompt = `You are a productivity assistant. Break down the following task into a JSON array of smaller, actionable sub-tasks. The array should not be nested inside any other JSON object. Do not include the original task in the response. Task: "${taskText}"`;
+            const responseText = await getGeminiResponse(prompt);
+            if (!responseText) return null;
+            try { return JSON.parse(responseText); } catch (e) { console.error("Failed to parse JSON from Gemini:", e); return null; }
+        }
+
+        async function getMotivationalQuote() {
+            motivationalQuoteDisplay.classList.remove('opacity-0');
+            motivationalQuoteDisplay.textContent = 'Buscando inspiración...';
+            const quote = await getGeminiResponse("Dame una frase motivacional corta y poderosa para empezar a trabajar.");
+            motivationalQuoteDisplay.textContent = quote || "Concéntrate y da lo mejor de ti.";
+        }
+
+        async function breakdownTask(index) {
+            const originalTask = todos[index];
+            if (!originalTask || originalTask.done) return;
+            const li = todoList.querySelector(`li[data-index="${index}"]`);
+            if (li) li.innerHTML = `<span class="flex-grow text-muted">✨ Desglosando tarea...</span>`;
+            const subtasks = await getTaskBreakdown(originalTask.text);
+            if (subtasks && Array.isArray(subtasks) && subtasks.length > 0) {
+                const newTodos = subtasks.map(text => ({ text, done: false }));
+                todos.splice(index, 1, ...newTodos);
+                announce(`Tarea desglosada en ${newTodos.length} sub-tareas.`);
+            } else {
+                showToast("No se pudo desglosar la tarea. Inténtalo de nuevo.");
+                announce("Error al desglosar la tarea.");
+            }
+            saveTodos();
+            renderTodos();
+        }
+
+        // --- Funciones de animación de arena ---
+        function createSandParticles() {
+            sandContainer.innerHTML = '';
+            particles = [];
+            for (let i = 0; i < NUM_PARTICLES; i++) {
+                const particle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                const p = { element: particle, x: 50 + (Math.random() - 0.5) * 58, y: 15 + Math.random() * 35, vy: 0.5 + Math.random() * 0.5 };
+                particle.setAttribute('cx', p.x); particle.setAttribute('cy', p.y); particle.setAttribute('r', 1);
+                sandContainer.appendChild(particle);
+                particles.push(p);
+            }
+        }
+
+        function animateSand() {
+            if (!isRunning) return;
+            particles.forEach(p => {
+                p.y += p.vy;
+                if (p.y > 85) { p.y = 15 + Math.random() * 5; p.x = 50 + (Math.random() - 0.5) * 58; }
+                p.element.setAttribute('cx', p.x); p.element.setAttribute('cy', p.y);
+            });
+            animationFrameId = requestAnimationFrame(animateSand);
+        }
+        
+        function updateSandFill() {
+            const totalDuration = DURATION[currentMode];
+            const elapsedTime = totalDuration - timeLeft;
+            const fillPercentage = elapsedTime / totalDuration;
+            const maxFillHeight = 35;
+            const fillHeight = maxFillHeight * fillPercentage;
+            const yPos = 85 - fillHeight;
+            sandFill.setAttribute('y', yPos); sandFill.setAttribute('height', fillHeight);
+        }
+
+        // --- Funciones del temporizador ---
+        function updateProgress() {
+            if (!ringCircumference) return;
+            const totalDuration = DURATION[currentMode];
+            const offset = ringCircumference - (timeLeft / totalDuration) * ringCircumference;
+            progressRing.style.strokeDashoffset = offset;
+        }
+        
+        function updateCycleDisplay() {
+            cycleDisplay.textContent = `Ciclo: ${pomodoroCycle} / ${CYCLES_BEFORE_LONG_BREAK}`;
+        }
+        
+        function updateDisplay() {
+            const minutes = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+            const seconds = (timeLeft % 60).toString().padStart(2, '0');
+            timerDisplay.textContent = `${minutes}:${seconds}`;
+            document.title = `${minutes}:${seconds} - Pomodoro`;
+            updateProgress();
+            updateSandFill();
+        }
+        
+        function startTimer() {
+            if (timer || timeLeft <= 0) return;
+            isRunning = true;
+            startPauseBtn.setAttribute('aria-label', 'Pausar temporizador');
+            playIcon.classList.add('hidden'); pauseIcon.classList.remove('hidden');
+            updateSkipButtonVisibility();
+            if (animationFrameId === null) animateSand();
+            announce("Temporizador iniciado.");
+            if (currentMode === 'pomodoro') getMotivationalQuote();
+            
+            timer = setInterval(() => {
+                timeLeft--;
+                updateDisplay();
+                if (timeLeft <= 0) {
+                    clearInterval(timer); timer = null; isRunning = false;
+                    cancelAnimationFrame(animationFrameId); animationFrameId = null;
+                    playFinishSound();
+                    showDesktopNotification(`${currentMode === 'pomodoro' ? 'Pomodoro' : 'Descanso'} finalizado.`);
+
+                    let nextMode;
+                    if (currentMode === 'pomodoro') {
+                        pomodoroCycle++;
+                        updateStats(); // Guardar progreso
+                        if (pomodoroCycle >= CYCLES_BEFORE_LONG_BREAK) {
+                            nextMode = 'longBreak';
+                            announce("Ciclos completados. Iniciando descanso largo.");
+                            pomodoroCycle = 0;
+                        } else {
+                            nextMode = 'shortBreak';
+                            announce("Pomodoro completado. Iniciando descanso corto.");
+                        }
+                    } else { 
+                        nextMode = 'pomodoro';
+                        announce("Descanso finalizado. Iniciando Pomodoro.");
+                    }
+                    
+                    switchMode(nextMode, true);
+                }
+            }, 1000);
+        }
+        
+        function pauseTimer() {
+            clearInterval(timer); timer = null; isRunning = false;
+            startPauseBtn.setAttribute('aria-label', 'Iniciar temporizador');
+            cancelAnimationFrame(animationFrameId); animationFrameId = null;
+            playIcon.classList.remove('hidden'); pauseIcon.classList.add('hidden');
+            updateSkipButtonVisibility();
+            announce("Temporizador pausado.");
+        }
+
+        function resetTimer() {
+            pauseTimer();
+            timeLeft = DURATION[currentMode];
+            createSandParticles();
+            updateAppearance();
+            updateDisplay();
+            updateCycleDisplay();
+        }
+
+        function switchMode(mode, autoStart = false) {
+            currentMode = mode;
+            motivationalQuoteDisplay.classList.add('opacity-0');
+            resetTimer();
+            if (autoStart) setTimeout(startTimer, 500);
+        }
+
+        function updateAppearance() {
+            const colors = {
+                pomodoro: { container: 'container-glow-pomodoro', text: 'text-glow-pomodoro', button: 'button-glow-pomodoro', particle: 'var(--accent-pomodoro)' },
+                shortBreak: { container: 'container-glow-shortBreak', text: 'text-glow-shortBreak', button: 'button-glow-shortBreak', particle: 'var(--accent-shortBreak)' },
+                longBreak: { container: 'container-glow-longBreak', text: 'text-glow-longBreak', button: 'button-glow-longBreak', particle: 'var(--accent-longBreak)' }
+            };
+            const currentColors = colors[currentMode];
+
+            document.documentElement.style.setProperty('--current-accent', currentColors.particle);
+
+            if(mainContainer) mainContainer.className = `main-container p-6 md:p-8 rounded-lg shadow-2xl text-center transition-all-smooth ${currentColors.container}`;
+            if(timerDisplay) timerDisplay.className = `my-4 text-4xl md:text-5xl font-thin tracking-tighter ${currentColors.text}`;
+            if(startPauseBtn) startPauseBtn.className = `w-24 h-24 flex items-center justify-center font-bold rounded-lg transition-all-smooth transform hover:scale-105 ${currentColors.button}`;
+            if(progressRing) progressRing.style.color = currentColors.particle;
+            if(sandFill) sandFill.style.fill = currentColors.particle;
+            
+            particles.forEach(p => p.element.style.fill = currentColors.particle);
+
+            Object.keys(modeButtons).forEach(key => {
+                const btn = modeButtons[key];
+                if (key === currentMode) {
+                    btn.classList.add('selected');
+                } else {
+                    btn.classList.remove('selected');
+                }
+            });
+
+            const activeTheme = localStorage.getItem('pomodoroTheme') || 'theme-80s';
+            themeButtons.forEach(btn => {
+                if(btn.dataset.theme === activeTheme) {
+                    btn.classList.add('selected');
+                } else {
+                    btn.classList.remove('selected');
+                }
+            });
+            
+            document.querySelectorAll('.time-btn, .sound-btn').forEach(b => {
+                if (b.classList.contains('selected')) {
+                    b.style.backgroundColor = 'var(--current-accent)';
+                    b.style.color = 'var(--bg-color)';
+                } else {
+                    b.style.backgroundColor = '';
+                    b.style.color = '';
+                }
+            });
+
+
+            updateSkipButtonVisibility();
+        }
+        
+        function updateSkipButtonVisibility() {
+            if (currentMode === 'pomodoro' && isRunning) skipBtn.classList.remove('hidden');
+            else skipBtn.classList.add('hidden');
+        }
+
+        function playFinishSound() {
+            const synth = new Tone.Synth().toDestination(); const now = Tone.now();
+            synth.triggerAttackRelease("C5", "8n", now); synth.triggerAttackRelease("G5", "8n", now + 0.2);
+        }
+        
+        // --- Funciones de Ajustes (Tema, Zen, etc.) ---
+        function applyTheme(themeName) {
+            body.className = `transition-all-smooth ${themeName} flex items-center justify-center min-h-screen`;
+            localStorage.setItem('pomodoroTheme', themeName);
+            updateAppearance();
+        }
+        
+        function applyDyslexiaMode(enabled) {
+            const toggle = dyslexiaToggle;
+            const thumb = toggle.querySelector('span');
+            if (enabled) {
+                document.body.classList.add('dyslexia-friendly');
+                toggle.setAttribute('aria-checked', 'true');
+                toggle.style.backgroundColor = 'var(--current-accent)';
+                thumb.style.transform = 'translateX(1.25rem)';
+            } else {
+                document.body.classList.remove('dyslexia-friendly');
+                toggle.setAttribute('aria-checked', 'false');
+                toggle.style.backgroundColor = '';
+                thumb.style.transform = '';
+            }
+            localStorage.setItem('dyslexiaMode', enabled);
+        }
+
+        function toggleZenMode() {
+            body.classList.toggle('zen-mode');
+            const isZen = body.classList.contains('zen-mode');
+            zenModeBtn.textContent = isZen ? 'Salir del Modo Zen' : 'Activar Modo Zen';
+            if (isZen) {
+                settingsPanel.classList.add('hidden');
+                const zenHint = document.getElementById('zen-exit-hint');
+                zenHint.classList.add('show');
+                setTimeout(() => {
+                    zenHint.classList.remove('show');
+                }, 2500);
+            }
+        }
+        
+        function handleSoundClick(e) {
+            const sound = e.target.dataset.sound;
+            if (currentSound) {
+                ambientSounds[currentSound].stop();
+            }
+            if (sound !== 'none') {
+                ambientSounds[sound].start();
+                currentSound = sound;
+            } else {
+                currentSound = null;
+            }
+            soundButtons.forEach(b => b.classList.remove('selected'));
+            e.target.classList.add('selected');
+            updateAppearance();
+        }
+        
+        // --- Notificaciones de Escritorio ---
+        function requestNotificationPermission() {
+             const toggle = notificationsToggle;
+             const thumb = toggle.querySelector('span');
+            if (!("Notification" in window)) {
+                showToast("Este navegador no soporta notificaciones.");
+                return;
+            }
+            Notification.requestPermission().then(permission => {
+                localStorage.setItem('notificationPermission', permission);
+                if (permission === 'granted') {
+                    toggle.setAttribute('aria-checked', 'true');
+                    toggle.style.backgroundColor = 'var(--current-accent)';
+                    thumb.style.transform = 'translateX(1.25rem)';
+                } else {
+                     toggle.setAttribute('aria-checked', 'false');
+                     toggle.style.backgroundColor = '';
+                     thumb.style.transform = '';
+                }
+            });
+        }
+        
+        function showDesktopNotification(bodyText) {
+            const permission = localStorage.getItem('notificationPermission');
+            if (permission === 'granted') {
+                new Notification("Pomodoro App", {
+                    body: bodyText,
+                    icon: "https://placehold.co/192x192/0d0221/ff00de?text=P"
+                });
+            }
+        }
+        
+        // --- Estadísticas y Gamificación ---
+        function updateStats() {
+            stats.history.push(Date.now());
+            stats.points += 10; // 10 puntos por pomodoro
+            localStorage.setItem('pomodoroStats', JSON.stringify(stats));
+        }
+
+        function renderStats() {
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            const startOfWeek = new Date();
+            startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay() + (startOfWeek.getDay() === 0 ? -6 : 1));
+            startOfWeek.setHours(0,0,0,0);
+
+            const pomosToday = stats.history.filter(ts => ts >= today.getTime()).length;
+            const pomosWeek = stats.history.filter(ts => ts >= startOfWeek.getTime()).length;
+            
+            focusPointsDisplay.textContent = stats.points;
+            pomodorosTodayDisplay.textContent = pomosToday;
+            pomodorosWeekDisplay.textContent = pomosWeek;
+        }
+
+        // --- Funciones de Lista de Tareas ---
+        function renderTodos() {
+            todoList.innerHTML = '';
+            todos.forEach((todo, index) => {
+                const li = document.createElement('li');
+                li.className = `flex items-center p-2 rounded-md transition-colors ${todo.done ? 'text-muted' : ''}`;
+                li.dataset.index = index;
+                li.innerHTML = `
+                    <input type="checkbox" data-index="${index}" class="mr-3 h-4 w-4 flex-shrink-0" ${todo.done ? 'checked' : ''}>
+                    <span class="flex-grow text-left ${todo.done ? 'line-through' : ''}">${todo.text}</span>
+                    <button data-action="breakdown" aria-label="Desglosar tarea con IA" class="px-2 text-muted hover:text-white transition-colors" ${todo.done ? 'disabled' : ''}>✨</button>
+                    <button data-action="delete" aria-label="Eliminar tarea" class="px-2 text-muted hover:text-white transition-colors">&times;</button>
+                `;
+                todoList.appendChild(li);
+            });
+        }
+        
+        function saveTodos() {
+            localStorage.setItem('pomodoroTodos', JSON.stringify(todos));
+        }
+
+        function addTodo(e) {
+            e.preventDefault();
+            const text = todoInput.value.trim();
+            if (text) {
+                todos.push({ text: text, done: false });
+                todoInput.value = '';
+                saveTodos();
+                renderTodos();
+            }
+        }
+        
+        function handleTodoListClick(e) {
+            const target = e.target;
+            const li = target.closest('li');
+            if (!li) return;
+            const index = parseInt(li.dataset.index, 10);
+
+            if (target.type === 'checkbox') {
+                todos[index].done = target.checked;
+                saveTodos();
+                renderTodos();
+            } else if (target.closest('button')?.dataset.action === 'delete') {
+                todos.splice(index, 1);
+                saveTodos();
+                renderTodos();
+            } else if (target.closest('button')?.dataset.action === 'breakdown') {
+                breakdownTask(index);
+            }
+        }
+
+        // --- Asignación de eventos ---
+        startPauseBtn.addEventListener('click', () => { if (Tone.context.state !== 'running') Tone.context.resume(); isRunning ? pauseTimer() : startTimer(); });
+        resetBtn.addEventListener('click', resetTimer);
+        skipBtn.addEventListener('click', () => {
+             if (currentMode !== 'pomodoro' || !isRunning) return;
+            const workDuration = DURATION.pomodoro;
+            const workCompleted = workDuration - timeLeft;
+            const workProportion = workCompleted / workDuration;
+            const fullBreakDuration = DURATION.shortBreak;
+            const proportionalBreakTime = Math.round(workProportion * fullBreakDuration);
+
+            pauseTimer();
+            timeLeft = proportionalBreakTime > 0 ? proportionalBreakTime : 1;
+            
+            switchMode('shortBreak', true);
+        });
+        Object.keys(modeButtons).forEach(key => { modeButtons[key].addEventListener('click', () => switchMode(key)); });
+
+        workTimeButtons.forEach(b => b.addEventListener('click', () => { DURATION.pomodoro = parseInt(b.dataset.time) * 60; workTimeButtons.forEach(btn => btn.classList.remove('selected')); b.classList.add('selected'); updateAppearance(); if (currentMode === 'pomodoro') resetTimer(); }));
+        shortBreakTimeButtons.forEach(b => b.addEventListener('click', () => { DURATION.shortBreak = parseInt(b.dataset.time) * 60; shortBreakTimeButtons.forEach(btn => btn.classList.remove('selected')); b.classList.add('selected'); updateAppearance(); if (currentMode === 'shortBreak') resetTimer(); }));
+        longBreakTimeButtons.forEach(b => b.addEventListener('click', () => { DURATION.longBreak = parseInt(b.dataset.time) * 60; longBreakTimeButtons.forEach(btn => btn.classList.remove('selected')); b.classList.add('selected'); updateAppearance(); if (currentMode === 'longBreak') resetTimer(); }));
+        
+        // Ajustes
+        settingsBtn.addEventListener('click', () => settingsPanel.classList.remove('hidden'));
+        closeSettingsBtn.addEventListener('click', () => settingsPanel.classList.add('hidden'));
+        statsBtn.addEventListener('click', () => { renderStats(); statsPanel.classList.remove('hidden'); });
+        closeStatsBtn.addEventListener('click', () => statsPanel.classList.add('hidden'));
+        themeButtons.forEach(b => b.addEventListener('click', () => applyTheme(b.dataset.theme)));
+        zenModeBtn.addEventListener('click', toggleZenMode);
+        dyslexiaToggle.addEventListener('click', () => {
+            const isEnabled = document.body.classList.contains('dyslexia-friendly');
+            applyDyslexiaMode(!isEnabled);
+        });
+        notificationsToggle.addEventListener('click', requestNotificationPermission);
+        soundButtons.forEach(b => b.addEventListener('click', handleSoundClick));
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { body.classList.remove('zen-mode'); zenModeBtn.textContent = 'Activar Modo Zen'; } });
+
+        // Lista de Tareas
+        todoForm.addEventListener('submit', addTodo);
+        todoList.addEventListener('click', handleTodoListClick);
+
+        // --- Inicialización ---
+        window.addEventListener('load', () => {
+            document.querySelector('.work-time-btn[data-time="25"]').classList.add('selected');
+            document.querySelector('.short-break-time-btn[data-time="5"]').classList.add('selected');
+            document.querySelector('.long-break-time-btn[data-time="15"]').classList.add('selected');
+            
+            const savedTheme = localStorage.getItem('pomodoroTheme') || 'theme-80s';
+            applyTheme(savedTheme);
+            
+            const dyslexiaEnabled = localStorage.getItem('dyslexiaMode') === 'true';
+            applyDyslexiaMode(dyslexiaEnabled);
+            
+            if (localStorage.getItem('notificationPermission') === 'granted') {
+                const toggle = notificationsToggle;
+                const thumb = toggle.querySelector('span');
+                toggle.setAttribute('aria-checked', 'true');
+                toggle.style.backgroundColor = 'var(--current-accent)';
+                thumb.style.transform = 'translateX(1.25rem)';
+            }
+            
+            stats = JSON.parse(localStorage.getItem('pomodoroStats')) || { history: [], points: 0 };
+            todos = JSON.parse(localStorage.getItem('pomodoroTodos')) || [];
+            renderTodos();
+            
+            const path = document.getElementById('progress-ring-hourglass');
+            ringCircumference = path.getTotalLength();
+            path.style.strokeDasharray = ringCircumference;
+            
+            resetTimer();
+        });
+    </script>
+</body>
+</html>
+
