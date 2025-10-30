@@ -217,6 +217,31 @@
             border-left-color: var(--color-accent);
         }
 
+        /* Navegación móvil de biblioteca */
+        #mobile-library-nav {
+            display: none;
+        }
+        .mobile-lib-tab-button {
+            flex: 1;
+            text-align: center;
+            padding: 0.5rem 0.75rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            color: var(--color-text-muted);
+            background-color: transparent;
+            border: 1px solid transparent;
+            transition: all 0.2s ease-in-out;
+        }
+        .mobile-lib-tab-button.active {
+            color: var(--color-text-primary);
+            background-color: var(--color-bg-tertiary);
+            border-color: var(--color-accent);
+        }
+        .mobile-lib-tab-button:focus {
+            outline: none;
+            border-color: var(--color-accent-text);
+        }
+
         /* Estilos para Sidebar Oculta/Visible */
         nav {
             width: 16rem; /* w-64 */
@@ -274,6 +299,9 @@
         }
         /* En móvil, la sidebar siempre se oculta/muestra con transform */
         @media (max-width: 767px) {
+            :root {
+                --mobile-player-height: 200px;
+            }
             nav {
                 position: fixed;
                 width: 16rem; /* w-64 */
@@ -309,6 +337,40 @@
             /* ARREGLO: Paneles EQ y Letras ocupan todo el ancho en móvil */
             #eq-container {
                 left: 0 !important;
+            }
+
+            #mobile-library-nav {
+                display: flex;
+                gap: 0.5rem;
+                padding: 0.5rem;
+                position: sticky;
+                top: 1rem;
+                z-index: 30;
+                background-color: var(--color-bg-secondary);
+                border-radius: 9999px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            }
+
+            #main-content {
+                padding: 4.5rem 1rem 1rem;
+                max-height: calc(100vh - var(--mobile-player-height));
+            }
+
+            #library-page {
+                padding-top: 0;
+            }
+
+            #library-page > h1 {
+                font-size: 1.75rem;
+                margin-bottom: 1.5rem;
+            }
+
+            #library-content-container {
+                max-height: calc(100vh - var(--mobile-player-height) - 9rem);
+            }
+
+            #player-bar {
+                padding: 0.75rem 1rem;
             }
         }
 
@@ -587,7 +649,15 @@
                 </div>
 
                 <!-- Pestañas y Vistas -->
-                <div class="flex justify-between items-center lib-tab-container mb-4">
+                <div class="md:hidden mb-4">
+                    <div id="mobile-library-nav" class="w-full">
+                        <button data-lib-tab="artists" class="mobile-lib-tab-button active">Artistas</button>
+                        <button data-lib-tab="albums" class="mobile-lib-tab-button">Álbumes</button>
+                        <button data-lib-tab="tracks" class="mobile-lib-tab-button">Pistas</button>
+                    </div>
+                </div>
+
+                <div class="hidden md:flex justify-between items-center lib-tab-container mb-4">
                     <!-- Pestañas Artista/Album/Pista -->
                     <div class="flex">
                         <button data-lib-tab="artists" class="lib-tab-button py-2 px-4 font-medium active">Artistas</button>
@@ -649,51 +719,51 @@
     <!-- ======================= -->
     <!-- BARRA DE REPRODUCTOR    -->
     <!-- ======================= -->
-    <footer id="player-bar" class="p-4 flex-shrink-0 relative z-50">
+    <footer id="player-bar" class="p-4 md:p-4 px-3 flex-shrink-0 relative z-50">
 
         <!-- REPRODUCTOR PERSONALIZADO (Ahora responsivo) -->
-        <div class="flex flex-col md:flex-row items-center">
+        <div class="flex flex-col md:flex-row items-center gap-2">
             <!-- Info de la canción: w-full md:w-1/4 -->
-            <div class="flex items-center w-full md:w-1/4 p-2 md:p-0">
-                <img id="now-playing-art" src="https://placehold.co/60x60/3f3f46/9ca3af?text=..." alt="Carátula" class="w-14 h-14 rounded-md" style="background-color: var(--color-bg-hover);">
+            <div class="flex items-center w-full md:w-1/4 p-2 md:p-0 gap-3">
+                <img id="now-playing-art" src="https://placehold.co/60x60/3f3f46/9ca3af?text=..." alt="Carátula" class="w-12 h-12 md:w-14 md:h-14 rounded-md" style="background-color: var(--color-bg-hover);">
                 <!-- Canvas del visualizador -->
                 <canvas id="visualizer-canvas" class="hidden md:block w-16 h-10 ml-2"></canvas>
-                <div class="ml-3 overflow-hidden">
+                <div class="overflow-hidden text-sm md:text-base">
                     <div id="now-playing-title" class="font-semibold truncate">Selecciona una canción</div>
-                    <div id="now-playing-artist" class="text-sm truncate" style="color: var(--color-text-muted);">...</div>
+                    <div id="now-playing-artist" class="text-xs md:text-sm truncate" style="color: var(--color-text-muted);">...</div>
                 </div>
             </div>
 
             <!-- Controles de Audio Personalizados: w-full md:w-1/2 -->
-            <div class="w-full md:w-1/2 px-4 border-t md:border-t-0 md:border-l md:border-r py-2 md:py-0" style="border-color: var(--color-border);">
+            <div class="w-full md:w-1/2 px-2 md:px-4 border-t md:border-t-0 md:border-l md:border-r py-2 md:py-0" style="border-color: var(--color-border);">
                 <!-- Botones -->
-                <div class="flex justify-center items-center gap-4 mb-2">
-                    <button id="shuffle-btn" class="btn-icon text-xl hidden md:block" title="Aleatorio">
+                <div class="flex justify-between md:justify-center items-center gap-3 mb-2 text-lg">
+                    <button id="shuffle-btn" class="btn-icon hidden md:block" title="Aleatorio">
                         <ion-icon name="shuffle-outline"></ion-icon>
                     </button>
-                    <button id="prev-btn" class="btn-icon text-2xl" title="Anterior">
+                    <button id="prev-btn" class="btn-icon text-2xl md:text-2xl" title="Anterior">
                         <ion-icon name="play-skip-back-outline"></ion-icon>
                     </button>
-                    <button id="play-pause-btn" class="btn-icon text-4xl p-1 rounded-full flex items-center justify-center" style="background-color: var(--color-accent); color: white;" title="Reproducir">
+                    <button id="play-pause-btn" class="btn-icon text-3xl md:text-4xl p-1 rounded-full flex items-center justify-center" style="background-color: var(--color-accent); color: white;" title="Reproducir">
                         <ion-icon name="play-outline" class="ml-1"></ion-icon> <!-- Icono por defecto -->
                     </button>
-                    <button id="next-btn" class="btn-icon text-2xl" title="Siguiente">
+                    <button id="next-btn" class="btn-icon text-2xl md:text-2xl" title="Siguiente">
                         <ion-icon name="play-skip-forward-outline"></ion-icon>
                     </button>
-                    <button id="repeat-btn" class="btn-icon text-xl hidden md:block" title="Repetir (Desactivado)">
+                    <button id="repeat-btn" class="btn-icon hidden md:block" title="Repetir (Desactivado)">
                         <ion-icon name="repeat-outline"></ion-icon>
                     </button>
                 </div>
                 <!-- Barra de Búsqueda y Tiempos -->
-                <div class="flex items-center gap-3">
-                    <span id="current-time" class="text-xs" style="color: var(--color-text-muted);">0:00</span>
-                    <input type="range" id="seek-bar" value="0" step="1" class="seek-bar w-full">
-                    <span id="duration" class="text-xs" style="color: var(--color-text-muted);">0:00</span>
+                <div class="flex items-center gap-2">
+                    <span id="current-time" class="text-[0.7rem] md:text-xs" style="color: var(--color-text-muted);">0:00</span>
+                    <input type="range" id="seek-bar" value="0" step="1" class="seek-bar w-full h-1">
+                    <span id="duration" class="text-[0.7rem] md:text-xs" style="color: var(--color-text-muted);">0:00</span>
                 </div>
             </div>
 
             <!-- Botones Extra (EQ y Letras): w-full md:w-1/4 -->
-            <div class="w-full md:w-1/4 flex justify-center md:justify-end items-center gap-2 p-2 md:p-0">
+            <div class="w-full md:w-1/4 flex justify-center md:justify-end items-center gap-2 p-1 md:p-0">
                 <!-- Botones de Shuffle/Repeat para móviles -->
                 <button id="shuffle-btn-mobile" class="btn btn-secondary btn-icon text-xl md:hidden" title="Aleatorio">
                     <ion-icon name="shuffle-outline"></ion-icon>
@@ -1007,6 +1077,7 @@
         const libraryContentEl = document.getElementById('library-content');
         const libraryPlaceholder = document.getElementById('library-placeholder');
         const libTabButtons = document.querySelectorAll('.lib-tab-button');
+        const mobileLibTabButtons = document.querySelectorAll('.mobile-lib-tab-button');
         const viewToggleListBtn = document.getElementById('view-toggle-list');
         const viewToggleGridBtn = document.getElementById('view-toggle-grid');
 
@@ -1113,13 +1184,23 @@
         viewToggleListBtn.addEventListener('click', () => setLibraryView('list'));
         viewToggleGridBtn.addEventListener('click', () => setLibraryView('grid'));
 
+        function setActiveLibraryTab(tab) {
+            activeLibraryTab = tab;
+            libTabButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.libTab === activeLibraryTab));
+            mobileLibTabButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.libTab === activeLibraryTab));
+            renderLibrary();
+        }
+
         libTabButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                activeLibraryTab = button.dataset.libTab;
-                libTabButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.libTab === activeLibraryTab));
-                renderLibrary();
-            });
+            button.addEventListener('click', () => setActiveLibraryTab(button.dataset.libTab));
         });
+
+        mobileLibTabButtons.forEach(button => {
+            button.addEventListener('click', () => setActiveLibraryTab(button.dataset.libTab));
+        });
+
+        // Aplicar estado inicial para sincronizar botones de escritorio y móvil
+        setActiveLibraryTab(activeLibraryTab);
 
         function getFilteredTracks() {
             if (!currentSearchTerm) return musicLibrary;
