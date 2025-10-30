@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial de Versiones</title>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1e293b; padding: 20px; }
+        h1 { color: #0f766e; margin-bottom: 20px; border-bottom: 2px solid #e0f2f1; padding-bottom: 10px; }
+        .version-card { background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; margin-bottom: 20px; padding: 20px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); }
+        .version-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .version-title { font-size: 1.5rem; font-weight: 700; color: #10b981; }
+        .version-date { font-size: 0.9rem; color: #64748b; }
+        .changes-list { margin-top: 10px; list-style-type: disc; padding-left: 20px; color: #334155; }
+        .changes-list li { margin-bottom: 5px; }
+        .preview-container { margin-top: 20px; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; height: 350px; }
+        .preview-content {
+            height: 100%; width: 100%; display: flex; justify-content: center; align-items: center;
+            background: linear-gradient(135deg, #e0f2f1 0%, #f0f9ff 100%); position: relative; overflow: hidden;
+        }
+
+        /* --- Estilos de la Maqueta --- */
+        .phone-frame { width: 250px; height: 350px; background: #27272a; border-radius: 20px; padding: 10px; box-shadow: 0 0 0 4px #4b5563, 0 8px 15px rgba(0, 0, 0, 0.3); position: relative; overflow: hidden; }
+        .screen { width: 100%; height: 100%; background: #1f2937; border-radius: 10px; display: flex; flex-direction: column; color: #d1d5db; font-size: 0.8rem; }
+        
+        .header-mock { height: 35px; background: #111827; display: flex; justify-content: space-between; align-items: center; padding: 0 10px; color: #10b981; font-weight: 600; font-size: 0.8rem; flex-shrink: 0; }
+        .sidebar-mock { width: 60px; background: rgba(31, 41, 55, 0.9); border-right: 1px solid #4b5563; padding: 10px 0; display: flex; flex-direction: column; gap: 8px; align-items: center; }
+        .sidebar-mock div { width: 40px; height: 40px; background: #4b5563; border-radius: 5px; display: flex; justify-content: center; align-items: center; color: #10b981; }
+        .sidebar-mock .active { background: #10b981; color: white; }
+        .player-mock { height: 40px; background: rgba(31, 41, 55, 0.9); border-top: 1px solid #4b5563; display: flex; align-items: center; justify-content: center; gap: 10px; flex-shrink: 0; }
+        .content-mock { flex-grow: 1; padding: 10px; display: flex; flex-direction: column; gap: 5px; overflow: hidden; }
+        .content-mock .item { height: 25px; background: #374151; border-radius: 4px; }
+
+        .calendar-mock { padding: 5px; display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; font-size: 0.6rem; text-align: center; }
+        .calendar-mock div { background: #374151; padding: 2px; border-radius: 2px; color: #d1d5db; }
+        .calendar-mock .day-number { font-weight: bold; }
+        .calendar-mock .event-day { background: #10b981; color: white; }
+        .btn-mock { padding: 3px 6px; background: #10b981; color: white; border-radius: 4px; font-size: 0.7rem; }
+        .tab-mock { padding: 4px 8px; font-size: 0.7rem; color: #9ca3af; }
+        .tab-mock.active { color: #10b981; border-bottom: 2px solid #10b981; }
+    </style>
+</head>
+<body>
+
+    <h1>Historial Visual de Versiones del Reproductor</h1>
+
+    <div class="version-card">
+        <div class="version-header">
+            <span class="version-title">Versión 16: Refactorización Total (Tailwind V2)</span>
+            <span class="version-date">Octubre 2025</span>
+        </div>
+        <ul class="changes-list">
+            <li>✨ **Reescritura Completa:** Se ha introducido una arquitectura de código completamente nueva, basada en Tailwind CSS pero con una estructura de 3 paneles (Sidebar, Main, Player) más moderna y responsiva.</li>
+            <li>✨ **Nuevos Iconos:** Se reemplazan los SVG por la librería `ion-icons`.</li>
+            <li>✅ **Simplificación:** Se elimina la lógica de "múltiples eventos" del calendario (volviendo a 1 por día) y se elimina el modo Karaoke/Letras para centrarse en la estabilidad del reproductor.</li>
+            <li>✅ **UI Mejorada:** Nuevo diseño de reproductor, botones de navegación y modales, todo gestionado con variables CSS y Tailwind.</li>
+        </ul>
+        <div class="preview-container">
+            <div class="preview-content">
+                <div class="phone-frame">
+                    <div class="screen" style="flex-direction: row; height: calc(100% - 40px);">
+                        <div class="sidebar-mock" style="width: 55px;">
+                            <div class="active"><svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/></svg></div>
+                            <div><svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg></div>
+                            <div style="margin-top: auto;"><svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0m-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/></svg></div>
+                        </div>
+                        <div class="content-mock" style="width: 100%;">
+                            <div class="header-mock" style="background: #1f2937; border-bottom: 1px solid #4b5563;">
+                                <span>Biblioteca</span>
+                                <div style="width: 15px; height: 15px; background: #10b981; border-radius: 3px;"></div>
+                            </div>
+                            <div style="display: flex; gap: 5px; margin-bottom: 5px;">
+                                <div style="width: 50%; height: 20px; background: #374151; border-radius: 4px;"></div>
+                                <div style="width: 50%; height: 20px; background: #374151; border-radius: 4px;"></div>
+                            </div>
+                            <div class="grid-view" style="gap: 5px; display: grid; grid-template-columns: repeat(2, 1fr);">
+                                <div class="grid-item" style="padding: 5px; background: #374151; border-radius: 4px;">
+                                    <div class="grid-item-cover" style="padding-bottom: 80%; background: #4b5563;"></div>
+                                    <div style="height: 5px; background: #9ca3af; border-radius: 2px; margin-top: 5px;"></div>
+                                </div>
+                                <div class="grid-item" style="padding: 5px; background: #374151; border-radius: 4px;">
+                                    <div class="grid-item-cover" style="padding-bottom: 80%; background: #4b5563;"></div>
+                                    <div style="height: 5px; background: #9ca3af; border-radius: 2px; margin-top: 5px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="player-mock" style="position: absolute; bottom: 0; width: 100%;">
+                        <div style="width: 10px; height: 10px; border-radius: 50%; background: #9ca3af;"></div>
+                        <div style="width: 25px; height: 25px; border-radius: 50%; background: white;"></div>
+                        <div style="width: 10px; height: 10px; border-radius: 50%; background: #9ca3af;"></div>
+                        <div style="width: 10px; height: 10px; border-radius: 50%; background: #9ca3af;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="version-card">
+        <div class="version-header">
+            <span class="version-title">Versión 15: Arquitectura Simplificada (Tailwind V1)</span>
+            <span class="version-date">Octubre 2025</span>
+        </div>
+        <ul class="changes-list">
+            <li>✨ **Reestructuración Mayor:** Se eliminó todo el CSS personalizado y se migró la aplicación a **Tailwind CSS CDN** para acortar el código.</li>
+            <li>✅ **Estabilidad Máxima:** Se revisó y simplificó la lógica del `AudioContext`, la cola de reproducción y la gestión de eventos (múltiples por día) para asegurar el funcionamiento sin fallos.</li>
+        </ul>
+        <div class="preview-container">
+            <div class="preview-content">
+                 <div class="phone-frame">
+                    <div class="screen" style="flex-direction: row; height: calc(100% - 40px);">
+                        <div class="sidebar-mock" style="width: 55px;">
+                            <div class="active">MUS</div>
+                            <div>CAL</div>
+                            <div style="margin-top: auto;">SET</div>
+                        </div>
+                        <div class="content-mock" style="width: 100%;">
+                            <div class="header-mock" style="background: #1f2937; border-bottom: 1px solid #4b5563;">
+                                <span>Biblioteca</span>
+                            </div>
+                            <div style="display: flex; gap: 5px; margin-bottom: 5px;">
+                                <div style="width: 50%; height: 20px; background: #374151; border-radius: 4px;"></div>
+                                <div style="width: 50%; height: 20px; background: #374151; border-radius: 4px;"></div>
+                            </div>
+                            <div class="grid-view" style="gap: 5px; display: grid; grid-template-columns: repeat(2, 1fr);">
+                                <div class="grid-item" style="padding: 5px; background: #374151; border-radius: 4px;">
+                                    <div class="grid-item-cover" style="padding-bottom: 80%; background: #4b5563;"></div>
+                                </div>
+                                <div class="grid-item" style="padding: 5px; background: #374151; border-radius: 4px;">
+                                    <div class="grid-item-cover" style="padding-bottom: 80%; background: #4b5563;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="player-mock" style="position: absolute; bottom: 0; width: 100%;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="version-card">
+        <div class="version-header">
+            <span class="version-title">Versión 14: Estabilidad y Flujo (Múltiples Eventos)</span>
+            <span class="version-date">Octubre 2025</span>
+        </div>
+        <ul class="changes-list">
+            <li>✅ **Corrección Mayor de Flujo:** Se refactorizó la lógica del calendario para la edición y guardado de **múltiples eventos por día**, asegurando que el proceso es estable.</li>
+            <li>✅ **Estabilidad de Audio:** Se corrigió el error de inicialización del `AudioContext` para que el Ecualizador y Visualizador funcionen siempre.</li>
+        </ul>
+        <div class="preview-container">
+            <div class="preview-content">
+                <div class="phone-frame">
+                    <div class="screen" style="background: #1f2937; padding: 10px;">
+                        <div class="header-mock" style="color: #d1d5db;">Eventos (10/Dic)</div>
+                        <div class="content-mock" style="gap: 8px; margin-top: 10px;">
+                            <div class="item" style="padding: 8px; height: auto; color: white; background: #4b5563;">
+                                <div style="font-weight: bold; font-size: 0.7rem;">Cita</div>
+                                <div style="font-size: 0.6rem; color: #9ca3af;">Sin música</div>
+                            </div>
+                             <div class="item" style="padding: 8px; height: auto; color: white; background: #10b981;">
+                                <div style="font-weight: bold; font-size: 0.7rem;">Música</div>
+                                <div style="font-size: 0.6rem; color: #e0f2f1;">Artista X</div>
+                            </div>
+                        </div>
+                        <div style="margin-top: auto; display: flex; justify-content: flex-end;">
+                             <div class="btn-mock">Añadir</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="version-card">
+        <div class="version-header">
+            <span class="version-title">Versión 13: Ocultar Menú Lateral</span>
+            <span class="version-date">Octubre 2025</span>
+        </div>
+        <ul class="changes-list">
+            <li>✨ **Nueva Función:** Se añadió un botón para ocultar y mostrar la barra lateral, guardando la preferencia.</li>
+            <li>✅ **Corrección de UI:** Se corrigieron varios errores de solapamiento (z-index) entre el reproductor, el EQ y la barra lateral.</li>
+        </ul>
+        <div class="preview-container">
+            <div class="preview-content">
+                 <div class="phone-frame">
+                    <div class="screen" style="flex-direction: row; height: calc(100% - 40px);">
+                        <div class="sidebar-mock" style="width: 25px;">
+                            <div class="active" style="width:15px; height:15px;"></div>
+                            <div style="width:15px; height:15px;"></div>
+                            <div style="margin-top: auto; width:15px; height:15px;"></div>
+                        </div>
+                        <div class="content-mock" style="width: 100%;">
+                            <div class="header-mock" style="background: #1f2937; border-bottom: 1px solid #4b5563;">
+                            </div>
+                            <div class="item"></div>
+                            <div class="item"></div>
+                        </div>
+                    </div>
+                    <div class="player-mock" style="position: absolute; bottom: 0; width: 100%;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="version-card">
+        <div class="version-header">
+            <span class="version-title">Versión 12: Navegación y Modos de Reproducción</span>
+            <span class="version-date">Octubre 2025</span>
+        </div>
+        <ul class="changes-list">
+            <li>✨ **Nuevos Botones:** Se añadieron los modos "Aleatorio" (Shuffle) y "Repetir" (Todo/Uno) al reproductor.</li>
+            <li>✨ **Navegación:** El artista y el título de la canción en el reproductor ahora son enlaces que navegan a la biblioteca.</li>
+        </ul>
+        <div class="preview-container">
+             <div class="preview-content">
+                <div class="phone-frame">
+                    <div class="screen" style="flex-direction: row; height: calc(100% - 40px);">
+                         <div class="sidebar-mock" style="width: 55px;">
+                            <div class="active"></div>
+                        </div>
+                        <div class="content-mock" style="width: 100%;">
+                            <div class="item"></div>
+                        </div>
+                    </div>
+                    <div class="player-mock" style="position: absolute; bottom: 0; width: 100%; gap: 15px;">
+                        <div style="width: 15px; height: 15px; border-radius: 50%; background: #10b981;"></div>
+                        <div style="width: 15px; height: 15px; border-radius: 50%; background: #9ca3af;"></div>
+                        <div style="width: 25px; height: 25px; border-radius: 50%; background: white;"></div>
+                        <div style="width: 15px; height: 15px; border-radius: 50%; background: #9ca3af;"></div>
+                        <div style="width: 15px; height: 15px; border-radius: 50%; background: #10b981;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="version-card">
+        <div class="version-header">
+            <span class="version-title">Versión 11: Estilo, Funciones, Visualizador</span>
+            <span class="version-date">Octubre 2025</span>
+        </div>
+        <ul class="changes-list">
+            <li>✨ **Efecto Glassmorphism:** Se aplicó un diseño de "vidrio esmerilado" (glass) a la barra lateral, reproductor y modales.</li>
+            <li>✨ **Visualizador de Audio:** Se añadió un visualizador de barras en tiempo real a la barra del reproductor.</li>
+            <li>✨ **Búsqueda en Biblioteca:** Se añadió una barra de búsqueda para filtrar Artistas, Álbumes y Pistas.</li>
+            <li>✨ **Control de Volumen:** Se añadió un deslizador de volumen en la barra del reproductor.</li>
+        </ul>
+        <div class="preview-container">
+            <div class="preview-content">
+                <div class="phone-frame">
+                    <div class="screen" style="flex-direction: row; height: calc(100% - 40px);">
+                         <div class="sidebar-mock" style="width: 55px; background: rgba(31, 41, 55, 0.7);">
+                            <div class="active"></div>
+                        </div>
+                        <div class="content-mock" style="width: 100%;">
+                            <div class="item" style="height: 20px; background: #374151;">Búsqueda...</div>
+                            <div class="item"></div>
+                        </div>
+                    </div>
+                    <div class="player-mock" style="position: absolute; bottom: 0; width: 100%; background: rgba(31, 41, 55, 0.7);">
+                        <div style="width: 10px; height: 5px; background: #10b981;"></div>
+                        <div style="width: 10px; height: 15px; background: #10b981;"></div>
+                        <div style="width: 10px; height: 10px; background: #10b981;"></div>
+                        <div style="width: 10px; height: 20px; background: #10b981;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="version-card">
+        <div class="version-header">
+            <span class="version-title">Versión 10: Múltiples APIs de Letras</span>
+            <span class="version-date">Septiembre 2025</span>
+        </div>
+        <ul class="changes-list">
+            <li>✨ **Mejora de Letras:** Se añade una segunda API (`lyrist.vercel.app`) y un sistema de "fallback" (si una falla, prueba la otra) para aumentar la tasa de éxito al buscar letras en internet.</li>
+        </ul>
+        <div class="preview-container">
+            <div class="preview-content">
+                 <div class="phone-frame">
+                    <div class="screen" style="background: #111827; padding: 10px;">
+                        <div class="header-mock" style="color: #10b981;">Buscando Letras...</div>
+                        <div style="font-size: 0.8rem; color: #9ca3af; text-align: center; margin-top: 20px;">
+                            <p>API 1: lyrist.vercel.app (OK)</p>
+                            <p>API 2: lyrics.ovh (Fallback)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="version-card">
+        <div class="version-header">
+            <span class="version-title">Versión 9: Letras de Internet</span>
+            <span class="version-date">Septiembre 2025</span>
+        </div>
+        <ul class="changes-list">
+            <li>✨ **Nueva Función:** Si no se encuentra un archivo `.lrc` local, la app ahora busca la letra (como texto estático) en internet usando la API `lyrics.ovh`.</li>
+        </ul>
+        <div class="preview-container">
+             <div class="preview-content">
+                <div class="phone-frame">
+                    <div class="screen" style="padding: 10px;">
+                        <div class="header-mock" style="color: #10b981;">Letra (Internet)</div>
+                        <div class="content-mock" style="margin-top: 10px; color: #d1d5db; font-size: 0.7rem; gap: 8px;">
+                            <p>Hello, it's me...</p>
+                            <p>I was wondering if after all these years...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="version-card">
+        <div class="version-header">
+            <span class="version-title">Versión 8: Reproductor Personalizado</span>
+            <span class="version-date">Septiembre 2025</span>
+        </div>
+        <ul class="changes-list">
+            <li>✨ **Rediseño del Reproductor:** Se elimina el reproductor `<audio>` por defecto de HTML y se reemplaza por uno personalizado (HTML/CSS/JS) con botones (Prev/Play/Next), barra de progreso y contador de tiempo.</li>
+        </ul>
+        <div class="preview-container">
+            <div class="preview-content">
+                <div class="phone-frame">
+                    <div class="screen" style="height: calc(100% - 40px);">
+                        <div class="item"></div>
+                    </div>
+                    <div class="player-mock" style="position: absolute; bottom: 0; width: 100%; gap: 15px;">
+                        <span style="font-size: 0.7rem;">1:05</span>
+                        <div style="width: 15px; height: 15px; border-radius: 50%; background: #9ca3af;"></div>
+                        <div style="width: 25px; height: 25px; border-radius: 50%; background: white;"></div>
+                        <div style="width: 15px; height: 15px; border-radius: 50%; background: #9ca3af;"></div>
+                        <span style="font-size: 0.7rem;">3:30</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="version-card">
+        <div class="version-header">
+            <span class="version-title">Versión 7: Vista de Rejilla y Estilo</span>
+            <span class="version-date">Agosto 2025</span>
+        </div>
+        <ul class="changes-list">
+            <li>✨ **Nueva Vista:** Se añade un interruptor para alternar la biblioteca entre "Lista" y "Rejilla" (cuadrados).</li>
+            <li>✅ **Rediseño:** Se moderniza el diseño de los botones de la barra lateral.</li>
+        </ul>
+        <div class="preview-container">
+            <div class="preview-content">
+                <div class="phone-frame">
+                    <div class="screen" style="flex-direction: row; height: calc(100% - 40px);">
+                        <div class="sidebar-mock" style="width: 55px;">
+                            <div class="active" style="border-left: 3px solid #10b981; background: transparent;"></div>
+                            <div style="background: transparent;"></div>
+                        </div>
+                        <div class="content-mock" style="width: 100%;">
+                            <div class="header-mock" style="background: #1f2937; border-bottom: 1px solid #4b5563;">
+                                <div style="width: 15px; height: 15px; background: #10b981; border-radius: 3px;"></div>
+                            </div>
+                            <div class="grid-view" style="gap: 5px; display: grid; grid-template-columns: repeat(2, 1fr);">
+                                <div class="grid-item" style="padding: 5px; background: #374151; border-radius: 4px;">
+                                    <div class="grid-item-cover" style="padding-bottom: 80%; background: #4b5563;"></div>
+                                </div>
+                                <div class="grid-item" style="padding: 5px; background: #374151; border-radius: 4px;">
+                                    <div class="grid-item-cover" style="padding-bottom: 80%; background: #4b5563;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="player-mock" style="position: absolute; bottom: 0; width: 100%;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="version-card">
+        <div class="version-header">
+            <span class="version-title">Versión 6: Letras Karaoke y Modo Zen</span>
+            <span class="version-date">Agosto 2025</span>
+        </div>
+        <ul class="changes-list">
+            <li>✨ **Nueva Función:** La app ahora lee archivos `.lrc` locales (si tienen el mismo nombre que la canción).</li>
+            <li>✨ **Modo Karaoke:** Un panel muestra la letra sincronizada con la música.</li>
+            <li>✨ **Modo Zen:** Un modo de pantalla completa para las letras.</li>
+        </ul>
+        <div class="preview-container">
+            <div class="preview-content">
+                <div class="phone-frame">
+                    <div class="screen" style="background: #111827; padding: 10px; justify-content: center; text-align: center; gap: 10px;">
+                        <p style="color: #9ca3af; font-size: 1rem;">This is a line of lyrics</p>
+                        <p style="color: #10b981; font-size: 1.2rem; font-weight: bold;">This is the active line</p>
+                        <p style="color: #9ca3af; font-size: 1rem;">This is the next line</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="version-card">
+        <div class="version-header">
+            <span class="version-title">Versión 5: Ajustes y Accesibilidad</span>
+            <span class="version-date">Julio 2025</span>
+        </div>
+        <ul class="changes-list">
+            <li>✨ **Menú de Ajustes:** Se añade un modal de Ajustes.</li>
+            <li>✨ **Temas:** Se implementa el cambio entre 3 temas (claro/oscuro).</li>
+            <li>✨ **Accesibilidad:** Se añaden opciones para tamaño de fuente y alto contraste.</li>
+            <li>✨ **Exportar:** Se añade la exportación de historial y eventos del calendario a `.txt`.</li>
+        </ul>
+        <div class="preview-container">
+            <div class="preview-content">
+                <div class="phone-frame">
+                    <div class="screen" style="background: #f0f9ff; padding: 10px;">
+                        <div class="header-mock" style="color: #0c4a6e; background: #e0f2fe;">Ajustes</div>
+                        <div class="content-mock" style="margin-top: 10px; gap: 8px;">
+                            <div class="item" style="background: #e0f2fe; color: #0c4a6e; padding: 5px; justify-content: space-between; display: flex; align-items: center;">
+                                <span>Tema</span> <span>Zafiro (Claro)</span>
+                            </div>
+                            <div class="item" style="background: #e0f2fe; color: #0c4a6e; padding: 5px; justify-content: space-between; display: flex; align-items: center;">
+                                <span>Alto Contraste</span> <span>(Off)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="version-card">
+        <div class="version-header">
+            <span class="version-title">Versión 4: Rediseño Total y Ecualizador (EQ)</span>
+            <span class="version-date">Junio 2025</span>
+        </div>
+        <ul class="changes-list">
+            <li>✨ **Rediseño Total:** Se cambia a un diseño moderno de 3 paneles (Barra Lateral, Contenido, Reproductor Fijo).</li>
+            <li>✨ **Nuevo Tema:** Se introduce el tema Zinc/Esmeralda.</li>
+            <li>✨ **Ecualizador:** Se añade un ecualizador (EQ) de 9 bandas usando la Web Audio API.</li>
+        </ul>
+        <div class="preview-container">
+             <div class="preview-content">
+                <div class="phone-frame">
+                    <div class="screen" style="flex-direction: row; height: calc(100% - 40px);">
+                        <div class="sidebar-mock" style="width: 55px;">
+                            <div class="active"></div>
+                            <div></div>
+                        </div>
+                        <div class="content-mock" style="width: 100%;">
+                            <div class="header-mock" style="background: #1f2937; border-bottom: 1px solid #4b5563;">
+                            </div>
+                            <div class="item"></div>
+                            <div class="item"></div>
+                        </div>
+                    </div>
+                    <div class="player-mock" style="position: absolute; bottom: 0; width: 100%;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="version-card">
+        <div class="version-header">
+            <span class="version-title">Versión 3: Metadatos (Artistas, Álbumes)</span>
+            <span class="version-date">Mayo 2025</span>
+        </div>
+        <ul class="changes-list">
+            <li>✨ **Lector de Metadatos:** Se integra `jsmediatags` para leer Artista, Álbum y Carátula de los archivos.</li>
+            <li>✨ **Biblioteca Inteligente:** La pestaña "Biblioteca" ahora tiene sub-pestañas para Artistas, Álbumes y Pistas.</li>
+        </ul>
+        <div class="preview-container">
+            <div class="preview-content">
+                <div class="phone-frame">
+                    <div class="screen">
+                        <div class="header-mock" style="background: #374151; justify-content: space-around;">
+                            <span class="tab-mock active">Biblioteca</span>
+                            <span class="tab-mock">Calendario</span>
+                        </div>
+                        <div style="display: flex; justify-content: center; gap: 10px; padding: 5px; background: #1f2937;">
+                            <span class="tab-mock active">Artistas</span>
+                            <span class="tab-mock">Álbumes</span>
+                        </div>
+                        <div class="content-mock">
+                            <div class="item"></div>
+                            <div class="item"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="version-card">
+        <div class="version-header">
+            <span class="version-title">Versión 2: Carga de Carpeta y Pestañas</span>
+            <span class="version-date">Abril 2025</span>
+        </div>
+        <ul class="changes-list">
+            <li>✨ **Carga de Carpeta:** Se reemplaza el diálogo de "abrir archivo" por un selector de carpeta.</li>
+            <li>✨ **Diseño de Pestañas:** La app se divide en dos secciones: "Biblioteca" (para la música) y "Calendario".</li>
+        </ul>
+        <div class="preview-container">
+             <div class="preview-content">
+                 <div class="phone-frame">
+                    <div class="screen">
+                        <div class="header-mock" style="background: #374151; justify-content: space-around;">
+                            <span class="tab-mock active">Biblioteca</span>
+                            <span class="tab-mock">Calendario</span>
+                        </div>
+                        <div class="content-mock" style="justify-content: center; align-items: center;">
+                            <div class="btn-mock">Cargar Carpeta</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="version-card">
+        <div class="version-header">
+            <span class="version-title">Versión 1: Base (HTML, CSS, JS)</span>
+            <span class="version-date">Septiembre 2025</span>
+        </div>
+        <ul class="changes-list">
+            <li>✨ **Base Inicial:** Se crea la estructura HTML con un calendario y un reproductor básico.</li>
+            <li>❌ **Música Local:** El reproductor inicial solo podía cargar archivos de audio a través de un diálogo (la única forma de usar archivos locales).</li>
+        </ul>
+        <div class="preview-container">
+            <div class="preview-content">
+                <div class="phone-frame">
+                    <div class="screen">
+                         <div class="header-mock" style="background: #374151; justify-content: center;">
+                            <span>Calendario Multimedia</span>
+                        </div>
+                        <div class="calendar-mock" style="margin-top: 10px;">
+                            <div style="background: #1f2937;">D</div>
+                            <div style="background: #1f2937;">L</div>
+                            <div style="background: #1f2937;">M</div>
+                            <div style="background: #1f2937;">M</div>
+                            <div style="background: #1f2937;">J</div>
+                            <div style="background: #1f2937;">V</div>
+                            <div style="background: #1f2937;">S</div>
+                            <div class="day-number">28</div>
+                            <div class="event-day">29</div>
+                            <div class="day-number">30</div>
+                        </div>
+                        <div class="player-mock" style="margin-top: auto; justify-content: center;">
+                            <div class="btn-mock">Reproducir Archivo</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

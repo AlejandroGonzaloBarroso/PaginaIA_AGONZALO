@@ -1,0 +1,1949 @@
+<!DOCTYPE html>
+<!-- La clase 'dark' y el estilo de fuente se aplicarán desde JS/LocalStorage -->
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App Multimedia</title>
+    <!-- 1. Carga de Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 2. Carga de JSMediatags para leer metadatos de audio -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
+    <!-- 3. Iconos (para el engranaje de ajustes y otros) -->
+    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+    <!-- 4. Fuente para Dislexia (se carga bajo demanda) -->
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
+    <!-- La fuente OpenDyslexic se cargará dinámicamente si es necesario -->
+
+    <style>
+        /* Definición de variables de color por tema */
+        :root {
+            /* Fuente base */
+            --font-primary: 'Open Sans', sans-serif;
+
+            /* Tema por defecto: Esmeralda (Oscuro) */
+            --color-bg-primary: #18181b; /* zinc-900 */
+            --color-bg-secondary: rgba(39, 39, 42, 0.75); /* zinc-800 con transparencia */
+            --color-bg-tertiary: #3f3f46; /* zinc-700 */
+            --color-bg-hover: #52525b; /* zinc-600 */
+            --color-border: #3f3f46; /* zinc-700 */
+            --color-text-primary: #ffffff;
+            --color-text-secondary: #d4d4d8; /* zinc-300 */
+            --color-text-muted: #a1a1aa; /* zinc-400 */
+            --color-accent: #059669; /* emerald-600 */
+            --color-accent-hover: #047857; /* emerald-700 */
+            --color-accent-text: #34d399; /* emerald-400 */
+            --color-accent-text-light: #6ee7b7; /* emerald-300 */
+            --color-today-bg: #065f46; /* emerald-800 */
+            --color-modal-bg: rgba(39, 39, 42, 0.85); /* zinc-800 más opaco */
+            --color-modal-backdrop: rgba(0,0,0,0.5);
+        }
+
+        html.theme-sapphire-dark {
+            --color-bg-primary: #1e1b4b; /* indigo-950 */
+            --color-bg-secondary: rgba(49, 46, 129, 0.75); /* indigo-900 con transparencia */
+            --color-bg-tertiary: #4338ca; /* indigo-700 */
+            --color-bg-hover: #4f46e5; /* indigo-600 */
+            --color-border: #312e81; /* indigo-900 */
+            --color-text-primary: #ffffff;
+            --color-text-secondary: #c7d2fe; /* indigo-200 */
+            --color-text-muted: #a5b4fc; /* indigo-300 */
+            --color-accent: #6366f1; /* indigo-500 */
+            --color-accent-hover: #4f46e5; /* indigo-600 */
+            --color-accent-text: #a5b4fc; /* indigo-300 */
+            --color-accent-text-light: #c7d2fe; /* indigo-200 */
+            --color-today-bg: #4338ca; /* indigo-700 */
+            --color-modal-bg: rgba(49, 46, 129, 0.85); /* indigo-900 más opaco */
+        }
+
+        html.theme-sapphire-light {
+            --color-bg-primary: #f5f3ff; /* violet-50 */
+            --color-bg-secondary: rgba(255, 255, 255, 0.75); /* blanco con transparencia */
+            --color-bg-tertiary: #ede9fe; /* violet-100 */
+            --color-bg-hover: #ddd6fe; /* violet-200 */
+            --color-border: #e0e7ff; /* indigo-100 */
+            --color-text-primary: #1e1b4b; /* indigo-950 */
+            --color-text-secondary: #312e81; /* indigo-900 */
+            --color-text-muted: #4338ca; /* indigo-700 */
+            --color-accent: #4f46e5; /* indigo-600 */
+            --color-accent-hover: #4338ca; /* indigo-700 */
+            --color-accent-text: #4338ca; /* indigo-700 */
+            --color-accent-text-light: #4f46e5; /* indigo-600 */
+            --color-today-bg: #c7d2fe; /* indigo-200 */
+            --color-modal-bg: rgba(255, 255, 255, 0.85); /* blanco más opaco */
+            --color-modal-backdrop: rgba(0,0,0,0.2);
+        }
+
+        /* Tema Rubí (Oscuro) */
+        html.theme-ruby-dark {
+            --color-bg-primary: #260505; /* Rojo-negro */
+            --color-bg-secondary: rgba(76, 5, 5, 0.75); /* Rojo-oscuro 900 con transparencia */
+            --color-bg-tertiary: #991b1b; /* red-700 */
+            --color-bg-hover: #b91c1c; /* red-600 */
+            --color-border: #7f1d1d; /* red-900 */
+            --color-text-primary: #ffffff;
+            --color-text-secondary: #fecaca; /* red-200 */
+            --color-text-muted: #fca5a5; /* red-300 */
+            --color-accent: #ef4444; /* red-500 */
+            --color-accent-hover: #dc2626; /* red-600 */
+            --color-accent-text: #f87171; /* red-400 */
+            --color-accent-text-light: #fca5a5; /* red-300 */
+            --color-today-bg: #991b1b; /* red-700 */
+            --color-modal-bg: rgba(76, 5, 5, 0.85); /* Rojo-oscuro 900 más opaco */
+        }
+
+        /* Tema Ámbar (Claro) */
+        html.theme-amber-light {
+            --color-bg-primary: #fffbeb; /* amber-50 */
+            --color-bg-secondary: rgba(255, 255, 255, 0.75); /* blanco con transparencia */
+            --color-bg-tertiary: #fef3c7; /* amber-100 */
+            --color-bg-hover: #fde68a; /* amber-200 */
+            --color-border: #fde68a; /* amber-200 */
+            --color-text-primary: #78350f; /* amber-950 */
+            --color-text-secondary: #92400e; /* amber-800 */
+            --color-text-muted: #b45309; /* amber-700 */
+            --color-accent: #d97706; /* amber-600 */
+            --color-accent-hover: #b45309; /* amber-700 */
+            --color-accent-text: #b45309; /* amber-700 */
+            --color-accent-text-light: #d97706; /* amber-600 */
+            --color-today-bg: #fde68a; /* amber-200 */
+            --color-modal-bg: rgba(255, 255, 255, 0.85); /* blanco más opaco */
+            --color-modal-backdrop: rgba(0,0,0,0.2);
+        }
+
+        /* Modo de Alto Contraste */
+        html.high-contrast {
+            --color-bg-primary: #000000;
+            --color-bg-secondary: #000000;
+            --color-bg-tertiary: #000000;
+            --color-bg-hover: #333333;
+            --color-border: #ffffff;
+            --color-text-primary: #ffffff;
+            --color-text-secondary: #ffffff;
+            --color-text-muted: #ffffff;
+            --color-accent: #ffff00; /* Amarillo brillante */
+            --color-accent-hover: #ffff33;
+            --color-accent-text: #ffff00;
+            --color-accent-text-light: #ffff00;
+            --color-today-bg: #000000;
+            --color-modal-bg: #000000;
+            --color-modal-backdrop: rgba(0,0,0,0.8);
+        }
+
+        /* Modo Dislexia */
+        @font-face {
+            font-family: 'OpenDyslexic';
+            src: url('https://cdn.jsdelivr.net/gh/OpenDyslexic/opendyslexic-webfont@latest/OpenDyslexic-Regular.woff2') format('woff2'),
+                 url('https://cdn.jsdelivr.net/gh/OpenDyslexic/opendyslexic-webfont@latest/OpenDyslexic-Regular.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        html.font-dyslexic * {
+            font-family: 'OpenDyslexic', var(--font-primary) !important;
+            letter-spacing: 0.5px !important;
+        }
+
+        /* Accesibilidad - Reducir Movimiento */
+        html.reduce-motion * {
+            transition: none !important;
+            animation: none !important;
+        }
+
+        /* Accesibilidad - Espaciado de Texto */
+        html.text-spacing * {
+            letter-spacing: 0.05em !important;
+            line-height: 1.75 !important;
+        }
+
+
+        /* Aplicación de variables */
+        body {
+            background-color: var(--color-bg-primary);
+            color: var(--color-text-primary);
+            font-family: var(--font-primary);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Estilo Glassmorphism */
+        nav, footer {
+            background-color: var(--color-bg-secondary);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: all 0.3s;
+        }
+        footer { border-top-color: var(--color-border); }
+        .modal-bg {
+            background-color: var(--color-modal-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        .modal-container {
+            background-color: var(--color-modal-backdrop);
+        }
+        /* En alto contraste, quitar el blur */
+        html.high-contrast nav, html.high-contrast footer, html.high-contrast .modal-bg {
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+        }
+
+        /* Estilo de botones de navegación */
+        .nav-button {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem; /* 12px */
+            padding: 0.75rem 1rem; /* 12px 16px */
+            border-radius: 0.5rem; /* 8px */
+            font-size: 1.125rem; /* 18px */
+            font-weight: 600;
+            color: var(--color-text-muted);
+            border-left: 4px solid transparent;
+            transition: all 0.2s ease-in-out;
+            /* Asegurar que el texto no se oculte al encoger */
+            white-space: nowrap;
+        }
+        .nav-button ion-icon {
+            font-size: 1.5rem; /* 24px */
+            flex-shrink: 0; /* Evitar que el icono se encoja */
+        }
+        .nav-button:hover {
+            background-color: var(--color-bg-tertiary);
+            color: var(--color-text-primary);
+        }
+        .nav-button.active {
+            background-color: var(--color-bg-tertiary);
+            color: var(--color-accent-text);
+            border-left-color: var(--color-accent);
+        }
+
+        /* Estilos para Sidebar Oculta/Visible */
+        nav {
+            width: 16rem; /* w-64 */
+            transition: width 0.3s ease-in-out, transform 0.3s ease-in-out, height 0s; /* height sin transición */
+             /* ARREGLO: La altura se gestiona con JS */
+            position: fixed; /* Asegura que esté fijo */
+            top: 0;
+            left: 0;
+            bottom: auto; /* Evita que ocupe todo */
+            overflow-y: auto; /* Añade scroll si el contenido es mucho */
+        }
+        main {
+            transition: margin-left 0.3s ease-in-out;
+        }
+        nav.collapsed {
+            width: 4rem; /* Ancho colapsado */
+        }
+        nav.collapsed .nav-button span {
+            display: none; /* Ocultar texto */
+        }
+        nav.collapsed .nav-button {
+            justify-content: center; /* Centrar icono */
+            padding-left: 0;
+            padding-right: 0;
+        }
+        nav.collapsed h1 {
+            display: none; /* Ocultar título */
+        }
+        nav.collapsed #sidebar-toggle-btn ion-icon {
+            transform: rotate(180deg); /* Girar icono */
+        }
+        /* Ajuste del main content en escritorio cuando la sidebar está colapsada */
+        @media (min-width: 768px) { /* md: */
+            body:not(.sidebar-collapsed) main {
+                margin-left: 16rem; /* w-64 */
+            }
+            body.sidebar-collapsed main {
+                margin-left: 4rem; /* Ancho colapsado */
+            }
+            body.sidebar-collapsed nav {
+                width: 4rem;
+            }
+            /* ARREGLO: Asegurar que la sidebar fija no se solape con el footer */
+             nav {
+                height: calc(100vh - var(--player-height, 0px)); /* Altura calculada */
+            }
+            
+            /* ARREGLO: Paneles EQ y Letras respetan la sidebar */
+            body:not(.sidebar-collapsed) #eq-container {
+                left: 16rem; /* w-64 */
+            }
+            body.sidebar-collapsed #eq-container {
+                left: 4rem; /* Ancho colapsado */
+            }
+        }
+        /* En móvil, la sidebar siempre se oculta/muestra con transform */
+        @media (max-width: 767px) {
+            nav {
+                position: fixed;
+                width: 16rem; /* w-64 */
+                transform: translateX(-100%);
+                 height: 100vh !important; /* En móvil sí ocupa toda la altura */
+                 top: 0;
+                 bottom: 0;
+            }
+            nav.open-mobile {
+                transform: translateX(0);
+            }
+            nav.collapsed { /* Resetear colapso en móvil */
+                width: 16rem;
+            }
+            nav.collapsed .nav-button span {
+                display: inline;
+            }
+            nav.collapsed .nav-button {
+                justify-content: flex-start;
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+             nav.collapsed h1 {
+                display: block;
+            }
+            nav.collapsed #sidebar-toggle-btn ion-icon {
+                transform: rotate(0deg);
+            }
+            main {
+                 margin-left: 0 !important; /* Siempre ocupa todo el ancho */
+            }
+            
+            /* ARREGLO: Paneles EQ y Letras ocupan todo el ancho en móvil */
+            #eq-container {
+                left: 0 !important;
+            }
+        }
+
+
+        .page { display: none; }
+        .page.active { display: block; }
+
+        /* Controles de formulario y botones */
+        .btn { padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 600; transition: all 0.2s; }
+        .btn:hover { transform: scale(1.02); filter: brightness(1.1); }
+        .btn-primary { background-color: var(--color-accent); color: white; }
+        .btn-primary:hover { background-color: var(--color-accent-hover); }
+        .btn-secondary { background-color: var(--color-bg-tertiary); color: var(--color-text-primary); }
+        .btn-secondary:hover { background-color: var(--color-bg-hover); }
+        .btn-danger { background-color: #dc2626; color: white; }
+        .btn-danger:hover { background-color: #b91c1c; }
+        .btn-icon { background-color: transparent; border: none; color: var(--color-text-muted); transition: all 0.2s; }
+        .btn-icon:hover { color: var(--color-text-primary); transform: scale(1.1); }
+        .btn-icon.active { color: var(--color-accent-text); }
+        .btn-icon[disabled] { color: var(--color-bg-tertiary); }
+
+        input, select {
+            background-color: var(--color-bg-tertiary);
+            border-color: var(--color-border);
+            color: var(--color-text-primary);
+            border-radius: 0.5rem;
+            border-width: 1px;
+            transition: all 0.3s;
+        }
+
+        /* Pestañas de Biblioteca */
+        .lib-tab-button {
+            transition: all 0.2s;
+            border-bottom: 2px solid transparent;
+            color: var(--color-text-muted);
+        }
+        .lib-tab-button.active {
+            color: var(--color-accent-text);
+            border-bottom-color: var(--color-accent-text);
+        }
+        .lib-tab-container { border-bottom-color: var(--color-border); }
+
+        /* Elementos de Canción (Lista) */
+        .song-item { background-color: var(--color-bg-tertiary); transition: all 0.2s; }
+        .song-item:hover { background-color: var(--color-bg-hover); transform: translateX(4px); }
+        .song-art { background-color: var(--color-bg-hover); }
+        .song-title { color: var(--color-text-primary); }
+        .song-details { color: var(--color-text-secondary); }
+
+        /* Vista de Rejilla */
+        .grid-view-item {
+            background-color: var(--color-bg-secondary);
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+        }
+        .grid-view-item:hover {
+            background-color: var(--color-bg-tertiary);
+            transform: translateY(-4px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        .grid-view-item img {
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            border-radius: 0.25rem;
+            margin-bottom: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Calendario */
+        .calendar-day { background-color: var(--color-bg-tertiary); transition: all 0.2s ease-in-out; }
+        .calendar-day:hover { transform: scale(1.05); background-color: var(--color-bg-hover); }
+        .today { background-color: var(--color-today-bg); font-weight: bold; }
+        .selected { background-color: var(--color-accent); color: white; }
+        .has-event { border: 2px solid var(--color-accent); }
+        .event-title { color: var(--color-accent-text-light); }
+        .calendar-header { color: var(--color-text-muted); }
+
+        /* Ecualizador (Panel Deslizante) */
+        #eq-container {
+            position: absolute;
+            bottom: 0;
+            /* ARREGLO: left: 0 y right: 0 eliminados para que respeten la media query */
+            right: 0;
+            z-index: 10;
+            padding: 1.5rem;
+            background-color: var(--color-bg-secondary);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-top: 1px solid var(--color-border);
+            transform: translateY(100%); /* Oculto por defecto */
+            transition: transform 0.4s ease-out, left 0.3s ease-in-out; /* ARREGLO: Añadida transición 'left' */
+        }
+        #eq-container.open {
+            transform: translateY(0);
+        }
+        /* Sliders verticales */
+        .eq-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 8px; /* Ancho del slider */
+            height: 120px; /* Alto del slider */
+            background: var(--color-bg-tertiary);
+            border-radius: 4px;
+            writing-mode: bt-lr; /* De abajo a arriba */
+        }
+        .eq-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--color-accent-text);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .eq-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: var(--color-accent-text);
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
+
+        /* Modales (con animación) */
+        .modal-container {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        .modal-container.open {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-bg {
+            transform: scale(0.95);
+            transition: transform 0.3s;
+        }
+        .modal-container.open .modal-bg {
+            transform: scale(1);
+        }
+
+        /* Interruptor (toggle) */
+        .switch { position: relative; display: inline-block; width: 50px; height: 28px; }
+        .switch input { display: none; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--color-bg-tertiary); transition: .4s; border-radius: 28px; }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--color-accent); }
+        input:checked + .slider:before { transform: translateX(22px); }
+
+        /* --- REPRODUCTOR PERSONALIZADO --- */
+        .seek-bar, .volume-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            background: var(--color-bg-tertiary);
+            border-radius: 3px;
+            outline: none;
+            cursor: pointer;
+        }
+        .seek-bar::-webkit-slider-thumb, .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: var(--color-accent-text);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .seek-bar:hover::-webkit-slider-thumb, .volume-slider:hover::-webkit-slider-thumb {
+            transform: scale(1.2);
+        }
+        .seek-bar::-moz-range-thumb, .volume-slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: var(--color-accent-text);
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+        .seek-bar:hover::-moz-range-thumb, .volume-slider:hover::-moz-range-thumb {
+            transform: scale(1.2);
+        }
+
+        /* Estilos de modernización (enlaces del reproductor) */
+        #now-playing-title, #now-playing-artist {
+            transition: color 0.2s;
+        }
+        #now-playing-title:hover, #now-playing-artist:hover {
+            text-decoration: underline;
+            cursor: pointer;
+            color: var(--color-text-primary);
+        }
+        #now-playing-art {
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        #now-playing-art:hover {
+            transform: scale(1.05);
+        }
+
+    </style>
+</head>
+<!-- Diseño de 3 paneles (Sidebar, Main, Player) -->
+<body class="font-sans flex flex-col h-screen overflow-hidden"> <!-- Evita scroll en body -->
+
+    <!-- Fondo del menú móvil (oculto por defecto) -->
+    <div id="menu-backdrop" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden md:hidden"></div>
+
+    <!-- Botón de menú móvil (oculto en escritorio) -->
+    <button id="menu-toggle-btn" class="btn-icon md:hidden fixed top-4 left-4 z-40 p-2 rounded-full" style="background-color: var(--color-bg-secondary); backdrop-filter: blur(10px);"> <!-- z-index mayor que backdrop -->
+        <ion-icon name="menu-outline" class="text-2xl"></ion-icon>
+    </button>
+
+    <div class="flex flex-grow overflow-hidden relative">
+
+        <!-- ======================= -->
+        <!-- BARRA LATERAL (NAV)     -->
+        <!-- ======================= -->
+        <nav id="sidebar" class="z-40 p-4 flex-shrink-0 flex flex-col justify-between transition-all duration-300 ease-in-out">
+            <div>
+                <!-- Botón de cerrar menú móvil (oculto en escritorio) -->
+                <button id="menu-close-btn" class="btn-icon md:hidden absolute top-2 right-2">
+                    <ion-icon name="close-outline" class="text-3xl"></ion-icon>
+                </button>
+
+                <h1 class="text-2xl font-bold text-center mb-6 mt-8 md:mt-0" style="color: var(--color-accent-text);">Mi Música</h1>
+                <div class="space-y-2">
+                    <button data-tab="library" class="nav-button active w-full text-left">
+                        <ion-icon name="library-outline"></ion-icon> <span>Biblioteca</span>
+                    </button>
+                    <button data-tab="calendar" class="nav-button w-full text-left">
+                        <ion-icon name="calendar-outline"></ion-icon> <span>Calendario</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <!-- Botón para Ocultar/Mostrar Sidebar (solo escritorio) -->
+                 <button id="sidebar-toggle-btn" class="nav-button w-full text-left hidden md:flex" title="Ocultar Menú">
+                    <ion-icon name="chevron-back-outline"></ion-icon> <span>Ocultar</span>
+                </button>
+                <!-- Botón de Ajustes -->
+                <button id="settings-btn" class="nav-button w-full text-left">
+                    <ion-icon name="settings-outline"></ion-icon>
+                    <span>Ajustes</span>
+                </button>
+            </div>
+        </nav>
+
+        <!-- ======================= -->
+        <!-- ÁREA DE CONTENIDO       -->
+        <!-- ======================= -->
+        <main id="main-content" class="flex-grow p-6 overflow-y-auto w-full transition-all duration-300 ease-in-out">
+
+            <!-- PÁGINA 1: BIBLIOTECA -->
+            <div id="library-page" class="page active pt-12 md:pt-0">
+                <h1 class="text-3xl font-bold mb-6">Biblioteca de Música</h1>
+
+                <div class="mb-4">
+                    <label for="folder-input" class="block mb-2 text-sm font-medium" style="color: var(--color-text-secondary);">
+                        Selecciona tu carpeta de música (incluye archivos `.lrc` para las letras).
+                    </label>
+                    <input type="file" id="folder-input" webkitdirectory directory multiple class="block w-full text-sm file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-semibold"/>
+                </div>
+
+                <!-- Barra de Búsqueda -->
+                <div class="mb-4 relative">
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2" style="color: var(--color-text-muted);">
+                        <ion-icon name="search-outline"></ion-icon>
+                    </span>
+                    <input type="search" id="search-input" class="w-full pl-10 pr-4 py-2" placeholder="Buscar en la biblioteca...">
+                </div>
+
+                <!-- Pestañas y Vistas -->
+                <div class="flex justify-between items-center lib-tab-container mb-4">
+                    <!-- Pestañas Artista/Album/Pista -->
+                    <div class="flex">
+                        <button data-lib-tab="artists" class="lib-tab-button py-2 px-4 font-medium active">Artistas</button>
+                        <button data-lib-tab="albums" class="lib-tab-button py-2 px-4 font-medium">Álbumes</button>
+                        <button data-lib-tab="tracks" class="lib-tab-button py-2 px-4 font-medium">Pistas</button>
+                    </div>
+                    <!-- Botones de Vista Lista/Rejilla -->
+                    <div class="flex gap-2">
+                        <button id="view-toggle-list" class="btn-icon text-2xl active" title="Vista de Lista">
+                            <ion-icon name="list-outline"></ion-icon>
+                        </button>
+                        <button id="view-toggle-grid" class="btn-icon text-2xl" title="Vista de Rejilla">
+                            <ion-icon name="grid-outline"></ion-icon>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="library-content-container" class="mt-6 max-h-[calc(100vh-20rem)] overflow-y-auto pr-2">
+                    <p id="library-placeholder" class="text-center" style="color: var(--color-text-muted);">Aún no se ha cargado ninguna carpeta.</p>
+                    <div id="library-content">
+                        <!-- El contenido (artistas, álbumes, pistas) se añadirá aquí con JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- PÁGINA 2: CALENDARIO -->
+            <div id="calendar-page" class="page pt-12 md:pt-0">
+                <h1 class="text-3xl font-bold text-center mb-6">Calendario de Eventos</h1>
+
+                <div id="calendar-container" class="mb-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <button id="prev-month" class="btn btn-primary px-4 py-2">&lt; Ant</button>
+                        <h2 id="month-year" class="text-2xl font-semibold"></h2>
+                        <button id="next-month" class="btn btn-primary px-4 py-2">Sig &gt;</button>
+                    </div>
+                    <div class="grid grid-cols-7 gap-1 text-center font-medium calendar-header mb-2">
+                        <div>Dom</div> <div>Lun</div> <div>Mar</div> <div>Mié</div> <div>Jue</div> <div>Vie</div> <div>Sáb</div>
+                    </div>
+                    <div id="calendar-grid" class="grid grid-cols-7 gap-2">
+                        <!-- Los días se generarán con JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- ======================= -->
+        <!-- PANEL DE ECUALIZADOR (EQ) -->
+        <!-- ======================= -->
+        <div id="eq-container">
+            <h4 class="text-center font-semibold mb-2">Ecualizador de 9 Bandas</h4>
+            <div class="flex justify-around items-center h-40">
+                <!-- Los sliders se generarán con JS -->
+            </div>
+        </div>
+
+
+    </div> <!-- Fin de .flex-grow -->
+
+    <!-- ======================= -->
+    <!-- BARRA DE REPRODUCTOR    -->
+    <!-- ======================= -->
+    <footer id="player-bar" class="p-4 flex-shrink-0 relative z-50">
+
+        <!-- REPRODUCTOR PERSONALIZADO (Ahora responsivo) -->
+        <div class="flex flex-col md:flex-row items-center">
+            <!-- Info de la canción: w-full md:w-1/4 -->
+            <div class="flex items-center w-full md:w-1/4 p-2 md:p-0">
+                <img id="now-playing-art" src="https://placehold.co/60x60/3f3f46/9ca3af?text=..." alt="Carátula" class="w-14 h-14 rounded-md" style="background-color: var(--color-bg-hover);">
+                <!-- Canvas del visualizador -->
+                <canvas id="visualizer-canvas" class="hidden md:block w-16 h-10 ml-2"></canvas>
+                <div class="ml-3 overflow-hidden">
+                    <div id="now-playing-title" class="font-semibold truncate">Selecciona una canción</div>
+                    <div id="now-playing-artist" class="text-sm truncate" style="color: var(--color-text-muted);">...</div>
+                </div>
+            </div>
+
+            <!-- Controles de Audio Personalizados: w-full md:w-1/2 -->
+            <div class="w-full md:w-1/2 px-4 border-t md:border-t-0 md:border-l md:border-r py-2 md:py-0" style="border-color: var(--color-border);">
+                <!-- Botones -->
+                <div class="flex justify-center items-center gap-4 mb-2">
+                    <button id="shuffle-btn" class="btn-icon text-xl hidden md:block" title="Aleatorio">
+                        <ion-icon name="shuffle-outline"></ion-icon>
+                    </button>
+                    <button id="prev-btn" class="btn-icon text-2xl" title="Anterior">
+                        <ion-icon name="play-skip-back-outline"></ion-icon>
+                    </button>
+                    <button id="play-pause-btn" class="btn-icon text-4xl p-1 rounded-full flex items-center justify-center" style="background-color: var(--color-accent); color: white;" title="Reproducir">
+                        <ion-icon name="play-outline" class="ml-1"></ion-icon> <!-- Icono por defecto -->
+                    </button>
+                    <button id="next-btn" class="btn-icon text-2xl" title="Siguiente">
+                        <ion-icon name="play-skip-forward-outline"></ion-icon>
+                    </button>
+                    <button id="repeat-btn" class="btn-icon text-xl hidden md:block" title="Repetir (Desactivado)">
+                        <ion-icon name="repeat-outline"></ion-icon>
+                    </button>
+                </div>
+                <!-- Barra de Búsqueda y Tiempos -->
+                <div class="flex items-center gap-3">
+                    <span id="current-time" class="text-xs" style="color: var(--color-text-muted);">0:00</span>
+                    <input type="range" id="seek-bar" value="0" step="1" class="seek-bar w-full">
+                    <span id="duration" class="text-xs" style="color: var(--color-text-muted);">0:00</span>
+                </div>
+            </div>
+
+            <!-- Botones Extra (EQ y Letras): w-full md:w-1/4 -->
+            <div class="w-full md:w-1/4 flex justify-center md:justify-end items-center gap-2 p-2 md:p-0">
+                <!-- Botones de Shuffle/Repeat para móviles -->
+                <button id="shuffle-btn-mobile" class="btn btn-secondary btn-icon text-xl md:hidden" title="Aleatorio">
+                    <ion-icon name="shuffle-outline"></ion-icon>
+                </button>
+                <button id="repeat-btn-mobile" class="btn btn-secondary btn-icon text-xl md:hidden" title="Repetir (Desactivado)">
+                    <ion-icon name="repeat-outline"></ion-icon>
+                </button>
+
+                <!-- Control de Volumen -->
+                <button id="volume-btn" class="btn btn-secondary btn-icon text-xl">
+                    <ion-icon name="volume-medium-outline"></ion-icon>
+                </button>
+                <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="1" class="volume-slider w-24 hidden md:block">
+
+                <button id="eq-toggle-btn" class="btn btn-secondary btn-icon text-xl" title="Ecualizador">
+                    <ion-icon name="options-outline"></ion-icon>
+                </button>
+            </div>
+        </div>
+        <!-- Audio tag (oculto) -->
+        <audio id="audio-player" class="hidden"></audio>
+    </footer>
+
+    <!-- ================================== -->
+    <!-- MODAL DE AJUSTES (Oculto) -->
+    <!-- ================================== -->
+    <div id="settings-modal" class="modal-container fixed inset-0 flex items-center justify-center p-4 z-50">
+        <div class="modal-bg rounded-lg p-6 w-full max-w-lg shadow-xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">Ajustes</h2>
+                <button id="settings-close-btn" class="btn-icon text-2xl" title="Cerrar">
+                    <ion-icon name="close-circle-outline"></ion-icon>
+                </button>
+            </div>
+
+            <div class="space-y-6">
+                <!-- Sección de Tema -->
+                <div>
+                    <h3 class="text-lg font-semibold mb-3">Tema de la Aplicación</h3>
+                    <select id="theme-select" class="w-full px-3 py-2 border">
+                        <option value="theme-emerald-dark">Esmeralda (Oscuro)</option>
+                        <option value="theme-sapphire-dark">Zafiro (Oscuro)</option>
+                        <option value="theme-sapphire-light">Zafiro (Claro)</option>
+                        <!-- Temas -->
+                        <option value="theme-ruby-dark">Rubí (Oscuro)</option>
+                        <option value="theme-amber-light">Ámbar (Claro)</option>
+                    </select>
+                </div>
+
+                <!-- Sección de Accesibilidad -->
+                <div>
+                    <h3 class="text-lg font-semibold mb-3">Accesibilidad</h3>
+                    <div class="space-y-4">
+                        <!-- Tamaño de Fuente -->
+                        <div class="flex justify-between items-center">
+                            <label for="font-size-label" class="font-medium">Tamaño de Fuente</label>
+                            <div class="flex gap-2">
+                                <button id="font-decrease" class="btn btn-secondary px-3 py-1">-</button>
+                                <button id="font-reset" class="btn btn-secondary px-3 py-1">R</button>
+                                <button id="font-increase" class="btn btn-secondary px-3 py-1">+</button>
+                            </div>
+                        </div>
+                        <!-- Alto Contraste -->
+                        <div class="flex justify-between items-center">
+                            <label for="high-contrast-toggle" class="font-medium">Alto Contraste</Glebel>
+                            <label class="switch">
+                                <input type="checkbox" id="high-contrast-toggle">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <!-- Modo Dislexia -->
+                        <div class="flex justify-between items-center">
+                            <label for="dyslexia-toggle" class="font-medium">Modo Dislexia</Glebel>
+                            <label class="switch">
+                                <input type="checkbox" id="dyslexia-toggle">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <!-- Reducir Movimiento -->
+                        <div class="flex justify-between items-center">
+                            <label for="reduce-motion-toggle" class="font-medium">Reducir Movimiento</Glebel>
+                            <label class="switch">
+                                <input type="checkbox" id="reduce-motion-toggle">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <!-- Espaciado de Texto -->
+                        <div class="flex justify-between items-center">
+                            <label for="text-spacing-toggle" class="font-medium">Aumentar Espaciado</Glebel>
+                            <label class="switch">
+                                <input type="checkbox" id="text-spacing-toggle">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección de Exportar -->
+                <div>
+                    <h3 class="text-lg font-semibold mb-3">Datos</h3>
+                    <button id="export-history-btn" class="w-full btn btn-secondary">
+                        Exportar Historial de Reproducción (.txt)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================== -->
+    <!-- MODAL DE EVENTOS (Oculto) -->
+    <!-- ================================== -->
+    <div id="event-modal" class="modal-container fixed inset-0 flex items-center justify-center p-4 z-50">
+        <div class="modal-bg rounded-lg p-6 w-full max-w-md shadow-xl">
+            <h2 id="modal-title" class="text-2xl font-bold mb-4">Añadir Evento</h2>
+            <input type="hidden" id="modal-date">
+
+            <div class="mb-4">
+                <label for="event-title-input" class="block text-sm font-medium mb-2">Título del Evento</label>
+                <input type="text" id="event-title-input" class="w-full px-3 py-2" placeholder="Ej: Cumpleaños de Ana">
+            </div>
+
+            <div class="mb-6">
+                <label for="event-music-select" class="block text-sm font-medium mb-2">Asignar Música</label>
+                <select id="event-music-select" class="w-full px-3 py-2">
+                    <option value="">Ninguna</option>
+                    <!-- Opciones de música se añaden con JS -->
+                </select>
+                <p id="music-select-warning" class="text-xs text-yellow-400 mt-2 hidden">No hay música cargada. Ve a la pestaña "Biblioteca".</p>
+            </div>
+
+            <div class="flex justify-between gap-4">
+                <div>
+                    <button id="modal-delete" class="btn btn-danger hidden">Eliminar</button>
+                    <button id="modal-export" class="btn btn-secondary hidden ml-2">Exportar</button>
+                </div>
+                <div class="flex gap-4">
+                    <button id="modal-cancel" class="btn btn-secondary">Cancelar</button>
+                    <button id="modal-save" class="btn btn-primary">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // --- Lógica de JavaScript ---
+
+        // 1. ESTADO GLOBAL DE LA APLICACIÓN
+        let currentDate = new Date();
+        let selectedDateElement = null;
+        let currentObjectURL = null;
+        let musicLibrary = [];
+        let artistsMap = new Map();
+        let albumsMap = new Map();
+        let calendarEvents = {};
+        let playbackHistory = [];
+        let activeTab = 'library';
+        let activeLibraryTab = 'artists';
+        let activeLibraryView = 'list';
+        let currentModalDate = null;
+        let currentFontSize = 16;
+        let isSidebarCollapsed = false;
+
+        // Estado del Reproductor
+        let playQueue = [];
+        let currentTrackIndex = -1;
+        let currentTrack = null;
+        let isShuffling = false;
+        let repeatMode = 'none';
+        let currentSearchTerm = '';
+
+        // Estado del Ecualizador y Visualizador
+        let audioContext;
+        let audioSource;
+        let filters = [];
+        let analyser;
+        let visualizerFrameId;
+        let isAudioContextSetup = false;
+        const filterFrequencies = [60, 170, 310, 600, 1000, 3000, 6000, 12000, 16000];
+
+        // Claves de LocalStorage
+        const LS_EVENTS_KEY = 'multimediaCalendarEvents';
+        const LS_THEME_KEY = 'multimediaTheme';
+        const LS_FONT_SIZE_KEY = 'multimediaFontSize';
+        const LS_HIGH_CONTRAST_KEY = 'multimediaHighContrast';
+        const LS_DYSLEXIA_MODE_KEY = 'multimediaDyslexiaMode';
+        const LS_HISTORY_KEY = 'multimediaPlaybackHistory';
+        const LS_REDUCE_MOTION_KEY = 'multimediaReduceMotion';
+        const LS_TEXT_SPACING_KEY = 'multimediaTextSpacing';
+        const LS_SIDEBAR_COLLAPSED_KEY = 'multimediaSidebarCollapsed';
+
+        // 2. ELEMENTOS DEL DOM
+        const audioPlayer = document.getElementById('audio-player');
+        const playerBar = document.getElementById('player-bar'); // Añadido ID al footer
+        // Player Bar UI
+        const nowPlayingArt = document.getElementById('now-playing-art');
+        const nowPlayingTitle = document.getElementById('now-playing-title');
+        const nowPlayingArtist = document.getElementById('now-playing-artist');
+        // EQ UI
+        const eqToggleBtn = document.getElementById('eq-toggle-btn');
+        const eqContainer = document.getElementById('eq-container');
+        // Lyrics UI (ELIMINADOS)
+        // Custom Player UI
+        const playPauseBtn = document.getElementById('play-pause-btn');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const seekBar = document.getElementById('seek-bar');
+        const currentTimeEl = document.getElementById('current-time');
+        const durationEl = document.getElementById('duration');
+        const shuffleBtn = document.getElementById('shuffle-btn');
+        const repeatBtn = document.getElementById('repeat-btn');
+        const shuffleBtnMobile = document.getElementById('shuffle-btn-mobile');
+        const repeatBtnMobile = document.getElementById('repeat-btn-mobile');
+
+        // Elementos del DOM (Nuevos)
+        const searchInput = document.getElementById('search-input');
+        const volumeBtn = document.getElementById('volume-btn');
+        const volumeSlider = document.getElementById('volume-slider');
+        const visualizerCanvas = document.getElementById('visualizer-canvas');
+        const visualizerCtx = visualizerCanvas.getContext('2d');
+
+        // Elementos del DOM (Sidebar y Layout)
+        const menuToggleBtn = document.getElementById('menu-toggle-btn');
+        const menuCloseBtn = document.getElementById('menu-close-btn');
+        const menuBackdrop = document.getElementById('menu-backdrop');
+        const sidebarEl = document.getElementById('sidebar');
+        const mainContentEl = document.getElementById('main-content');
+        const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn');
+
+
+        // --- Lógica de Pestañas Principales ---
+        const tabButtons = document.querySelectorAll('.nav-button[data-tab]');
+        const pages = document.querySelectorAll('.page');
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                showTab(button.dataset.tab);
+                closeMobileMenu(); // Solo cerrar menú móvil al navegar
+            });
+        });
+
+        function showTab(tabName) {
+            activeTab = tabName;
+            tabButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tabName));
+            pages.forEach(page => page.classList.toggle('active', page.id === `${tabName}-page`));
+        }
+
+        // --- Lógica de Menú Móvil ---
+        function openMobileMenu() {
+            sidebarEl.classList.add('open-mobile');
+            menuBackdrop.classList.remove('hidden');
+        }
+        function closeMobileMenu() {
+            sidebarEl.classList.remove('open-mobile');
+            menuBackdrop.classList.add('hidden');
+        }
+        menuToggleBtn.addEventListener('click', openMobileMenu);
+        menuCloseBtn.addEventListener('click', closeMobileMenu);
+        menuBackdrop.addEventListener('click', closeMobileMenu);
+
+        // --- Lógica de Sidebar Ocultar/Mostrar (Escritorio) ---
+        function toggleSidebar() {
+            isSidebarCollapsed = !isSidebarCollapsed;
+            updateSidebarState();
+            saveToLocalStorage(LS_SIDEBAR_COLLAPSED_KEY, isSidebarCollapsed);
+        }
+
+        function updateSidebarState() {
+             // Aplicar clases al body para ajustar el margen del main content en escritorio
+            document.body.classList.toggle('sidebar-collapsed', isSidebarCollapsed);
+            // Aplicar clase a la sidebar para cambiar su ancho y estilo
+            sidebarEl.classList.toggle('collapsed', isSidebarCollapsed);
+
+            const toggleIcon = sidebarToggleBtn.querySelector('ion-icon');
+            const toggleText = sidebarToggleBtn.querySelector('span');
+            if (isSidebarCollapsed) {
+                toggleIcon.name = 'chevron-forward-outline';
+                if (toggleText) toggleText.textContent = 'Mostrar';
+                sidebarToggleBtn.title = 'Mostrar Menú';
+            } else {
+                toggleIcon.name = 'chevron-back-outline';
+                if (toggleText) toggleText.textContent = 'Ocultar';
+                sidebarToggleBtn.title = 'Ocultar Menú';
+            }
+        }
+        sidebarToggleBtn.addEventListener('click', toggleSidebar);
+
+        // --- ARREGLO: Ajustar altura de la sidebar ---
+        function adjustSidebarHeight() {
+             // Solo ajustar en pantallas de escritorio/tableta (cuando la sidebar es fija)
+            if (window.innerWidth >= 768) {
+                const playerHeight = playerBar.offsetHeight;
+                // Actualizar variable CSS para el estilo
+                document.documentElement.style.setProperty('--player-height', `${playerHeight}px`);
+                // Aplicar altura directamente (más fiable a veces)
+                sidebarEl.style.height = `calc(100vh - ${playerHeight}px)`;
+            } else {
+                 // En móvil, resetear la altura para que sea 100vh
+                 sidebarEl.style.height = '100vh';
+                 document.documentElement.style.removeProperty('--player-height');
+            }
+        }
+        // Llamar al cargar y al redimensionar
+        window.addEventListener('resize', adjustSidebarHeight);
+        // Llamar también al inicio después de un pequeño delay para asegurar que el DOM está listo
+        setTimeout(adjustSidebarHeight, 100);
+
+
+        // --- Lógica de la Biblioteca ---
+        const folderInput = document.getElementById('folder-input');
+        const libraryContentEl = document.getElementById('library-content');
+        const libraryPlaceholder = document.getElementById('library-placeholder');
+        const libTabButtons = document.querySelectorAll('.lib-tab-button');
+        const viewToggleListBtn = document.getElementById('view-toggle-list');
+        const viewToggleGridBtn = document.getElementById('view-toggle-grid');
+
+        function getFileMetadata(file) {
+            return new Promise((resolve) => {
+                new window.jsmediatags.Reader(file)
+                    .read({
+                        onSuccess: (tag) => {
+                            resolve({
+                                title: tag.tags.title || file.name.replace(/\.[^/.]+$/, ""),
+                                artist: tag.tags.artist || 'Artista Desconocido',
+                                album: tag.tags.album || 'Álbum Desconocido',
+                                picture: tag.tags.picture,
+                                file: file,
+                                lrcFile: null // Se rellenará después
+                            });
+                        },
+                        onError: (error) => {
+                            console.warn(`Error reading metadata for ${file.name}:`, error);
+                            resolve({
+                                title: file.name.replace(/\.[^/.]+$/, ""),
+                                artist: 'Artista Desconocido',
+                                album: 'Álbum Desconocido',
+                                picture: null,
+                                file: file,
+                                lrcFile: null
+                            });
+                        }
+                    });
+            });
+        }
+
+        async function handleFolderSelect(event) {
+            musicLibrary = [];
+            artistsMap.clear();
+            albumsMap.clear();
+            libraryContentEl.innerHTML = '';
+            libraryPlaceholder.textContent = 'Procesando archivos...';
+            libraryPlaceholder.style.display = 'block';
+
+            const files = event.target.files;
+            const audioFiles = [];
+            const lrcFiles = new Map(); // Map<basename, file>
+
+            for (const file of files) {
+                if (file.type.startsWith('audio/')) {
+                    audioFiles.push(file);
+                }
+                // ELIMINADA: Lógica de .lrc
+            }
+
+            if (audioFiles.length === 0) {
+                libraryPlaceholder.textContent = 'No se encontraron archivos de audio.';
+                return;
+            }
+
+            libraryPlaceholder.textContent = 'Leyendo metadatos...';
+            const metadataPromises = audioFiles.map(getFileMetadata);
+            musicLibrary = await Promise.all(metadataPromises);
+
+            // ELIMINADA: Lógica de unir .lrc
+            
+            processLibrary();
+            renderLibrary();
+            libraryPlaceholder.style.display = 'none';
+        }
+        folderInput.addEventListener('change', handleFolderSelect);
+
+        function processLibrary() {
+            artistsMap.clear();
+            albumsMap.clear();
+            musicLibrary.forEach(track => {
+                artistsMap.has(track.artist) ? artistsMap.get(track.artist).push(track) : artistsMap.set(track.artist, [track]);
+                albumsMap.has(track.album) ? albumsMap.get(track.album).push(track) : albumsMap.set(track.album, [track]);
+            });
+        }
+
+        function arrayBufferToBase64(buffer) {
+            let binary = '';
+            const bytes = new Uint8Array(buffer);
+            const len = bytes.byteLength;
+            const CHUNK_SIZE = 0x8000;
+            for (let i = 0; i < len; i += CHUNK_SIZE) {
+                const chunk = bytes.subarray(i, Math.min(i + CHUNK_SIZE, len));
+                binary += String.fromCharCode.apply(null, chunk);
+            }
+            return btoa(binary);
+        }
+
+        // --- LÓGICA DE RENDERIZADO DE BIBLIOTECA (con BÚSQUEDA) ---
+
+        searchInput.addEventListener('input', (e) => {
+            currentSearchTerm = e.target.value.toLowerCase();
+            renderLibrary();
+        });
+
+        function setLibraryView(view) {
+            activeLibraryView = view;
+            viewToggleListBtn.classList.toggle('active', view === 'list');
+            viewToggleGridBtn.classList.toggle('active', view === 'grid');
+            renderLibrary();
+        }
+
+        viewToggleListBtn.addEventListener('click', () => setLibraryView('list'));
+        viewToggleGridBtn.addEventListener('click', () => setLibraryView('grid'));
+
+        libTabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                activeLibraryTab = button.dataset.libTab;
+                libTabButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.libTab === activeLibraryTab));
+                renderLibrary();
+            });
+        });
+
+        function getFilteredTracks() {
+            if (!currentSearchTerm) return musicLibrary;
+            return musicLibrary.filter(track =>
+                track.title.toLowerCase().includes(currentSearchTerm) ||
+                track.artist.toLowerCase().includes(currentSearchTerm) ||
+                track.album.toLowerCase().includes(currentSearchTerm)
+            );
+        }
+
+        function renderLibrary() {
+            libraryContentEl.innerHTML = '';
+
+            const filteredTracks = getFilteredTracks();
+            if (filteredTracks.length === 0 && musicLibrary.length > 0) {
+                libraryContentEl.innerHTML = `<p class='text-center' style='color: var(--color-text-muted);'>No se encontraron resultados para "${currentSearchTerm}".</p>`;
+                return;
+            }
+            if (filteredTracks.length === 0 && musicLibrary.length === 0) {
+                 libraryContentEl.innerHTML = ''; // Placeholder se encarga
+                 return;
+            }
+
+            if (activeLibraryView === 'list') {
+                renderLibraryAsList(filteredTracks);
+            } else {
+                renderLibraryAsGrid(filteredTracks);
+            }
+        }
+
+        function renderLibraryAsList(filteredTracks) {
+            const filteredArtistsMap = new Map();
+            const filteredAlbumsMap = new Map();
+            filteredTracks.forEach(track => {
+                filteredArtistsMap.has(track.artist) ? filteredArtistsMap.get(track.artist).push(track) : filteredArtistsMap.set(track.artist, [track]);
+                filteredAlbumsMap.has(track.album) ? filteredAlbumsMap.get(track.album).push(track) : filteredAlbumsMap.set(track.album, [track]);
+            });
+
+            const renderTarget = activeLibraryTab === 'artists' ? filteredArtistsMap : (activeLibraryTab === 'albums' ? filteredAlbumsMap : null);
+
+            if (renderTarget) {
+                const sortedKeys = [...renderTarget.keys()].sort();
+                sortedKeys.forEach(key => {
+                    const header = document.createElement('h2');
+                    header.className = 'text-xl font-semibold mt-4 mb-2';
+                    header.style.color = 'var(--color-accent-text)';
+                    header.textContent = key;
+                    header.id = `lib-header-${CSS.escape(key)}`;
+                    libraryContentEl.appendChild(header);
+                    renderTracksAsList(renderTarget.get(key), libraryContentEl, activeLibraryTab === 'albums', activeLibraryTab === 'artists');
+                });
+            } else { // 'tracks'
+                renderTracksAsList(filteredTracks, libraryContentEl, true, true);
+            }
+        }
+
+        function renderTracksAsList(trackList, container, showArtist, showAlbum) {
+            const sortedTrackList = [...trackList].sort((a, b) => a.title.localeCompare(b.title));
+            sortedTrackList.forEach(track => {
+                const songEl = document.createElement('div');
+                songEl.className = 'song-item flex items-center p-3 rounded-lg mb-2 cursor-pointer';
+                let imageUrl = 'https://placehold.co/40x40/52525b/e0e0e0?text=?';
+                if (track.picture) {
+                    try {
+                        const base64String = arrayBufferToBase64(track.picture.data);
+                        imageUrl = `data:${track.picture.format};base64,${base64String}`;
+                    } catch (e) { console.error("Error procesando imagen:", e); }
+                }
+                let details = [];
+                if (showArtist) details.push(track.artist);
+                if (showAlbum) details.push(track.album);
+                songEl.innerHTML = `
+                    <img src="${imageUrl}" alt="Cover" class="song-art w-10 h-10 rounded mr-3 object-cover flex-shrink-0" onerror="this.src='https://placehold.co/40x40/52525b/e0e0e0?text=?';">
+                    <div class="song-info overflow-hidden">
+                        <div class="song-title font-semibold truncate">${track.title}</div>
+                        <div class="song-details text-sm truncate">${details.join(' - ')}</div>
+                    </div>`;
+                songEl.addEventListener('click', () => buildQueueAndPlay(track, sortedTrackList));
+                container.appendChild(songEl);
+            });
+        }
+
+        function renderLibraryAsGrid(filteredTracks) {
+            const filteredArtistsMap = new Map();
+            const filteredAlbumsMap = new Map();
+            filteredTracks.forEach(track => {
+                filteredArtistsMap.has(track.artist) ? filteredArtistsMap.get(track.artist).push(track) : filteredArtistsMap.set(track.artist, [track]);
+                filteredAlbumsMap.has(track.album) ? filteredAlbumsMap.get(track.album).push(track) : filteredAlbumsMap.set(track.album, [track]);
+            });
+
+            const gridContainer = document.createElement('div');
+            gridContainer.className = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4';
+
+            if (activeLibraryTab === 'artists') {
+                const sortedArtists = [...filteredArtistsMap.keys()].sort();
+                sortedArtists.forEach(artistName => {
+                    const tracks = filteredArtistsMap.get(artistName).sort((a,b) => a.title.localeCompare(b.title));
+                    const firstTrackWithArt = tracks.find(t => t.picture) || tracks[0];
+                    const gridItem = createGridItem(
+                        firstTrackWithArt.picture,
+                        artistName,
+                        `${tracks.length} ${tracks.length > 1 ? 'pistas' : 'pista'}`,
+                        () => { buildQueueAndPlay(tracks[0], tracks); }
+                    );
+                    gridContainer.appendChild(gridItem);
+                });
+            } else if (activeLibraryTab === 'albums') {
+                const sortedAlbums = [...filteredAlbumsMap.keys()].sort();
+                sortedAlbums.forEach(albumName => {
+                    const tracks = filteredAlbumsMap.get(albumName).sort((a,b) => a.title.localeCompare(b.title));
+                    const firstTrackWithArt = tracks.find(t => t.picture) || tracks[0];
+                    const gridItem = createGridItem(
+                        firstTrackWithArt.picture,
+                        albumName,
+                        firstTrackWithArt.artist,
+                        () => { buildQueueAndPlay(tracks[0], tracks); }
+                    );
+                    gridContainer.appendChild(gridItem);
+                });
+            } else { // 'tracks'
+                const sortedTrackList = [...filteredTracks].sort((a, b) => a.title.localeCompare(b.title));
+                sortedTrackList.forEach(track => {
+                    const gridItem = createGridItem(
+                        track.picture,
+                        track.title,
+                        track.artist,
+                        () => { buildQueueAndPlay(track, sortedTrackList); }
+                    );
+                    gridContainer.appendChild(gridItem);
+                });
+            }
+            libraryContentEl.appendChild(gridContainer);
+        }
+
+
+        function createGridItem(picture, title, subtitle, onClick) {
+            const itemEl = document.createElement('div');
+            itemEl.className = 'grid-view-item flex flex-col text-center';
+            let imageUrl = 'https://placehold.co/150x150/52525b/e0e0e0?text=?';
+            if (picture) {
+                try {
+                    const base64String = arrayBufferToBase64(picture.data);
+                    imageUrl = `data:${picture.format};base64,${base64String}`;
+                } catch (e) { console.warn("Error processing grid image:", e); }
+            }
+            itemEl.innerHTML = `
+                <img src="${imageUrl}" alt="Cover" class="w-full rounded-md object-cover mb-2 shadow-lg" onerror="this.src='https://placehold.co/150x150/52525b/e0e0e0?text=?';">
+                <p class="font-semibold text-sm truncate" style="color: var(--color-text-primary);">${title}</p>
+                <p class="text-xs truncate" style="color: var(--color-text-muted);">${subtitle}</p>`;
+            itemEl.addEventListener('click', onClick);
+            return itemEl;
+        }
+
+        // --- Lógica de Reproducción ---
+
+        function buildQueueAndPlay(clickedTrack, contextList) {
+            playQueue = contextList;
+            currentTrackIndex = playQueue.findIndex(t => t.file === clickedTrack.file);
+            if (currentTrackIndex === -1) currentTrackIndex = 0;
+            loadTrack(currentTrackIndex);
+        }
+
+        function loadTrack(index) {
+            if (index < 0 || index >= playQueue.length) return;
+
+            currentTrackIndex = index;
+            currentTrack = playQueue[index];
+            const file = currentTrack.file;
+
+            if (!isAudioContextSetup) setupAudioContext();
+            if (audioContext.state === 'suspended') audioContext.resume();
+            if (currentObjectURL) URL.revokeObjectURL(currentObjectURL);
+
+            currentObjectURL = URL.createObjectURL(file);
+            audioPlayer.src = currentObjectURL;
+
+            // ELIMINADA: resetLyrics();
+
+            // Actualizar UI
+            nowPlayingTitle.textContent = currentTrack.title;
+            nowPlayingArtist.textContent = currentTrack.artist;
+            addToHistory(currentTrack.title, currentTrack.artist);
+
+            // Cargar carátula
+            let imageUrl = 'https://placehold.co/60x60/3f3f46/9ca3af?text=?';
+            if (currentTrack.picture) {
+                try {
+                    const base64String = arrayBufferToBase64(currentTrack.picture.data);
+                    imageUrl = `data:${currentTrack.picture.format};base64,${base64String}`;
+                } catch (e) { console.error("Error procesando imagen para 'now playing':", e); }
+            }
+            nowPlayingArt.src = imageUrl;
+
+            // --- LÓGICA DE LETRAS --- (ELIMINADA)
+
+            audioPlayer.play();
+        }
+
+        // --- FUNCIONES DE REPRODUCCIÓN (SHUFFLE/REPEAT) ---
+        function toggleShuffle() {
+            isShuffling = !isShuffling;
+            shuffleBtn.classList.toggle('active', isShuffling);
+            shuffleBtnMobile.classList.toggle('active', isShuffling);
+            const title = isShuffling ? 'Aleatorio (Activado)' : 'Aleatorio (Desactivado)';
+            shuffleBtn.title = title;
+            shuffleBtnMobile.title = title;
+        }
+
+        function cycleRepeatMode() {
+            const icon = repeatBtn.querySelector('ion-icon');
+            const iconMobile = repeatBtnMobile.querySelector('ion-icon');
+            let title = '';
+
+            if (repeatMode === 'none') {
+                repeatMode = 'all';
+                icon.name = 'infinite-outline';
+                iconMobile.name = 'infinite-outline';
+                repeatBtn.classList.add('active');
+                repeatBtnMobile.classList.add('active');
+                title = 'Repetir (Todo)';
+            } else if (repeatMode === 'all') {
+                repeatMode = 'one';
+                icon.name = 'repeat-one-outline';
+                iconMobile.name = 'repeat-one-outline';
+                repeatBtn.classList.add('active');
+                repeatBtnMobile.classList.add('active');
+                title = 'Repetir (Una)';
+            } else {
+                repeatMode = 'none';
+                icon.name = 'repeat-outline';
+                iconMobile.name = 'repeat-outline';
+                repeatBtn.classList.remove('active');
+                repeatBtnMobile.classList.remove('active');
+                title = 'Repetir (Desactivado)';
+            }
+            repeatBtn.title = title;
+            repeatBtnMobile.title = title;
+        }
+
+        function playNext() {
+            if (playQueue.length === 0) return;
+
+            if (repeatMode === 'one') {
+                audioPlayer.currentTime = 0;
+                audioPlayer.play();
+                return;
+            }
+
+            let newIndex;
+            if (isShuffling) {
+                if (playQueue.length === 1) {
+                    newIndex = 0;
+                } else {
+                    do {
+                        newIndex = Math.floor(Math.random() * playQueue.length);
+                    } while (newIndex === currentTrackIndex);
+                }
+            } else {
+                newIndex = currentTrackIndex + 1;
+            }
+
+            if (newIndex >= playQueue.length) {
+                if (repeatMode === 'all') {
+                    newIndex = 0;
+                } else {
+                    audioPlayer.pause();
+                    updatePlayPauseIcon();
+                    return;
+                }
+            }
+            loadTrack(newIndex);
+        }
+
+        function playPrev() {
+            if (playQueue.length === 0) return;
+
+            if (audioPlayer.currentTime > 3) {
+                audioPlayer.currentTime = 0;
+                audioPlayer.play();
+                return;
+            }
+
+            let newIndex;
+            if (isShuffling) {
+                if (playQueue.length === 1) {
+                    newIndex = 0;
+                } else {
+                    do {
+                        newIndex = Math.floor(Math.random() * playQueue.length);
+                    } while (newIndex === currentTrackIndex);
+                }
+            } else {
+                newIndex = currentTrackIndex - 1;
+            }
+
+            if (newIndex < 0) {
+                if (repeatMode === 'all') {
+                    newIndex = playQueue.length - 1;
+                } else {
+                    audioPlayer.pause();
+                    updatePlayPauseIcon();
+                    return;
+                }
+            }
+            loadTrack(newIndex);
+        }
+
+
+        function togglePlayPause() {
+            if (!isAudioContextSetup) setupAudioContext();
+            if (audioContext.state === 'suspended') audioContext.resume();
+            if (audioPlayer.paused) {
+                audioPlayer.play();
+            } else {
+                audioPlayer.pause();
+            }
+        }
+
+        function updatePlayPauseIcon() {
+            if (audioPlayer.paused) {
+                playPauseBtn.innerHTML = '<ion-icon name="play-outline" class="ml-1"></ion-icon>';
+                playPauseBtn.title = "Reproducir";
+            } else {
+                playPauseBtn.innerHTML = '<ion-icon name="pause-outline"></ion-icon>';
+                playPauseBtn.title = "Pausar";
+            }
+        }
+
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${minutes}:${String(secs).padStart(2, '0')}`;
+        }
+
+        function updateSeekBar() {
+            if (isNaN(audioPlayer.duration)) return;
+            seekBar.value = audioPlayer.currentTime;
+            currentTimeEl.textContent = formatTime(audioPlayer.currentTime);
+        }
+
+        function setupSeekBar() {
+            if (isNaN(audioPlayer.duration)) return;
+            seekBar.max = audioPlayer.duration;
+            durationEl.textContent = formatTime(audioPlayer.duration);
+        }
+
+        function seekAudio() {
+            audioPlayer.currentTime = seekBar.value;
+        }
+
+        // --- Event Listeners de Navegación del Reproductor ---
+        function goToCurrentArtist() {
+            if (!currentTrack) return;
+            showTab('library');
+            activeLibraryTab = 'artists';
+            libTabButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.libTab === activeLibraryTab));
+            setLibraryView('list');
+            setTimeout(() => {
+                const headerId = `lib-header-${CSS.escape(currentTrack.artist)}`;
+                document.getElementById(headerId)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+            closeMobileMenu();
+        }
+
+        function goToCurrentAlbum() {
+            if (!currentTrack) return;
+            showTab('library');
+            activeLibraryTab = 'albums';
+            libTabButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.libTab === activeLibraryTab));
+            setLibraryView('list');
+            setTimeout(() => {
+                const headerId = `lib-header-${CSS.escape(currentTrack.album)}`;
+                document.getElementById(headerId)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+            closeMobileMenu();
+        }
+
+        nowPlayingArtist.addEventListener('click', goToCurrentArtist);
+        nowPlayingTitle.addEventListener('click', goToCurrentAlbum);
+        // ELIMINADO: Event listener de nowPlayingArt
+
+        // Event Listeners del Reproductor
+        playPauseBtn.addEventListener('click', togglePlayPause);
+        nextBtn.addEventListener('click', playNext);
+        prevBtn.addEventListener('click', playPrev);
+        shuffleBtn.addEventListener('click', toggleShuffle);
+        repeatBtn.addEventListener('click', cycleRepeatMode);
+        shuffleBtnMobile.addEventListener('click', toggleShuffle);
+        repeatBtnMobile.addEventListener('click', cycleRepeatMode);
+
+        audioPlayer.addEventListener('play', updatePlayPauseIcon);
+        audioPlayer.addEventListener('pause', updatePlayPauseIcon);
+        audioPlayer.addEventListener('ended', playNext);
+        audioPlayer.addEventListener('timeupdate', updateSeekBar);
+        audioPlayer.addEventListener('loadedmetadata', setupSeekBar);
+
+        seekBar.addEventListener('input', seekAudio);
+
+
+        // --- Lógica de Volumen ---
+        volumeSlider.addEventListener('input', (e) => {
+            audioPlayer.volume = e.target.value;
+        });
+
+        audioPlayer.addEventListener('volumechange', () => {
+            volumeSlider.value = audioPlayer.volume;
+            const icon = volumeBtn.querySelector('ion-icon');
+            if (audioPlayer.volume === 0 || audioPlayer.muted) {
+                icon.name = 'volume-mute-outline';
+            } else if (audioPlayer.volume < 0.5) {
+                icon.name = 'volume-low-outline';
+            } else {
+                icon.name = 'volume-medium-outline';
+            }
+        });
+
+        volumeBtn.addEventListener('click', () => {
+            audioPlayer.muted = !audioPlayer.muted;
+            if (audioPlayer.muted) {
+                volumeSlider.value = 0;
+            } else {
+                volumeSlider.value = audioPlayer.volume;
+            }
+            audioPlayer.dispatchEvent(new Event('volumechange'));
+        });
+
+
+        // --- AUDIO CONTEXT y VISUALIZADOR ---
+        function setupAudioContext() {
+            if (isAudioContextSetup) return;
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            audioSource = audioContext.createMediaElementSource(audioPlayer);
+
+            analyser = audioContext.createAnalyser();
+            analyser.fftSize = 128;
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+
+            let lastNode = audioSource;
+            lastNode.connect(analyser); // Analyser antes de filtros
+
+            // Conectar filtros
+            for (let i = 0; i < filterFrequencies.length; i++) {
+                const freq = filterFrequencies[i];
+                const filter = audioContext.createBiquadFilter();
+                filter.type = (i === 0) ? 'lowshelf' : (i === filterFrequencies.length - 1) ? 'highshelf' : 'peaking';
+                filter.frequency.value = freq;
+                filter.Q.value = 1;
+                filter.gain.value = 0;
+                lastNode.connect(filter);
+                lastNode = filter;
+                filters.push(filter);
+            }
+            lastNode.connect(audioContext.destination);
+            isAudioContextSetup = true;
+
+            visualizerCanvas.classList.remove('hidden');
+            drawVisualizer(dataArray, bufferLength);
+            renderEQSliders();
+        }
+
+        function drawVisualizer(dataArray, bufferLength) {
+            visualizerFrameId = requestAnimationFrame(() => drawVisualizer(dataArray, bufferLength));
+            analyser.getByteFrequencyData(dataArray);
+
+            visualizerCtx.clearRect(0, 0, visualizerCanvas.width, visualizerCanvas.height);
+            const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--color-accent-text-light').trim();
+            visualizerCtx.fillStyle = accentColor;
+
+            const barWidth = (visualizerCanvas.width / bufferLength) * 1.5;
+            let barHeight;
+            let x = 0;
+
+            for (let i = 0; i < bufferLength; i++) {
+                barHeight = dataArray[i] / 2.5;
+                if (barHeight < 1) barHeight = 1;
+                visualizerCtx.fillRect(x, visualizerCanvas.height - barHeight, barWidth, barHeight);
+                x += barWidth + 1;
+            }
+        }
+
+
+        function renderEQSliders() {
+            const eqSlidersContainer = eqContainer.querySelector('.flex');
+            eqSlidersContainer.innerHTML = '';
+            filterFrequencies.forEach((freq, index) => {
+                const sliderWrapper = document.createElement('div');
+                sliderWrapper.className = 'flex flex-col items-center px-1';
+                const slider = document.createElement('input');
+                slider.type = 'range'; slider.min = -20; slider.max = 20; slider.value = filters[index]?.gain.value || 0; slider.step = 1;
+                slider.className = 'eq-slider';
+                slider.dataset.filterIndex = index;
+                slider.addEventListener('input', (e) => {
+                    if(filters[index]) filters[index].gain.value = e.target.value;
+                });
+                const label = document.createElement('label');
+                label.className = 'text-xs mt-2';
+                label.style.color = 'var(--color-text-secondary)';
+                label.textContent = freq < 1000 ? `${freq}Hz` : `${freq/1000}kHz`;
+                sliderWrapper.appendChild(slider); sliderWrapper.appendChild(label); eqSlidersContainer.appendChild(sliderWrapper);
+            });
+        }
+
+        eqToggleBtn.addEventListener('click', () => {
+            eqContainer.classList.toggle('open');
+            // ELIMINADA: Lógica de cerrar panel de letras
+        });
+
+        function playSongByFileName(fileName) {
+            const track = musicLibrary.find(item => item.file.name === fileName);
+            if (track) {
+                buildQueueAndPlay(track, [track]);
+            } else {
+                console.error(`No se pudo encontrar la canción "${fileName}".`);
+            }
+        }
+
+        function addToHistory(title, artist) {
+            playbackHistory.push({ title, artist, timestamp: new Date().toISOString() });
+            saveToLocalStorage(LS_HISTORY_KEY, playbackHistory);
+        }
+
+        // --- Lógica de Letras (LRC) --- (ELIMINADA)
+        // ELIMINADAS: 
+        // const lrcRegex
+        // function resetLyrics()
+        // function loadLyricsFromLRC()
+        // async function fetchInternetLyrics()
+        // function parseLRC()
+        // function populateLyricsDisplays()
+        // audioPlayer.addEventListener('timeupdate', ...)
+        // function updateLyricHighlight()
+        // lyricsToggleBtn.addEventListener('click', ...)
+        // zenModeBtn.addEventListener('click', ...)
+        // zenCloseBtn.addEventListener('click', ...)
+        // exportLyricsBtn.addEventListener('click', ...)
+
+
+        // --- Lógica del Calendario ---
+        const monthYearEl = document.getElementById('month-year');
+        const calendarGridEl = document.getElementById('calendar-grid');
+        const prevMonthBtn = document.getElementById('prev-month');
+        const nextMonthBtn = document.getElementById('next-month');
+
+        function renderCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            monthYearEl.textContent = `${currentDate.toLocaleString('es-ES', { month: 'long' })} ${year}`;
+            calendarGridEl.innerHTML = '';
+            const firstDayOfMonth = new Date(year, month, 1).getDay();
+            const lastDateOfMonth = new Date(year, month + 1, 0).getDate();
+            const today = new Date();
+            for (let i = 0; i < firstDayOfMonth; i++) calendarGridEl.innerHTML += `<div class="p-4 rounded-lg"></div>`;
+            for (let day = 1; day <= lastDateOfMonth; day++) {
+                const dayEl = document.createElement('div');
+                dayEl.textContent = day;
+                dayEl.classList.add('calendar-day', 'p-2', 'rounded-lg', 'text-left', 'align-top', 'cursor-pointer');
+                const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                dayEl.dataset.date = dateString;
+                if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) dayEl.classList.add('today');
+                const dayEvent = calendarEvents[dateString];
+                if (dayEvent) {
+                    dayEl.classList.add('has-event');
+                    const eventTitleEl = document.createElement('div');
+                    eventTitleEl.textContent = dayEvent.title;
+                    eventTitleEl.classList.add('event-title');
+                    dayEl.appendChild(eventTitleEl);
+                }
+                dayEl.addEventListener('click', handleDayClick);
+                calendarGridEl.appendChild(dayEl);
+            }
+        }
+
+        function handleDayClick(event) {
+            const clickedEl = event.currentTarget;
+            const dateString = clickedEl.dataset.date;
+            if (selectedDateElement) selectedDateElement.classList.remove('selected');
+            clickedEl.classList.add('selected');
+            selectedDateElement = clickedEl;
+            const dayEvent = calendarEvents[dateString];
+            showEventModal(dateString);
+            if (dayEvent && dayEvent.musicFile) playSongByFileName(dayEvent.musicFile);
+        }
+        prevMonthBtn.addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() - 1); renderCalendar(); });
+        nextMonthBtn.addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() + 1); renderCalendar(); });
+
+        // --- Lógica del Modal de Eventos ---
+        const eventModal = document.getElementById('event-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalDateInput = document.getElementById('modal-date');
+        const eventTitleInput = document.getElementById('event-title-input');
+        const eventMusicSelect = document.getElementById('event-music-select');
+        const musicSelectWarning = document.getElementById('music-select-warning');
+        const modalCancelBtn = document.getElementById('modal-cancel');
+        const modalSaveBtn = document.getElementById('modal-save');
+        const modalDeleteBtn = document.getElementById('modal-delete');
+        const modalExportBtn = document.getElementById('modal-export');
+
+        function showEventModal(dateString) {
+            currentModalDate = dateString;
+            modalDateInput.value = dateString;
+            eventTitleInput.value = '';
+            eventMusicSelect.innerHTML = '<option value="">Ninguna</option>';
+            modalDeleteBtn.classList.add('hidden');
+            modalExportBtn.classList.add('hidden');
+            if (musicLibrary.length > 0) {
+                musicSelectWarning.classList.add('hidden');
+                musicLibrary.sort((a,b) => a.title.localeCompare(b.title));
+                musicLibrary.forEach(track => {
+                    const option = document.createElement('option');
+                    option.value = track.file.name;
+                    option.textContent = `${track.title} - ${track.artist}`;
+                    eventMusicSelect.appendChild(option);
+                });
+            } else {
+                musicSelectWarning.classList.remove('hidden');
+            }
+            const event = calendarEvents[dateString];
+            if (event) {
+                modalTitle.textContent = `Editar Evento (${dateString})`;
+                eventTitleInput.value = event.title;
+                eventMusicSelect.value = event.musicFile || "";
+                modalDeleteBtn.classList.remove('hidden');
+                modalExportBtn.classList.remove('hidden');
+            } else {
+                modalTitle.textContent = `Añadir Evento (${dateString})`;
+            }
+            eventModal.classList.add('open');
+        }
+        function hideEventModal() { eventModal.classList.remove('open'); currentModalDate = null; }
+        modalCancelBtn.addEventListener('click', hideEventModal);
+        modalSaveBtn.addEventListener('click', () => {
+            const title = eventTitleInput.value.trim();
+            const musicFile = eventMusicSelect.value;
+            const date = currentModalDate;
+            if (!title) { eventTitleInput.focus(); return; }
+            calendarEvents[date] = { title, musicFile };
+            saveToLocalStorage(LS_EVENTS_KEY, calendarEvents);
+            renderCalendar();
+            hideEventModal();
+        });
+        modalDeleteBtn.addEventListener('click', () => {
+            if (currentModalDate) {
+                delete calendarEvents[currentModalDate];
+                saveToLocalStorage(LS_EVENTS_KEY, calendarEvents);
+                renderCalendar();
+                hideEventModal();
+            }
+        });
+        modalExportBtn.addEventListener('click', () => { if (currentModalDate) exportEventToTxt(currentModalDate); });
+
+        // --- Lógica del Modal de Ajustes ---
+        const settingsModal = document.getElementById('settings-modal');
+        const settingsBtn = document.getElementById('settings-btn');
+        const settingsCloseBtn = document.getElementById('settings-close-btn');
+        const themeSelect = document.getElementById('theme-select');
+        const fontDecrease = document.getElementById('font-decrease');
+        const fontReset = document.getElementById('font-reset');
+        const fontIncrease = document.getElementById('font-increase');
+        const highContrastToggle = document.getElementById('high-contrast-toggle');
+        const dyslexiaToggle = document.getElementById('dyslexia-toggle');
+        const exportHistoryBtn = document.getElementById('export-history-btn');
+        const reduceMotionToggle = document.getElementById('reduce-motion-toggle');
+        const textSpacingToggle = document.getElementById('text-spacing-toggle');
+
+
+        settingsBtn.addEventListener('click', () => {
+            settingsModal.classList.add('open');
+            closeMobileMenu();
+        });
+        settingsCloseBtn.addEventListener('click', () => settingsModal.classList.remove('open'));
+
+        // Tema
+        themeSelect.addEventListener('change', (e) => applyTheme(e.target.value));
+        function applyTheme(themeName) {
+            document.documentElement.className = '';
+            if (themeName !== 'theme-emerald-dark') {
+                document.documentElement.classList.add(themeName);
+            }
+            // Re-aplicar clases de accesibilidad
+            if (highContrastToggle.checked) document.documentElement.classList.add('high-contrast');
+            if (dyslexiaToggle.checked) document.documentElement.classList.add('font-dyslexic');
+            if (reduceMotionToggle.checked) document.documentElement.classList.add('reduce-motion');
+            if (textSpacingToggle.checked) document.documentElement.classList.add('text-spacing');
+
+            saveToLocalStorage(LS_THEME_KEY, themeName);
+        }
+
+        // Tamaño de Fuente
+        fontDecrease.addEventListener('click', () => updateFontSize(-1));
+        fontIncrease.addEventListener('click', () => updateFontSize(1));
+        fontReset.addEventListener('click', () => updateFontSize(0));
+        function updateFontSize(change) {
+            if (change === 0) currentFontSize = 16;
+            else currentFontSize += change;
+            if (currentFontSize < 12) currentFontSize = 12;
+            if (currentFontSize > 24) currentFontSize = 24;
+            document.documentElement.style.fontSize = `${currentFontSize}px`;
+            saveToLocalStorage(LS_FONT_SIZE_KEY, currentFontSize);
+        }
+
+        // Alto Contraste
+        highContrastToggle.addEventListener('change', (e) => {
+            document.documentElement.classList.toggle('high-contrast', e.target.checked);
+            saveToLocalStorage(LS_HIGH_CONTRAST_KEY, e.target.checked);
+        });
+
+        // Modo Dislexia
+        dyslexiaToggle.addEventListener('change', (e) => {
+            document.documentElement.classList.toggle('font-dyslexic', e.target.checked);
+            saveToLocalStorage(LS_DYSLEXIA_MODE_KEY, e.target.checked);
+        });
+
+        // Reducir Movimiento
+        reduceMotionToggle.addEventListener('change', (e) => {
+            document.documentElement.classList.toggle('reduce-motion', e.target.checked);
+            saveToLocalStorage(LS_REDUCE_MOTION_KEY, e.target.checked);
+        });
+
+        // Espaciado de Texto
+        textSpacingToggle.addEventListener('change', (e) => {
+            document.documentElement.classList.toggle('text-spacing', e.target.checked);
+            saveToLocalStorage(LS_TEXT_SPACING_KEY, e.target.checked);
+        });
+
+        // Exportar Historial
+        exportHistoryBtn.addEventListener('click', exportHistoryToTxt);
+
+        // --- Lógica de Exportación ---
+        function downloadTxt(filename, content) {
+            const element = document.createElement('a');
+            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(content));
+            element.setAttribute('download', filename);
+            element.style.display = 'none';
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+        }
+
+        function exportHistoryToTxt() {
+            if (playbackHistory.length === 0) { alert("El historial está vacío."); return; }
+            let content = "Historial de Reproducción\n===========================\n\n";
+            playbackHistory.forEach(item => {
+                const date = new Date(item.timestamp).toLocaleString('es-ES');
+                content += `[${date}] ${item.title} - ${item.artist}\n`;
+            });
+            downloadTxt('historial_reproduccion.txt', content);
+        }
+
+
+        function exportEventToTxt(dateString) {
+            const event = calendarEvents[dateString];
+            if (!event) return;
+            let content = `Evento del Calendario\n======================\n\n`;
+            content += `Fecha: ${dateString}\n`;
+            content += `Título: ${event.title}\n`;
+            let musicInfo = "Ninguna";
+            if (event.musicFile) {
+                const track = musicLibrary.find(t => t.file.name === event.musicFile);
+                musicInfo = track ? `${track.title} - ${track.artist}` : event.musicFile;
+            }
+            content += `Música Asignada: ${musicInfo}\n`;
+            downloadTxt(`evento_${dateString}.txt`, content);
+        }
+
+        // --- Lógica de Persistencia (LocalStorage) ---
+        function saveToLocalStorage(key, value) {
+            localStorage.setItem(key, JSON.stringify(value));
+        }
+        function loadFromLocalStorage(key, defaultValue) {
+            const storedValue = localStorage.getItem(key);
+            return storedValue ? JSON.parse(storedValue) : defaultValue;
+        }
+
+        // --- INICIALIZACIÓN ---
+        function init() {
+            // Cargar datos
+            calendarEvents = loadFromLocalStorage(LS_EVENTS_KEY, {});
+            playbackHistory = loadFromLocalStorage(LS_HISTORY_KEY, []);
+
+            // Cargar ajustes
+            const savedTheme = loadFromLocalStorage(LS_THEME_KEY, 'theme-emerald-dark');
+            themeSelect.value = savedTheme;
+
+            currentFontSize = loadFromLocalStorage(LS_FONT_SIZE_KEY, 16);
+            updateFontSize(0);
+
+            const highContrast = loadFromLocalStorage(LS_HIGH_CONTRAST_KEY, false);
+            highContrastToggle.checked = highContrast;
+
+            const dyslexiaMode = loadFromLocalStorage(LS_DYSLEXIA_MODE_KEY, false);
+            dyslexiaToggle.checked = dyslexiaMode;
+
+            // Cargar ajustes de accesibilidad
+            const reduceMotion = loadFromLocalStorage(LS_REDUCE_MOTION_KEY, false);
+            reduceMotionToggle.checked = reduceMotion;
+
+            const textSpacing = loadFromLocalStorage(LS_TEXT_SPACING_KEY, false);
+            textSpacingToggle.checked = textSpacing;
+
+            // Aplicar todo al inicio
+            applyTheme(savedTheme);
+
+            // Cargar estado de la sidebar
+            isSidebarCollapsed = loadFromLocalStorage(LS_SIDEBAR_COLLAPSED_KEY, false);
+            updateSidebarState(); // Aplicar estado inicial
+            adjustSidebarHeight(); // Ajustar altura inicial
+
+
+            // Renderizar
+            setLibraryView('list');
+            showTab(activeTab);
+            renderCalendar();
+
+            // Inicializar volumen
+            audioPlayer.volume = 1;
+            volumeSlider.value = 1;
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+
+    </script>
+</body>
+</html>
+
+
+
