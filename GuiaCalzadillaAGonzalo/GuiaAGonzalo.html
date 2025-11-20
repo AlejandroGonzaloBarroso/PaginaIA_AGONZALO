@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calzadilla | Tesoro de la Dehesa</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Playfair Display (Serif) & Inter (Sans) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- Feather Icons -->
+    <script src="https://unpkg.com/feather-icons"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class', // Habilitar modo oscuro por clase
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f2fbf5',
+                            100: '#e1f6e8',
+                            600: '#16a34a', // Primary Green
+                            800: '#166534', // Dark Green
+                            900: '#14532d', // Deepest Green
+                        },
+                        stone: {
+                            850: '#1c1917', // Dark footer
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* --- Estilos Base & Animaciones --- */
+        body {
+            font-family: 'Inter', sans-serif;
+            color: #334155; /* Slate 700 */
+            background-color: #f8fafc; /* Slate 50 */
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* Animación de Scroll (Reveal) */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.5, 0, 0, 1);
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* --- Accesibilidad --- */
+        body.font-readable { font-family: Verdana, sans-serif !important; }
+        body.font-readable h1, body.font-readable h2, body.font-readable h3 { font-family: Verdana, sans-serif !important; letter-spacing: normal; }
+        body.spacing-increased { line-height: 2 !important; letter-spacing: 0.05em; }
+        
+        /* Estilos de cursor y guía (Añadidos para que funcionen las herramientas) */
+        body.hide-cursor { cursor: none; }
+        #reading-guide { 
+            position: fixed; 
+            height: 30px; 
+            background-color: rgba(0, 0, 255, 0.2); 
+            z-index: 9999;
+            pointer-events: none;
+            left: 0; 
+            right: 0;
+            display: none;
+        }
+        #large-cursor {
+            position: fixed;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            z-index: 9999;
+            display: none; /* Asegurar que está oculto por defecto */
+        }
+
+
+        /* --- Modo Oscuro (CORREGIDO Y REFORZADO) --- */
+        body.dark-mode {
+            background-color: #0f172a !important; /* Slate 900 */
+            color: #cbd5e1 !important; /* Slate 300 */
+        }
+        /* Fondo de tarjetas y secciones en modo oscuro */
+        body.dark-mode .bg-white, 
+        body.dark-mode .bg-gray-50 {
+            background-color: #1e293b !important; /* Slate 800 */
+            border-color: #334155 !important; /* Slate 700 */
+            color: #e2e8f0 !important;
+        }
+        /* Textos en modo oscuro */
+        body.dark-mode .text-gray-900, 
+        body.dark-mode .text-gray-800 {
+            color: #f1f5f9 !important; /* Slate 100 */
+        }
+        body.dark-mode .text-gray-700, 
+        body.dark-mode .text-gray-600, 
+        body.dark-mode .text-gray-500 {
+            color: #94a3b8 !important; /* Slate 400 */
+        }
+        /* Header Glass en modo oscuro */
+        body.dark-mode header.glass {
+            background-color: rgba(15, 23, 42, 0.9) !important;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        /* Menú Accesibilidad en modo oscuro */
+        body.dark-mode #accessibility-menu {
+            background-color: #1e293b;
+            color: #fff;
+            border-color: #334155;
+        }
+        body.dark-mode #accessibility-menu button {
+             background-color: #334155; /* Slate 700 */
+             color: #fff;
+        }
+        body.dark-mode #accessibility-menu button:hover {
+             background-color: #475569; /* Slate 600 */
+        }
+
+        /* --- Estilos Alto Contraste (Prioridad Alta) --- */
+        body.high-contrast { background-color: #000; color: #fff; }
+        body.high-contrast .bg-white, body.high-contrast .bg-gray-100, body.high-contrast .bg-gray-50 { background-color: #000 !important; border: 1px solid #fff; }
+        body.high-contrast .text-gray-900, body.high-contrast .text-gray-800, body.high-contrast .text-gray-600, body.high-contrast .text-gray-500 { color: #fff !important; }
+        body.high-contrast .border-gray-100, body.high-contrast .border-gray-200 { border-color: #fff !important; }
+
+        /* --- Estilos Generales UI --- */
+        #music-player {
+            backdrop-filter: blur(10px);
+            background-color: rgba(28, 25, 23, 0.95); /* Stone 850 */
+        }
+        
+        header.glass {
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            transition: background-color 0.3s ease;
+        }
+
+        .card-hover-effect {
+            transition: all 0.4s ease;
+        }
+        .card-hover-effect:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        /* Lightbox */
+        #lightbox { opacity: 0; pointer-events: none; transition: opacity 0.3s ease-out; background-color: rgba(0, 0, 0, 0.95); }
+        #lightbox.active { opacity: 1; pointer-events: auto; }
+        #lightbox-img { transform: scale(0.95); transition: transform 0.3s ease-out; max-width: 90vw; max-height: 90vh; }
+        #lightbox.active #lightbox-img { transform: scale(1); }
+        .clickable-image { cursor: zoom-in; }
+        
+        /* Estilo para el spinner del mapa */
+        .spinner {
+            border-top-color: #3498db;
+            border-right-color: transparent;
+            border-bottom-color: #3498db;
+            border-left-color: transparent;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Estilo para el modal de datos */
+        #data-modal {
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Guías Visuales Accesibilidad -->
+    <div id="reading-guide"></div>
+    <div id="large-cursor"></div>
+
+    <!-- HEADER STICKY & GLASS -->
+    <header class="glass fixed w-full top-0 z-40 transition-all duration-300 h-20 flex items-center">
+        <div class="container mx-auto px-6">
+            <div class="flex justify-between items-center">
+                <!-- Logo / Título -->
+                <div class="flex items-center gap-4">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/Escudo_de_Calzadilla_%28C%C3%A1ceres%29.svg/1173px-Escudo_de_Calzadilla_%28C%C3%A1ceres%29.svg.png" 
+                         alt="Escudo" class="h-12 w-auto drop-shadow-sm">
+                    <div class="hidden md:block">
+                        <h1 class="text-2xl font-bold text-gray-800 tracking-tight font-serif">Calzadilla</h1>
+                        <p class="text-xs text-green-700 font-sans uppercase tracking-widest font-semibold">Cáceres • Extremadura</p>
+                    </div>
+                </div>
+
+                <!-- Botón Accesibilidad -->
+                <div class="relative">
+                    <button id="accessibility-toggle" class="bg-brand-600 text-white hover:bg-brand-800 transition-colors rounded-full px-5 py-2 text-sm font-medium flex items-center gap-2 shadow-lg">
+                        <i data-feather="sliders" class="w-4 h-4"></i>
+                        <span>Accesibilidad</span>
+                    </button>
+                    <!-- Menú Dropdown -->
+                    <div id="accessibility-menu" class="absolute right-0 mt-4 w-80 bg-white text-gray-800 rounded-2xl shadow-2xl p-5 hidden border border-gray-100 max-h-[80vh] overflow-y-auto z-50 origin-top-right transition-all transform">
+                        <div class="flex justify-between items-center mb-4 border-b pb-2">
+                            <h4 class="font-bold text-lg">Ajustes</h4>
+                            <button id="reset-accessibility" class="text-xs text-red-600 hover:underline font-semibold">Restablecer</button>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <!-- Fuentes -->
+                            <div>
+                                <p class="text-xs font-bold text-gray-400 uppercase mb-2">Texto</p>
+                                <div class="flex gap-2">
+                                    <button id="font-decrease" class="flex-1 bg-gray-100 hover:bg-gray-200 py-2 rounded text-sm font-bold">-A</button>
+                                    <button id="font-increase" class="flex-1 bg-gray-100 hover:bg-gray-200 py-2 rounded text-sm font-bold">A+</button>
+                                </div>
+                                <button id="font-readable-toggle" class="w-full mt-2 bg-gray-100 hover:bg-gray-200 py-2 rounded text-sm text-left px-3">Fuente Legible (Verdana)</button>
+                                <button id="spacing-toggle" class="w-full mt-1 bg-gray-100 hover:bg-gray-200 py-2 rounded text-sm text-left px-3">Aumentar Espaciado</button>
+                            </div>
+                            
+                            <!-- Color -->
+                            <div>
+                                <p class="text-xs font-bold text-gray-400 uppercase mb-2">Visualización</p>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <button id="dark-mode-toggle" class="bg-gray-100 hover:bg-gray-200 py-2 rounded text-sm">Modo Oscuro</button>
+                                    <button id="contrast-toggle" class="bg-gray-100 hover:bg-gray-200 py-2 rounded text-sm">Alto Contraste</button>
+                                </div>
+                            </div>
+
+                            <!-- Herramientas -->
+                            <div>
+                                <p class="text-xs font-bold text-gray-400 uppercase mb-2">Ayudas</p>
+                                <button id="read-aloud-btn" class="w-full bg-blue-50 text-blue-700 hover:bg-blue-100 py-2 rounded text-sm flex items-center justify-center gap-2 mb-2">
+                                    <i data-feather="volume-2" class="w-4 h-4"></i> Leer Página
+                                </button>
+                                <button id="reading-guide-toggle" class="w-full bg-gray-100 hover:bg-gray-200 py-2 rounded text-sm text-left px-3 mb-1">Guía de Lectura</button>
+                                <!-- CURSOR GRANDE ELIMINADO DEL HTML -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- HERO SECTION (Cinematográfica) -->
+    <section class="relative h-[85vh] w-full overflow-hidden flex items-center justify-center">
+        <img id="hero-image" 
+             src="https://estaticos-cdn.prensaiberica.es/clip/e1176dab-1252-470f-adc1-b5ddbef32e12_16-9-aspect-ratio_default_0.jpg" 
+             alt="Paisaje de la Dehesa de Calzadilla" 
+             class="absolute inset-0 w-full h-full object-cover clickable-image transition-transform duration-[10s] hover:scale-110">
+        
+        <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/70"></div>
+        
+        <!-- CORRECCIÓN: Añadido 'pt-20' para evitar solapamiento con el header fijo -->
+        <div class="relative z-10 text-center px-4 max-w-4xl mx-auto reveal active pt-20">
+            <span class="text-green-400 font-bold tracking-[0.2em] uppercase text-sm md:text-base mb-4 block shadow-black drop-shadow-md">Turismo Rural Auténtico</span>
+            <h2 class="text-5xl md:text-7xl font-serif font-bold text-white mb-6 leading-tight drop-shadow-2xl">
+                Descubre el Alma <br> de la <span class="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-300 drop-shadow-sm">Dehesa</span>
+            </h2>
+            <p class="text-gray-200 text-lg md:text-xl mb-10 max-w-2xl mx-auto font-light leading-relaxed drop-shadow-md">
+                Historia romana, leyendas vivas y naturaleza en estado puro. Bienvenido a Calzadilla, el corazón de la comarca de Coria.
+            </p>
+        </div>
+    </section>
+
+    <!-- CONTENIDO PRINCIPAL (Grid Asimétrico) -->
+    <main class="container mx-auto px-6 py-16 relative z-10 -mt-20">
+        
+        <!-- Tarjeta de Introducción (DESTACADA) -->
+        <div class="bg-white rounded-2xl shadow-2xl p-8 md:p-12 mb-20 reveal border-t-4 border-green-600">
+            <div class="text-center">
+                <span class="text-xs text-gray-500 uppercase tracking-widest mb-4 block">— Cita de Viaje —</span>
+                <h3 class="text-4xl font-serif font-semibold text-gray-900 mb-6 leading-snug italic max-w-3xl mx-auto">
+                    "Calzadilla no es solo un destino; es una experiencia. Un legado esculpido en piedra, donde el eco de las sandalias romanas resuena entre encinas centenarias."
+                </h3>
+                <div class="w-16 h-0.5 bg-green-600 mx-auto mt-6"></div>
+            </div>
+            
+            <div class="mt-8 grid md:grid-cols-12 gap-8 items-start">
+                <div class="md:col-span-8">
+                    <p class="text-gray-600 text-lg leading-relaxed mb-4">
+                        Situado estratégicamente en la comarca de Coria, este pueblo es un punto neurálgico en la historia extremeña. Su entorno es un testimonio vivo de la armonía entre el ser humano y la naturaleza, con vastas dehesas que albergan una rica fauna y ganadería de reses bravas.
+                    </p>
+                </div>
+                <div class="md:col-span-4 bg-green-50 rounded-xl p-6 border border-green-100 shadow-inner">
+                    <h4 class="font-bold text-green-800 mb-3 flex items-center"><i data-feather="info" class="w-5 h-5 mr-2"></i> Datos Clave</h4>
+                    <ul class="space-y-3 text-sm text-gray-700">
+                        <li class="flex justify-between border-b border-green-200 pb-2"><span>Provincia:</span> <span class="font-semibold">Cáceres</span></li>
+                        <li class="flex justify-between border-b border-green-200 pb-2"><span>Comarca:</span> <span class="font-semibold">Vegas del Alagón</span></li>
+                        <li class="flex justify-between border-b border-green-200 pb-2"><span>Gentilicio:</span> <span class="font-semibold">Calzadillanos / Lagartos</span></li>
+                        <li class="flex justify-between"><span>Patrona:</span> <span class="font-semibold">Santa Catalina</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Layout Principal -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+            
+            <!-- COLUMNA IZQUIERDA (Contenido - 8 cols) -->
+            <div class="lg:col-span-8 space-y-16">
+
+                <!-- SECCIÓN: PATRIMONIO -->
+                <section id="que-ver" class="reveal">
+                    <div class="flex items-end justify-between mb-8 border-b border-gray-200 pb-4">
+                        <div>
+                            <span class="text-green-600 font-bold tracking-wider uppercase text-xs">Patrimonio</span>
+                            <h3 class="text-3xl font-serif font-bold text-gray-900 mt-1">Joyas Arquitectónicas</h3>
+                        </div>
+                        <i data-feather="camera" class="w-6 h-6 text-gray-400"></i>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <!-- Card 1: Iglesia -->
+                        <div class="group bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl card-hover-effect border border-gray-100">
+                            <div class="h-64 overflow-hidden relative">
+                                <img id="iglesia-image" src="https://www.verpueblos.com/fotos_reducidas/0/0/0/00159000.jpg" alt="Iglesia" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 clickable-image">
+                                <div class="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-gray-800 shadow">Siglo XV</div>
+                            </div>
+                            <div class="p-6">
+                                <h4 class="text-xl font-bold text-gray-900 mb-2 font-serif min-h-[3rem]">Iglesia de la Consolación</h4>
+                                <p class="text-gray-600 leading-relaxed">Sobria construcción de mampostería y ladrillo, con una imponente torre campanario que vigila el pueblo.</p>
+                            </div>
+                        </div>
+                        <!-- Card 2: Ermita -->
+                        <div class="group bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl card-hover-effect border border-gray-100">
+                            <div class="h-64 overflow-hidden relative">
+                                <img id="ermita-image" src="https://diocesiscoriacaceres.es/storage/2022/04/20151129-calzadilla.jpg" alt="Ermita" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 clickable-image">
+                                <div class="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-gray-800 shadow">Siglo XVI</div>
+                            </div>
+                            <div class="p-6">
+                                <h4 class="text-xl font-bold text-gray-900 mb-2 font-serif min-h-[3rem]">Ermita del Cristo</h4>
+                                <p class="text-gray-600 leading-relaxed">Santuario de cruz latina. El corazón espiritual de Calzadilla y hogar de la leyenda del lagarto.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECCIÓN: LEYENDA -->
+                <section class="reveal bg-stone-900 rounded-2xl p-8 md:p-12 text-white relative overflow-hidden shadow-2xl">
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-green-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 -translate-y-1/2 translate-x-1/2"></div>
+                    <div class="relative z-10 grid md:grid-cols-2 gap-10 items-center">
+                        <div>
+                            <span class="text-green-400 font-bold uppercase tracking-widest text-xs">Mito y Realidad</span>
+                            <h3 class="text-3xl md:text-4xl font-serif font-bold mb-6 mt-2">La Leyenda del Lagarto</h3>
+                            <p class="text-gray-300 mb-6 leading-relaxed text-lg">
+                                Un pastor, acorralado por un monstruoso reptil, imploró al Cristo de la Agonía y abatió a la bestia.
+                            </p>
+                            <div class="bg-white/10 backdrop-blur-md rounded-lg p-4 border border-white/10">
+                                <p class="text-sm text-gray-200 italic">
+                                    "La piel disecada del animal aún cuelga en la ermita como símbolo eterno de gratitud."
+                                </p>
+                            </div>
+                        </div>
+                        <div class="relative">
+                            <img id="lagarto-image" src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Lagarto_Calzadilla.jpg/1200px-Lagarto_Calzadilla.jpg" alt="El Lagarto" class="rounded-lg shadow-2xl border-4 border-white/20 w-full transform rotate-2 hover:rotate-0 transition-transform duration-500 clickable-image">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECCIÓN: NATURALEZA Y ETNOGRAFÍA -->
+                <section class="reveal">
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
+                        <div class="grid md:grid-cols-2">
+                            <div class="h-64 md:h-auto relative">
+                                <img id="chozos-image" src="https://cdn1.es.casasrurales.net/emp/fotoscasas/075854/640/Exteriores%20de%20los%20chozos3.JPG" alt="Chozos" class="w-full h-full object-cover clickable-image">
+                            </div>
+                            <div class="p-8 flex flex-col justify-center">
+                                <div class="mb-4">
+                                    <span class="bg-green-100 text-green-800 text-xs font-bold px-2 py-1 rounded uppercase">Etnografía</span>
+                                </div>
+                                <h4 class="text-2xl font-bold text-gray-900 mb-4 font-serif">Los Chozos de Pastor</h4>
+                                <p class="text-gray-600 mb-6">
+                                    Refugios de falsa cúpula que narran la vida austera y sabia de los antiguos ganaderos.
+                                </p>
+                                <!-- ENLACE ELIMINADO -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- FORMULARIO DE CONTACTO -->
+                <section class="reveal bg-gray-50 rounded-2xl p-8 border border-gray-200">
+                    <div class="text-center mb-8">
+                        <h3 class="text-2xl font-serif font-bold text-gray-900">¿Planeando tu visita?</h3>
+                        <p class="text-gray-600">Estamos aquí para ayudarte a descubrir cada rincón.</p>
+                    </div>
+                    <form id="contact-form" class="max-w-lg mx-auto space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <input type="text" id="name" name="name" placeholder="Nombre" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-shadow bg-white">
+                            <input type="email" id="email" name="email" placeholder="Email" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-shadow bg-white">
+                        </div>
+                        <textarea rows="4" id="message" name="message" placeholder="¿Cómo podemos ayudarte?" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-shadow bg-white"></textarea>
+                        <button type="submit" class="w-full bg-gray-900 text-white font-bold py-3 rounded-lg hover:bg-green-700 transition-colors shadow-lg">
+                            Enviar Consulta
+                        </button>
+                    </form>
+                </section>
+
+            </div>
+            
+            <!-- COLUMNA DERECHA (Sidebar) -->
+            <aside class="lg:col-span-4 space-y-8 relative">
+                <div class="sticky top-24 space-y-8">
+                    
+                    <!-- Widget Tiempo -->
+                    <div class="bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl shadow-xl p-6 text-white card-hover-effect reveal relative overflow-hidden">
+                        <div class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-white opacity-10 rounded-full blur-xl"></div>
+                        <div class="flex justify-between items-center relative z-10">
+                            <div>
+                                <p class="text-blue-200 text-sm font-medium uppercase tracking-wider">Clima Actual</p>
+                                <span class="text-5xl font-bold mt-1 block">22°</span>
+                                <p class="mt-1">Cielo despejado</p>
+                            </div>
+                            <i data-feather="sun" class="w-16 h-16 text-yellow-400"></i>
+                        </div>
+                        <div class="mt-6 grid grid-cols-2 gap-4 text-sm text-blue-100 border-t border-blue-500/50 pt-4">
+                            <div class="flex items-center"><i data-feather="wind" class="w-4 h-4 mr-2"></i> 12 km/h</div>
+                            <div class="flex items-center"><i data-feather="droplet" class="w-4 h-4 mr-2"></i> 45%</div>
+                        </div>
+                    </div>
+
+                    <!-- Agenda -->
+                    <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 reveal">
+                        <h4 class="font-bold text-gray-900 mb-4 flex items-center text-lg font-serif">
+                            <i data-feather="calendar" class="w-5 h-5 mr-2 text-red-500"></i> Agenda Local
+                        </h4>
+                        <div class="space-y-4">
+                            <div class="flex gap-4 group cursor-pointer">
+                                <div class="bg-gray-100 group-hover:bg-red-50 text-gray-600 group-hover:text-red-600 rounded-xl p-2 text-center min-w-[3.5rem] transition-colors">
+                                    <span class="text-xs font-bold uppercase block">Sep</span>
+                                    <span class="text-xl font-bold block">14</span>
+                                </div>
+                                <div>
+                                    <h5 class="font-bold text-gray-800 group-hover:text-red-600 transition-colors">El Cristo</h5>
+                                    <p class="text-xs text-gray-500 mt-1">Fiestas Patronales.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gastronomía Visual -->
+                    <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 reveal">
+                        <h4 class="font-bold text-gray-900 mb-4 flex items-center text-lg font-serif">
+                            <i data-feather="coffee" class="w-5 h-5 mr-2 text-yellow-600"></i> Sabores
+                        </h4>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1 rounded-full bg-yellow-50 text-yellow-800 text-xs font-bold border border-yellow-100">Burranco</span>
+                            <span class="px-3 py-1 rounded-full bg-orange-50 text-orange-800 text-xs font-bold border border-orange-100">Patateras</span>
+                            <span class="px-3 py-1 rounded-full bg-gray-50 text-gray-800 text-xs font-bold border border-gray-200">Caldereta</span>
+                        </div>
+                    </div>
+
+                    <!-- Mapa (Con Spinner de Carga) -->
+                    <div class="bg-white rounded-2xl shadow-lg overflow-hidden reveal border border-gray-100 relative">
+                        <div id="map-spinner" class="absolute inset-0 flex items-center justify-center bg-white/80 z-10 transition-opacity duration-500">
+                            <div class="w-8 h-8 border-4 border-gray-300 rounded-full spinner"></div>
+                        </div>
+                         <iframe
+                            id="google-map-iframe"
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d12261.27878845016!2d-6.446864119853966!3d40.07663361845663!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd3e1a620803c51d%3A0xa04f56a5c3c0c0!2s10817%20Calzadilla%2C%20C%C3%A1ceres%2C%20Espa%C3%B1a!5e0!3m2!1ses!2ses!4v1678888888888!5m2!1ses!2ses"
+                            width="100%" height="250" style="border:0;" allowfullscreen="" loading="lazy">
+                        </iframe>
+                    </div>
+
+                </div>
+            </aside>
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-stone-850 text-gray-400 py-16 relative z-10 border-t border-gray-800">
+        <div class="container mx-auto px-6 text-center text-xs text-gray-600">
+            &copy; 2025 Turismo de Calzadilla. Todos los derechos reservados.
+        </div>
+    </footer>
+
+    <!-- Elementos Flotantes -->
+    <button id="back-to-top" class="fixed bottom-24 right-6 bg-gray-900 hover:bg-green-600 text-white rounded-full p-3 shadow-2xl z-40 transition-all duration-300 opacity-0 invisible translate-y-4" aria-label="Volver arriba">
+        <i data-feather="arrow-up" class="w-5 h-5"></i>
+    </button>
+
+    <!-- Lightbox -->
+    <div id="lightbox" class="fixed inset-0 flex items-center justify-center z-[100]">
+        <div class="relative p-4">
+            <img id="lightbox-img" src="" alt="Full" class="rounded shadow-2xl">
+            <button id="lightbox-close" class="absolute -top-2 -right-2 bg-white text-black rounded-full w-8 h-8 flex items-center justify-center font-bold shadow hover:bg-gray-200">&times;</button>
+        </div>
+    </div>
+
+    <!-- Modal de Exportación de Datos -->
+    <div id="data-modal" class="fixed inset-0 hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-lg w-full p-6 relative">
+            <button id="data-modal-close" class="absolute top-3 right-3 text-gray-500 hover:text-red-500 transition-colors">&times;</button>
+            <h3 class="text-2xl font-serif font-bold text-gray-900 dark:text-white mb-4">Datos de la Consulta Enviada</h3>
+            
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Estos datos han sido procesados (simulación). Puedes copiarlos para referencia:</p>
+            
+            <pre id="exported-data" class="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg overflow-x-auto text-xs text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-600"></pre>
+            
+            <div class="mt-4 flex flex-col sm:flex-row gap-3">
+                <button id="copy-data-btn" class="flex-1 bg-green-600 text-white font-bold py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center">
+                    <i data-feather="copy" class="w-4 h-4 mr-2"></i> Copiar Datos (JSON)
+                </button>
+                <a id="mailto-link" href="#" class="flex-1 text-center bg-blue-600 text-white font-bold py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center" target="_blank">
+                    <i data-feather="mail" class="w-4 h-4 mr-2"></i> Enviar por Email
+                </a>
+            </div>
+            <p id="copy-status" class="text-center text-xs text-green-600 mt-2 hidden"></p>
+        </div>
+    </div>
+    
+    <!-- Reproductor de Música -->
+    <audio id="audio-player" class="hidden"></audio>
+    <div id="music-player" class="fixed bottom-0 left-0 right-0 border-t border-white/10 text-white p-3 z-50 flex items-center justify-between px-6 shadow-2xl">
+        <div class="flex items-center gap-4">
+            <div class="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center">
+                <i data-feather="music" class="w-5 h-5 text-green-400"></i>
+            </div>
+            <div class="hidden sm:block">
+                <p class="text-sm font-bold text-white truncate" id="song-title">Ambiente Dehesa</p>
+                <p class="text-xs text-gray-400">Música Relax</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <button id="prev-song" class="text-gray-400 hover:text-white"><i data-feather="skip-back" class="w-5 h-5"></i></button>
+            <button id="play-pause-song" class="bg-white text-black rounded-full p-2 hover:scale-105 transition-transform"><i data-feather="play" id="play-pause-song-icon" class="w-5 h-5 fill-current ml-0.5"></i></button>
+            <button id="next-song" class="text-gray-400 hover:text-white"><i data-feather="skip-forward" class="w-5 h-5"></i></button>
+        </div>
+    </div>
+
+    <!-- Scripts Lógica -->
+    <script>
+        feather.replace();
+
+        const revealElements = document.querySelectorAll('.reveal');
+        const revealOnScroll = () => {
+            const windowHeight = window.innerHeight;
+            revealElements.forEach((reveal) => {
+                const elementTop = reveal.getBoundingClientRect().top;
+                if (elementTop < windowHeight - 100) {
+                    reveal.classList.add("active");
+                }
+            });
+        };
+        window.addEventListener("scroll", revealOnScroll);
+        revealOnScroll();
+        
+        // --- Estados Globales para Accesibilidad Avanzada ---
+        const readingGuideEl = document.getElementById('reading-guide');
+        
+        let isGuideActive = false;
+        let synth = window.speechSynthesis;
+        let utterance = null;
+        
+        const accToggle = document.getElementById('accessibility-toggle');
+        const accMenu = document.getElementById('accessibility-menu');
+        const htmlEl = document.documentElement;
+        
+        // --- Lógica de Menú Desplegable ---
+        if(accToggle && accMenu) {
+            accToggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                accMenu.classList.toggle('hidden');
+            });
+            document.addEventListener('click', (e) => {
+                if (!accMenu.contains(e.target) && !accToggle.contains(e.target)) {
+                    accMenu.classList.add('hidden');
+                }
+            });
+        }
+
+        // --- Lógica Básica de Toggle Class y Fuentes ---
+        
+        // Accesibilidad Toggle Class Function
+        const toggleClass = (id, cls) => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('click', function() {
+                    document.body.classList.toggle(cls);
+                    this.classList.toggle('bg-green-100'); // Estilo de botón activo
+                });
+            }
+        };
+
+        toggleClass('font-readable-toggle', 'font-readable');
+        toggleClass('spacing-toggle', 'spacing-increased');
+        toggleClass('contrast-toggle', 'high-contrast');
+        toggleClass('dark-mode-toggle', 'dark-mode');
+
+        // Font Size Logic
+        const fontInc = document.getElementById('font-increase');
+        const fontDec = document.getElementById('font-decrease');
+        if(fontInc) fontInc.addEventListener('click', () => {
+            const style = window.getComputedStyle(htmlEl).fontSize;
+            htmlEl.style.fontSize = (parseFloat(style) + 2) + 'px';
+        });
+        if(fontDec) fontDec.addEventListener('click', () => {
+            const style = window.getComputedStyle(htmlEl).fontSize;
+            htmlEl.style.fontSize = (parseFloat(style) - 2) + 'px';
+        });
+
+        // --- Lógica: Guía de Lectura ---
+        
+        function updateCursorAndGuide(e) {
+            if (isGuideActive) {
+                // Posicionar la guía horizontal en la altura del ratón
+                readingGuideEl.style.top = (e.clientY - readingGuideEl.offsetHeight / 2) + 'px'; 
+            }
+        }
+        
+        document.addEventListener('mousemove', updateCursorAndGuide);
+
+        function toggleReadingGuide() {
+            isGuideActive = !isGuideActive;
+            readingGuideEl.style.display = isGuideActive ? 'block' : 'none';
+            document.getElementById('reading-guide-toggle').classList.toggle('bg-green-100', isGuideActive);
+            document.body.classList.toggle('hide-cursor', isGuideActive); // Ocultar cursor para Guía
+        }
+
+        // --- Lógica: Leer Página (Speech Synthesis) ---
+        
+        const readAloudBtn = document.getElementById('read-aloud-btn');
+        
+        function toggleReadAloud() {
+            if (!synth) return alert("Tu navegador no soporta la síntesis de voz.");
+            
+            if (synth.speaking && !synth.paused) {
+                // Pausar
+                synth.pause();
+                readAloudBtn.innerHTML = '<i data-feather="volume-2" class="w-4 h-4"></i> Reanudar Lectura';
+            } else if (synth.paused) {
+                // Reanudar
+                synth.resume();
+                readAloudBtn.innerHTML = '<i data-feather="pause" class="w-4 h-4"></i> Pausar Lectura';
+            } else {
+                // Iniciar la lectura
+                // Extraer solo el contenido visible del main
+                const mainContent = document.querySelector('main').innerText; 
+                utterance = new SpeechSynthesisUtterance(mainContent);
+                utterance.lang = 'es-ES';
+                
+                // Al finalizar
+                utterance.onend = () => {
+                    readAloudBtn.innerHTML = '<i data-feather="volume-2" class="w-4 h-4"></i> Leer Página';
+                    feather.replace();
+                    readAloudBtn.classList.remove('bg-green-100');
+                };
+                
+                synth.speak(utterance);
+                readAloudBtn.innerHTML = '<i data-feather="pause" class="w-4 h-4"></i> Pausar Lectura';
+            }
+            feather.replace();
+            readAloudBtn.classList.toggle('bg-green-100');
+        }
+
+        function stopReading() {
+             if (synth && synth.speaking) {
+                synth.cancel();
+                readAloudBtn.innerHTML = '<i data-feather="volume-2" class="w-4 h-4"></i> Leer Página';
+                feather.replace();
+                readAloudBtn.classList.remove('bg-green-100');
+            }
+        }
+        
+        // --- Lógica: Botón de Reset y Asignación Final de Eventos ---
+        
+        const resetBtn = document.getElementById('reset-accessibility');
+        
+        function resetAccessibility() {
+            // 1. Resetear clases CSS básicas (se repite la lógica de toggleClass para desactivar)
+            document.body.classList.remove('font-readable', 'spacing-increased', 'high-contrast', 'dark-mode', 'hide-cursor');
+            htmlEl.style.fontSize = ''; 
+            
+            // 2. Resetear botones visuales
+            document.querySelectorAll('#accessibility-menu button').forEach(btn => btn.classList.remove('bg-green-100'));
+            
+            // 3. Resetear Guía
+            if (isGuideActive) toggleReadingGuide();
+            
+            // 4. Detener lectura en voz alta
+            stopReading();
+        }
+
+        // --- Lógica de Exportación de Datos (MODIFICADA) ---
+        const dataModal = document.getElementById('data-modal');
+        const modalCloseBtn = document.getElementById('data-modal-close');
+        const exportedDataPre = document.getElementById('exported-data');
+        const copyDataBtn = document.getElementById('copy-data-btn');
+        const mailtoLink = document.getElementById('mailto-link');
+        const copyStatus = document.getElementById('copy-status');
+
+        function setupContactForm() {
+            const form = document.getElementById('contact-form');
+            if (!form) return;
+
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+
+                const formData = {
+                    nombre: document.getElementById('name').value,
+                    email: document.getElementById('email').value,
+                    mensaje: document.getElementById('message').value,
+                    fecha: new Date().toLocaleDateString('es-ES'),
+                    hora: new Date().toLocaleTimeString('es-ES')
+                };
+
+                const jsonString = JSON.stringify(formData, null, 2);
+                
+                // Mostrar los datos en el modal
+                exportedDataPre.textContent = jsonString;
+                
+                // Configurar el enlace mailto
+                const emailBody = `Consulta Turística de Calzadilla:\n\nNombre: ${formData.nombre}\nEmail: ${formData.email}\nMensaje: ${formData.mensaje}\nFecha: ${formData.fecha} ${formData.hora}`;
+                mailtoLink.href = `mailto:oficina@turismocalzadilla.es?subject=Nueva Consulta Web (${formData.nombre})&body=${encodeURIComponent(emailBody)}`;
+
+                // Mostrar el modal
+                dataModal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+
+                form.reset(); // Limpiar el formulario
+                feather.replace(); // Recargar iconos del modal
+            });
+            
+            modalCloseBtn.addEventListener('click', () => {
+                dataModal.style.display = 'none';
+                document.body.style.overflow = '';
+                copyStatus.classList.add('hidden');
+            });
+
+            copyDataBtn.addEventListener('click', () => {
+                // Utilizar document.execCommand('copy') como fallback para entornos sandboxed
+                const textToCopy = exportedDataPre.textContent;
+                
+                const textarea = document.createElement('textarea');
+                textarea.value = textToCopy;
+                textarea.style.position = 'fixed'; // Para evitar el scroll
+                document.body.appendChild(textarea);
+                textarea.focus();
+                textarea.select();
+                
+                try {
+                    const successful = document.execCommand('copy');
+                    copyStatus.textContent = successful ? '¡Copiado al portapapeles con éxito!' : 'Error al copiar. Por favor, cópielo manualmente.';
+                } catch (err) {
+                    copyStatus.textContent = 'Error al copiar. Por favor, cópielo manualmente.';
+                }
+                
+                document.body.removeChild(textarea);
+                copyStatus.classList.remove('hidden');
+            });
+        }
+        
+        // --- Asignación de Eventos ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Accesibilidad Avanzada
+            document.getElementById('reading-guide-toggle').addEventListener('click', toggleReadingGuide);
+            readAloudBtn.addEventListener('click', toggleReadAloud);
+            
+            // Botón de Reset
+            resetBtn.addEventListener('click', resetAccessibility);
+            
+            // Llamadas a funciones de inicialización existentes
+            setupAudioPlayerLogic();
+            setupMapLoading(); // Nueva función para el mapa
+            setupContactForm(); // Nueva función para el formulario (MODIFICADA)
+        });
+
+
+        // Audio Player Logic (Movido a función separada para orden)
+        function setupAudioPlayerLogic() {
+            const audio = document.getElementById('audio-player');
+            const playBtn = document.getElementById('play-pause-song');
+            const nextBtn = document.getElementById('next-song');
+            const prevBtn = document.getElementById('prev-song');
+            
+            if(audio && playBtn) {
+                const playlist = [
+                    'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+                    'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3'
+                ];
+                let idx = 0;
+                const songTitleEl = document.getElementById('song-title');
+                
+                audio.src = playlist[0];
+                songTitleEl.textContent = "Ambiente Dehesa";
+
+                playBtn.addEventListener('click', () => {
+                    if(audio.paused) {
+                        audio.play();
+                        playBtn.innerHTML = '<i data-feather="pause" class="w-5 h-5 fill-current"></i>';
+                    } else {
+                        audio.pause();
+                        playBtn.innerHTML = '<i data-feather="play" class="w-5 h-5 fill-current ml-0.5"></i>';
+                    }
+                    feather.replace();
+                });
+
+                nextBtn.addEventListener('click', () => {
+                    idx = (idx + 1) % playlist.length;
+                    audio.src = playlist[idx];
+                    songTitleEl.textContent = playlist[idx].includes('Song-1') ? "Calma en la Dehesa" : "Paseo por el Robledal";
+                    audio.play();
+                    playBtn.innerHTML = '<i data-feather="pause" class="w-5 h-5 fill-current"></i>';
+                    feather.replace();
+                });
+                
+                // Agregamos lógica para el botón anterior
+                 prevBtn.addEventListener('click', () => {
+                    idx = (idx - 1 + playlist.length) % playlist.length;
+                    audio.src = playlist[idx];
+                    songTitleEl.textContent = playlist[idx].includes('Song-1') ? "Calma en la Dehesa" : "Paseo por el Robledal";
+                    audio.play();
+                    playBtn.innerHTML = '<i data-feather="pause" class="w-5 h-5 fill-current"></i>';
+                    feather.replace();
+                });
+                
+                audio.addEventListener('ended', () => {
+                    nextBtn.click(); // Reproducir la siguiente al terminar
+                });
+            }
+        }
+        
+        // --- Lógica del Mapa con Spinner de Carga ---
+        function setupMapLoading() {
+            const mapIframe = document.getElementById('google-map-iframe');
+            const spinner = document.getElementById('map-spinner');
+
+            if (mapIframe && spinner) {
+                 // Mostrar spinner por defecto
+                 spinner.style.opacity = 1;
+                 spinner.style.pointerEvents = 'auto';
+
+                 // Simular carga lenta o esperar evento (aunque el evento load es más fiable)
+                 mapIframe.addEventListener('load', () => {
+                    spinner.style.opacity = 0;
+                    spinner.style.pointerEvents = 'none';
+                 });
+                 
+                 // Fallback por si el evento load no se dispara en iframes (ej: 1.5s)
+                 setTimeout(() => {
+                    if (spinner.style.opacity == 1) {
+                         spinner.style.opacity = 0;
+                         spinner.style.pointerEvents = 'none';
+                    }
+                 }, 1500);
+            }
+        }
+
+        // --- Otras funciones de inicialización (existentes) ---
+        
+        // Back To Top (Existente)
+        const backToTop = document.getElementById('back-to-top');
+        if(backToTop) {
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 300) backToTop.classList.remove('opacity-0', 'invisible', 'translate-y-4');
+                else backToTop.classList.add('opacity-0', 'invisible', 'translate-y-4');
+            });
+            backToTop.addEventListener('click', () => window.scrollTo({top:0, behavior:'smooth'}));
+        }
+
+        // Lightbox (Existente)
+        const lb = document.getElementById('lightbox');
+        const lbImg = document.getElementById('lightbox-img');
+        const lbClose = document.getElementById('lightbox-close');
+        
+        if(lb && lbImg) {
+            document.querySelectorAll('.clickable-image').forEach(img => {
+                img.addEventListener('click', e => {
+                    e.stopPropagation();
+                    lbImg.src = img.src;
+                    lb.classList.add('active');
+                });
+            });
+            const closeLb = () => lb.classList.remove('active');
+            if(lbClose) lbClose.addEventListener('click', closeLb);
+            lb.addEventListener('click', e => { if(e.target === lb) closeLb(); });
+            document.addEventListener('keydown', e => { if(e.key === 'Escape') closeLb(); });
+        }
+    </script>
+</body>
+</html>
