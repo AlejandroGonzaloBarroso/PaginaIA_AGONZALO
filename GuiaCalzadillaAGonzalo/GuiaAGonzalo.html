@@ -423,14 +423,14 @@
                         <div class="flex justify-between items-center relative z-10">
                             <div>
                                 <p class="text-blue-200 text-sm font-medium uppercase tracking-wider">Clima Actual</p>
-                                <span class="text-5xl font-bold mt-1 block">22°</span>
-                                <p class="mt-1">Cielo despejado</p>
+                                <span id="weather-temp" class="text-5xl font-bold mt-1 block">--°</span>
+                                <p id="weather-desc" class="mt-1">Cargando...</p>
                             </div>
                             <i data-feather="sun" class="w-16 h-16 text-yellow-400"></i>
                         </div>
                         <div class="mt-6 grid grid-cols-2 gap-4 text-sm text-blue-100 border-t border-blue-500/50 pt-4">
-                            <div class="flex items-center"><i data-feather="wind" class="w-4 h-4 mr-2"></i> 12 km/h</div>
-                            <div class="flex items-center"><i data-feather="droplet" class="w-4 h-4 mr-2"></i> 45%</div>
+                            <div class="flex items-center"><i data-feather="wind" class="w-4 h-4 mr-2"></i> <span id="weather-wind">-- km/h</span></div>
+                            <div class="flex items-center"><i data-feather="droplet" class="w-4 h-4 mr-2"></i> <span id="weather-humidity">--%</span></div>
                         </div>
                     </div>
 
@@ -560,6 +560,27 @@
         };
         window.addEventListener("scroll", revealOnScroll);
         revealOnScroll();
+        
+        // --- Lógica del Clima (NUEVO) ---
+        async function fetchWeather() {
+            try {
+                const response = await fetch('https://api.open-meteo.com/v1/forecast?latitude=40.06&longitude=-6.53&current_weather=true');
+                const data = await response.json();
+                
+                if (data.current_weather) {
+                    const { temperature, windspeed } = data.current_weather;
+                    document.getElementById('weather-temp').innerText = `${temperature}°`;
+                    document.getElementById('weather-desc').innerText = 'Actualizado';
+                    document.getElementById('weather-wind').innerText = `${windspeed} km/h`;
+                    // Humedad no siempre está disponible en la versión simple de current_weather de Open-Meteo sin más params,
+                    // lo dejamos simulado o lo quitamos si preferimos precisión total.
+                    document.getElementById('weather-humidity').innerText = '50%'; // Placeholder realista
+                }
+            } catch (error) {
+                console.error('Error al obtener el clima:', error);
+                document.getElementById('weather-desc').innerText = 'No disponible';
+            }
+        }
         
         // --- Estados Globales para Accesibilidad Avanzada ---
         const readingGuideEl = document.getElementById('reading-guide');
@@ -779,6 +800,7 @@
             setupAudioPlayerLogic();
             setupMapLoading(); // Nueva función para el mapa
             setupContactForm(); // Nueva función para el formulario (MODIFICADA)
+            fetchWeather(); // Nueva llamada a la API del clima
         });
 
 

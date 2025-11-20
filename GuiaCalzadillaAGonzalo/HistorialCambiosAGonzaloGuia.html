@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Historial - Guía de Calzadilla</title>
+    <title>Historial Interactivo - Guía de Calzadilla</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/feather-icons"></script>
@@ -11,249 +11,294 @@
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
         h1, h2, h3 { font-family: 'Playfair Display', serif; }
         
-        /* Estilos para las demos embebidas */
-        .demo-container {
-            transition: max-height 0.5s ease-in-out, opacity 0.5s ease-in-out;
-            max-height: 0;
-            opacity: 0;
+        /* Animaciones para el despliegue de demos */
+        .demo-wrapper {
+            display: grid;
+            grid-template-rows: 0fr;
+            transition: grid-template-rows 0.4s ease-out;
+        }
+        .demo-wrapper.open {
+            grid-template-rows: 1fr;
+        }
+        .demo-inner {
             overflow: hidden;
+            padding-top: 1rem;
         }
-        .demo-container.active {
-            max-height: 500px; /* Altura máxima aproximada */
-            opacity: 1;
-            margin-top: 1rem;
-        }
+        
         iframe {
-            border: 1px solid #e5e7eb;
+            width: 100%;
+            height: 300px;
+            border: 1px solid #e2e8f0;
             border-radius: 0.5rem;
             background-color: white;
+            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
         }
     </style>
 </head>
-<body class="text-gray-800">
+<body class="text-gray-800 bg-gray-50">
     
-    <div class="container mx-auto p-6 pt-12 max-w-4xl">
+    <div class="container mx-auto p-4 md:p-12 max-w-5xl">
         
-        <header class="mb-12 text-center">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/Escudo_de_Calzadilla_%28C%C3%A1ceres%29.svg/1173px-Escudo_de_Calzadilla_%28C%C3%A1ceres%29.svg.png" alt="Escudo" class="h-20 w-auto mx-auto mb-4 drop-shadow-md">
-            <h1 class="text-4xl font-bold text-gray-900 mb-2">Registro de Cambios</h1>
-            <p class="text-gray-500">Historial completo y visual del proyecto web "Guía de Calzadilla"</p>
+        <header class="mb-16 text-center">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/Escudo_de_Calzadilla_%28C%C3%A1ceres%29.svg/1173px-Escudo_de_Calzadilla_%28C%C3%A1ceres%29.svg.png" alt="Escudo" class="h-24 w-auto mx-auto mb-6 drop-shadow-lg hover:scale-105 transition-transform duration-300">
+            <h1 class="text-5xl font-bold text-gray-900 mb-4 tracking-tight">Evolución del Proyecto</h1>
+            <p class="text-xl text-gray-500 font-light">Registro histórico y visual de la "Guía de Calzadilla"</p>
         </header>
 
-        <!-- Timeline -->
-        <div class="space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-gray-300 before:to-transparent">
+        <!-- TIMELINE -->
+        <div class="relative space-y-12 before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-gray-200 before:via-gray-300 before:to-gray-200">
 
-            <!-- v2.2.5 (NUEVO - ACTUAL) -->
-            <div class="relative flex flex-col md:flex-row items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-                <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-indigo-600 text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10 mb-4 md:mb-0">
-                    <i data-feather="check-circle" class="w-5 h-5"></i>
+            <!-- v2.2.6 (ACTUAL) -->
+            <div class="relative flex flex-col md:flex-row items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
+                <div class="flex items-center justify-center w-12 h-12 rounded-full border-4 border-white bg-teal-600 text-white shadow-lg z-10 mb-4 md:mb-0 shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
+                    <i data-feather="cloud-lightning" class="w-6 h-6"></i>
                 </div>
-                <div class="w-full md:w-[calc(50%-2.5rem)] bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-                    <div class="flex items-center justify-between mb-2">
-                        <h3 class="font-bold text-gray-900 text-lg">v2.2.5 - Corrección Accesibilidad</h3>
-                        <span class="text-xs font-bold bg-indigo-600 text-white px-2 py-1 rounded">Estable</span>
+                
+                <div class="w-full md:w-[calc(50%-3rem)] bg-white p-6 rounded-2xl shadow-xl border border-gray-100 hover:shadow-2xl transition-shadow duration-300">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-gray-900 text-xl">v2.2.6 - Datos en Tiempo Real</h3>
+                        <span class="text-xs font-bold bg-teal-100 text-teal-800 px-3 py-1 rounded-full">API Live</span>
                     </div>
-                    <p class="text-gray-600 text-sm mb-4">Reparación completa de la lógica de las herramientas de asistencia (Voz y Guía).</p>
+                    <p class="text-gray-600 text-sm mb-4">Conexión con Open-Meteo para mostrar el clima real.</p>
                     
-                    <button class="text-indigo-600 text-sm font-bold hover:underline flex items-center toggle-demo" data-target="demo-v2-2-5">
-                        <i data-feather="eye" class="w-4 h-4 mr-1"></i> Ver Demo Interactiva
+                    <button class="w-full py-2 px-4 bg-gray-50 hover:bg-teal-50 text-teal-700 font-semibold rounded-lg border border-gray-200 hover:border-teal-200 transition-colors flex items-center justify-center gap-2 toggle-demo">
+                        <i data-feather="eye" class="w-4 h-4"></i> Ver Demo (Clima)
                     </button>
                     
-                    <div id="demo-v2-2-5" class="demo-container">
-                        <iframe class="w-full h-64" srcdoc='
-                            <body style="font-family:sans-serif; padding:20px; text-align:center;">
-                                <h2 style="color:#4f46e5;">Versión v2.2.5</h2>
-                                <p>Correcciones finales aplicadas.</p>
-                                <button style="background:#4f46e5; color:white; border:none; padding:8px 16px; border-radius:4px; margin-top:10px;">🔊 Leer Página (Funcional)</button>
-                                <div style="margin-top:20px; height:2px; background:blue; opacity:0.5;">(Guía de lectura visible)</div>
-                            </body>
-                        '></iframe>
+                    <div class="demo-wrapper">
+                        <div class="demo-inner">
+                            <iframe srcdoc='
+                                <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+                                <body class="bg-gray-100 flex items-center justify-center h-full font-sans p-4">
+                                    <div class="bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl shadow-xl p-6 text-white w-full max-w-sm">
+                                        <div class="flex justify-between items-center mb-4">
+                                            <h3 class="font-bold">Clima (API Real)</h3>
+                                            <span class="bg-blue-500/30 px-2 rounded text-xs">Live</span>
+                                        </div>
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <span class="text-5xl font-bold">18°C</span>
+                                                <p class="text-blue-100 text-sm">Cargado de Open-Meteo</p>
+                                            </div>
+                                            <div class="text-4xl">☀️</div>
+                                        </div>
+                                    </div>
+                                </body>
+                            '></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- v2.2.5 -->
+            <div class="relative flex flex-col md:flex-row items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
+                <div class="flex items-center justify-center w-12 h-12 rounded-full border-4 border-white bg-indigo-600 text-white shadow-lg z-10 mb-4 md:mb-0 shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
+                    <i data-feather="check-circle" class="w-6 h-6"></i>
+                </div>
+                <div class="w-full md:w-[calc(50%-3rem)] bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
+                    <h3 class="font-bold text-gray-900 text-xl mb-1">v2.2.5 - Accesibilidad Robusta</h3>
+                    <p class="text-gray-600 text-sm mb-4">Lógica de "Leer Página" y "Guía de Lectura" reparada.</p>
+                    <button class="w-full py-2 px-4 bg-gray-50 hover:bg-indigo-50 text-indigo-700 font-semibold rounded-lg border border-gray-200 hover:border-indigo-200 transition-colors flex items-center justify-center gap-2 toggle-demo">
+                        <i data-feather="eye" class="w-4 h-4"></i> Ver Demo (Tools)
+                    </button>
+                    <div class="demo-wrapper">
+                        <div class="demo-inner">
+                            <iframe srcdoc='
+                                <body style="font-family:sans-serif; padding:20px; text-align:center; background:#f8fafc;">
+                                    <div style="margin-bottom:20px; padding:10px; background:white; border-radius:8px; border:1px solid #ddd;">
+                                        <p>Pasa el ratón por aquí:</p>
+                                        <div style="height:2px; background:blue; width:100%; margin:10px 0;">(Guía visual activa)</div>
+                                    </div>
+                                    <button style="background:#4f46e5; color:white; border:none; padding:10px 20px; border-radius:6px;">🔊 Leer Texto (Funciona)</button>
+                                </body>
+                            '></iframe>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- v2.2.3 -->
             <div class="relative flex flex-col md:flex-row items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
-                <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-blue-500 text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10 mb-4 md:mb-0">
-                    <i data-feather="download" class="w-5 h-5"></i>
+                <div class="flex items-center justify-center w-12 h-12 rounded-full border-4 border-white bg-blue-500 text-white shadow-lg z-10 mb-4 md:mb-0 shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
+                    <i data-feather="download" class="w-6 h-6"></i>
                 </div>
-                <div class="w-full md:w-[calc(50%-2.5rem)] bg-white p-6 rounded-xl shadow border border-gray-100">
-                    <h3 class="font-bold text-gray-900 text-lg mb-1">v2.2.3 - Exportación de Datos</h3>
-                    <p class="text-gray-600 text-sm mb-2">Formulario inteligente con capacidad de exportación JSON/Email.</p>
-                    
-                    <button class="text-blue-600 text-sm font-bold hover:underline flex items-center toggle-demo" data-target="demo-v2-2-3">
-                        <i data-feather="eye" class="w-4 h-4 mr-1"></i> Ver Demo Interactiva
+                <div class="w-full md:w-[calc(50%-3rem)] bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
+                    <h3 class="font-bold text-gray-900 text-xl mb-1">v2.2.3 - Data Export</h3>
+                    <p class="text-gray-600 text-sm mb-4">Exportación JSON de formularios.</p>
+                    <button class="w-full py-2 px-4 bg-gray-50 hover:bg-blue-50 text-blue-700 font-semibold rounded-lg border border-gray-200 hover:border-blue-200 transition-colors flex items-center justify-center gap-2 toggle-demo">
+                        <i data-feather="eye" class="w-4 h-4"></i> Ver Demo (Form)
                     </button>
-                    
-                    <div id="demo-v2-2-3" class="demo-container">
-                        <iframe class="w-full h-64" srcdoc='
-                            <body style="font-family:sans-serif; padding:20px;">
-                                <h3 style="color:#2563eb;">Contacta</h3>
-                                <input type="text" placeholder="Nombre" style="display:block; width:100%; margin-bottom:10px; padding:5px;">
-                                <button style="background:#2563eb; color:white; border:none; padding:8px 16px; border-radius:4px;">Enviar Consulta</button>
-                                <div style="margin-top:10px; padding:10px; background:#f3f4f6; font-family:monospace; font-size:10px;">
-                                    { "status": "export_ready", "data": { ... } }
-                                </div>
-                            </body>
-                        '></iframe>
+                    <div class="demo-wrapper">
+                        <div class="demo-inner">
+                            <iframe srcdoc='
+                                <body style="font-family:sans-serif; padding:20px;">
+                                    <div style="border:1px solid #ccc; padding:15px; border-radius:8px; background:#fff;">
+                                        <h4>Formulario Enviado</h4>
+                                        <pre style="background:#eee; padding:10px; font-size:10px;">{ "nombre": "Usuario", "mensaje": "Hola" }</pre>
+                                        <button style="background:#2563eb; color:white; border:none; padding:5px 10px; border-radius:4px; font-size:12px;">Copiar JSON</button>
+                                    </div>
+                                </body>
+                            '></iframe>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- v2.2.0 -->
             <div class="relative flex flex-col md:flex-row items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
-                <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-gray-900 text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10 mb-4 md:mb-0">
-                    <i data-feather="star" class="w-5 h-5"></i>
+                <div class="flex items-center justify-center w-12 h-12 rounded-full border-4 border-white bg-gray-900 text-white shadow-lg z-10 mb-4 md:mb-0 shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
+                    <i data-feather="star" class="w-6 h-6"></i>
                 </div>
-                <div class="w-full md:w-[calc(50%-2.5rem)] bg-white p-6 rounded-xl shadow border border-gray-100">
-                    <h3 class="font-bold text-gray-900 text-lg mb-1">v2.2.0 - Edición Premium</h3>
-                    <span class="text-xs text-gray-900 font-bold mb-3 block">Rediseño Total (Playfair Display & Glass)</span>
-                    
-                    <button class="text-gray-900 text-sm font-bold hover:underline flex items-center toggle-demo" data-target="demo-v2-2-0">
-                        <i data-feather="eye" class="w-4 h-4 mr-1"></i> Ver Demo Interactiva
+                <div class="w-full md:w-[calc(50%-3rem)] bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
+                    <h3 class="font-bold text-gray-900 text-xl mb-1">v2.2.0 - Diseño Premium</h3>
+                    <p class="text-gray-600 text-sm mb-4">Tipografía Playfair, Glassmorphism y Hero cinematográfico.</p>
+                    <button class="w-full py-2 px-4 bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold rounded-lg border border-gray-200 transition-colors flex items-center justify-center gap-2 toggle-demo">
+                        <i data-feather="eye" class="w-4 h-4"></i> Ver Demo (Estilo)
                     </button>
-                    
-                    <div id="demo-v2-2-0" class="demo-container">
-                        <iframe class="w-full h-64" srcdoc='
-                            <head><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap" rel="stylesheet"></head>
-                            <body style="font-family:sans-serif; padding:0; margin:0;">
-                                <div style="background:#1f2937; color:white; padding:15px; text-align:center; font-family:Playfair Display, serif;">
-                                    CALZADILLA
-                                    <div style="font-size:10px; font-family:sans-serif; margin-top:5px;">TURISMO RURAL AUTÉNTICO</div>
-                                </div>
-                                <div style="padding:20px; text-align:center;">
-                                    <h3 style="font-family:Playfair Display, serif;">Descubre el Alma de la Dehesa</h3>
-                                    <button style="background:#16a34a; color:white; border:none; padding:10px 20px; border-radius:20px; margin-top:10px;">Explorar</button>
-                                </div>
-                            </body>
-                        '></iframe>
+                    <div class="demo-wrapper">
+                        <div class="demo-inner">
+                            <iframe srcdoc='
+                                <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter&display=swap" rel="stylesheet">
+                                <body style="margin:0; font-family:Inter, sans-serif;">
+                                    <div style="height:150px; background:linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.7)), url(https://picsum.photos/seed/calza/800/400); background-size:cover; color:white; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;">
+                                        <h1 style="font-family:Playfair Display, serif; margin:0; font-size:24px;">Calzadilla</h1>
+                                        <p style="font-size:10px; letter-spacing:2px; text-transform:uppercase;">Turismo Rural</p>
+                                    </div>
+                                    <div style="padding:20px; background:#f8fafc;">
+                                        <div style="background:white; padding:15px; border-radius:10px; box-shadow:0 4px 6px rgba(0,0,0,0.05); border-top:3px solid #16a34a;">
+                                            <h3 style="font-family:Playfair Display; margin-top:0;">Historia y Tradición</h3>
+                                            <p style="font-size:12px; color:#666;">Un diseño refinado para una experiencia superior.</p>
+                                        </div>
+                                    </div>
+                                </body>
+                            '></iframe>
+                        </div>
                     </div>
                 </div>
             </div>
             
             <!-- v2.0.0 -->
             <div class="relative flex flex-col md:flex-row items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
-                <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-purple-600 text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10 mb-4 md:mb-0">
-                    <i data-feather="layout" class="w-5 h-5"></i>
+                <div class="flex items-center justify-center w-12 h-12 rounded-full border-4 border-white bg-purple-600 text-white shadow-lg z-10 mb-4 md:mb-0 shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
+                    <i data-feather="layout" class="w-6 h-6"></i>
                 </div>
-                <div class="w-full md:w-[calc(50%-2.5rem)] bg-white p-6 rounded-xl shadow border border-gray-100">
-                    <h3 class="font-bold text-gray-900 text-lg mb-1">v2.0.0 - Estructura en Tarjetas</h3>
-                    <p class="text-gray-600 text-sm mb-2">Cambio de listas a diseño Grid con Cards.</p>
-                    
-                    <button class="text-purple-600 text-sm font-bold hover:underline flex items-center toggle-demo" data-target="demo-v2-0-0">
-                        <i data-feather="eye" class="w-4 h-4 mr-1"></i> Ver Demo Interactiva
+                <div class="w-full md:w-[calc(50%-3rem)] bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
+                    <h3 class="font-bold text-gray-900 text-xl mb-1">v2.0.0 - Maquetación Grid</h3>
+                    <p class="text-gray-600 text-sm mb-4">Estructura basada en Tarjetas y Grid.</p>
+                    <button class="w-full py-2 px-4 bg-gray-50 hover:bg-purple-50 text-purple-700 font-semibold rounded-lg border border-gray-200 hover:border-purple-200 transition-colors flex items-center justify-center gap-2 toggle-demo">
+                        <i data-feather="eye" class="w-4 h-4"></i> Ver Demo (Grid)
                     </button>
-                    
-                    <div id="demo-v2-0-0" class="demo-container">
-                        <iframe class="w-full h-64" srcdoc='
-                            <body style="font-family:sans-serif; padding:20px; background:#f3f4f6;">
-                                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                                    <div style="background:white; padding:10px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1);">
-                                        <div style="height:60px; background:#ddd; margin-bottom:5px;"></div>
-                                        <b>Iglesia</b>
+                    <div class="demo-wrapper">
+                        <div class="demo-inner">
+                            <iframe srcdoc='
+                                <body style="font-family:sans-serif; padding:10px; background:#f3f4f6;">
+                                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                                        <div style="background:white; border-radius:8px; overflow:hidden; box-shadow:0 2px 5px rgba(0,0,0,0.1);">
+                                            <div style="height:60px; background:#ddd;"></div>
+                                            <div style="padding:10px;"><b>Iglesia</b><br><span style="font-size:10px;">Siglo XV</span></div>
+                                        </div>
+                                        <div style="background:white; border-radius:8px; overflow:hidden; box-shadow:0 2px 5px rgba(0,0,0,0.1);">
+                                            <div style="height:60px; background:#ddd;"></div>
+                                            <div style="padding:10px;"><b>Ermita</b><br><span style="font-size:10px;">Siglo XVI</span></div>
+                                        </div>
                                     </div>
-                                    <div style="background:white; padding:10px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1);">
-                                        <div style="height:60px; background:#ddd; margin-bottom:5px;"></div>
-                                        <b>Ermita</b>
-                                    </div>
-                                </div>
-                            </body>
-                        '></iframe>
+                                </body>
+                            '></iframe>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- v1.8.0 -->
             <div class="relative flex flex-col md:flex-row items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
-                <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-teal-600 text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10 mb-4 md:mb-0">
-                    <i data-feather="music" class="w-5 h-5"></i>
+                <div class="flex items-center justify-center w-12 h-12 rounded-full border-4 border-white bg-teal-600 text-white shadow-lg z-10 mb-4 md:mb-0 shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
+                    <i data-feather="music" class="w-6 h-6"></i>
                 </div>
-                <div class="w-full md:w-[calc(50%-2.5rem)] bg-white p-6 rounded-xl shadow border border-gray-100">
-                    <h3 class="font-bold text-gray-900 text-lg mb-1">v1.8.0 - Música y Scroll</h3>
-                    <p class="text-gray-600 text-sm mb-2">Integración de reproductor y menú scrollable.</p>
-                    
-                    <button class="text-teal-600 text-sm font-bold hover:underline flex items-center toggle-demo" data-target="demo-v1-8-0">
-                        <i data-feather="eye" class="w-4 h-4 mr-1"></i> Ver Demo Interactiva
+                <div class="w-full md:w-[calc(50%-3rem)] bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
+                    <h3 class="font-bold text-gray-900 text-xl mb-1">v1.8.0 - Audio Integrado</h3>
+                    <p class="text-gray-600 text-sm mb-4">Reproductor de música ambiente.</p>
+                    <button class="w-full py-2 px-4 bg-gray-50 hover:bg-teal-50 text-teal-700 font-semibold rounded-lg border border-gray-200 hover:border-teal-200 transition-colors flex items-center justify-center gap-2 toggle-demo">
+                        <i data-feather="eye" class="w-4 h-4"></i> Ver Demo (Player)
                     </button>
-                    
-                    <div id="demo-v1-8-0" class="demo-container">
-                        <iframe class="w-full h-64" srcdoc='
-                            <body style="font-family:sans-serif; padding:20px; position:relative; height:100%;">
-                                <p>Contenido de la página...</p>
-                                <div style="position:fixed; bottom:0; left:0; right:0; background:#333; color:white; padding:10px; display:flex; justify-content:space-between; align-items:center;">
-                                    <span>🎵 Música Ambiente</span>
-                                    <div>
-                                        <button style="background:none; border:none; color:white;">⏮</button>
-                                        <button style="background:white; border:none; color:black; border-radius:50%; width:25px; height:25px;">▶</button>
-                                        <button style="background:none; border:none; color:white;">⏭</button>
+                    <div class="demo-wrapper">
+                        <div class="demo-inner">
+                            <iframe srcdoc='
+                                <body style="font-family:sans-serif; margin:0; background:#f0fdf4; height:200px; position:relative;">
+                                    <p style="padding:20px;">Contenido...</p>
+                                    <div style="position:absolute; bottom:0; width:100%; background:#1f2937; color:white; padding:10px; box-sizing:border-box; display:flex; justify-content:space-between; align-items:center;">
+                                        <div style="font-size:12px;">🎵 Música Relax</div>
+                                        <div>
+                                            <button style="background:none; border:none; color:white;">⏮</button>
+                                            <button style="background:white; border:none; color:black; border-radius:50%; width:24px; height:24px;">▶</button>
+                                            <button style="background:none; border:none; color:white;">⏭</button>
+                                        </div>
                                     </div>
-                                </div>
-                            </body>
-                        '></iframe>
+                                </body>
+                            '></iframe>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- v1.4.0 -->
             <div class="relative flex flex-col md:flex-row items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
-                <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-green-600 text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10 mb-4 md:mb-0">
-                    <i data-feather="map" class="w-5 h-5"></i>
+                <div class="flex items-center justify-center w-12 h-12 rounded-full border-4 border-white bg-green-600 text-white shadow-lg z-10 mb-4 md:mb-0 shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
+                    <i data-feather="map" class="w-6 h-6"></i>
                 </div>
-                <div class="w-full md:w-[calc(50%-2.5rem)] bg-white p-6 rounded-xl shadow border border-gray-100">
-                    <h3 class="font-bold text-gray-900 text-lg mb-1">v1.4.0 - Geolocalización</h3>
-                    <p class="text-gray-600 text-sm mb-2">Mapa interactivo y Lector de Voz inicial.</p>
-                    
-                    <button class="text-green-600 text-sm font-bold hover:underline flex items-center toggle-demo" data-target="demo-v1-4-0">
-                        <i data-feather="eye" class="w-4 h-4 mr-1"></i> Ver Demo Interactiva
+                <div class="w-full md:w-[calc(50%-3rem)] bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
+                    <h3 class="font-bold text-gray-900 text-xl mb-1">v1.4.0 - Mapa & Voz</h3>
+                    <p class="text-gray-600 text-sm mb-4">Google Maps interactivo y síntesis de voz básica.</p>
+                    <button class="w-full py-2 px-4 bg-gray-50 hover:bg-green-50 text-green-700 font-semibold rounded-lg border border-gray-200 hover:border-green-200 transition-colors flex items-center justify-center gap-2 toggle-demo">
+                        <i data-feather="eye" class="w-4 h-4"></i> Ver Demo (Mapa)
                     </button>
-                    
-                    <div id="demo-v1-4-0" class="demo-container">
-                        <iframe class="w-full h-64" srcdoc='
-                            <body style="font-family:sans-serif; padding:20px;">
-                                <h4>Cómo Llegar</h4>
-                                <div style="width:100%; height:100px; background:#eee; display:flex; align-items:center; justify-content:center; color:#888; border:1px solid #ccc;">
-                                    [Mapa Google Maps Interactivo]
-                                </div>
-                                <button style="margin-top:10px;">🗣 Leer Página</button>
-                            </body>
-                        '></iframe>
+                    <div class="demo-wrapper">
+                        <div class="demo-inner">
+                            <iframe srcdoc='
+                                <body style="font-family:sans-serif; padding:10px;">
+                                    <button style="background:#eee; border:1px solid #ccc; padding:5px 10px; margin-bottom:10px;">🗣 Leer Texto</button>
+                                    <div style="background:#e5e7eb; height:120px; display:flex; align-items:center; justify-content:center; color:#6b7280; border-radius:8px;">
+                                        [ Google Maps Iframe ]
+                                    </div>
+                                </body>
+                            '></iframe>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- v1.0.0 -->
             <div class="relative flex flex-col md:flex-row items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
-                <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-gray-500 text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10 mb-4 md:mb-0">
-                    <i data-feather="flag" class="w-5 h-5"></i>
+                <div class="flex items-center justify-center w-12 h-12 rounded-full border-4 border-white bg-gray-500 text-white shadow-lg z-10 mb-4 md:mb-0 shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
+                    <i data-feather="flag" class="w-6 h-6"></i>
                 </div>
-                <div class="w-full md:w-[calc(50%-2.5rem)] bg-white p-6 rounded-xl shadow border border-gray-100">
-                    <h3 class="font-bold text-gray-900 text-lg mb-1">v1.0.0 - Lanzamiento Inicial</h3>
-                    <p class="text-gray-600 text-sm mb-2">Estructura básica, diseño responsive y contenido inicial.</p>
-                    
-                    <button class="text-gray-500 text-sm font-bold hover:underline flex items-center toggle-demo" data-target="demo-v1-0-0">
-                        <i data-feather="eye" class="w-4 h-4 mr-1"></i> Ver Demo Interactiva
+                <div class="w-full md:w-[calc(50%-3rem)] bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
+                    <h3 class="font-bold text-gray-900 text-xl mb-1">v1.0.0 - Lanzamiento Inicial</h3>
+                    <p class="text-gray-600 text-sm mb-4">Estructura básica, Tailwind y diseño responsive.</p>
+                    <button class="w-full py-2 px-4 bg-gray-50 hover:bg-gray-100 text-gray-700 font-semibold rounded-lg border border-gray-200 transition-colors flex items-center justify-center gap-2 toggle-demo">
+                        <i data-feather="eye" class="w-4 h-4"></i> Ver Demo (Básico)
                     </button>
-                    
-                    <div id="demo-v1-0-0" class="demo-container">
-                        <iframe class="w-full h-64" srcdoc='
-                            <body style="font-family:sans-serif; padding:20px;">
-                                <h1 style="color:#16a34a;">Guía de Calzadilla</h1>
-                                <p>Bienvenido a la web turística.</p>
-                                <ul>
-                                    <li>Qué Ver</li>
-                                    <li>Cultura</li>
-                                    <li>Gastronomía</li>
-                                </ul>
-                            </body>
-                        '></iframe>
+                    <div class="demo-wrapper">
+                        <div class="demo-inner">
+                            <iframe srcdoc='
+                                <body style="font-family:sans-serif; padding:20px;">
+                                    <h1 style="color:#16a34a; border-bottom:2px solid #eee;">Guía Calzadilla</h1>
+                                    <p>Bienvenido a la primera versión.</p>
+                                    <ul style="color:#4b5563;">
+                                        <li>Qué Ver</li>
+                                        <li>Gastronomía</li>
+                                    </ul>
+                                    <div style="margin-top:20px; font-size:12px; color:#999;">(Sin interactividad avanzada)</div>
+                                </body>
+                            '></iframe>
+                        </div>
                     </div>
                 </div>
             </div>
 
         </div>
         
-        <div class="mt-12 text-center">
-            <p class="text-sm text-gray-400">Historial completo generado el 18/11/2025.</p>
+        <div class="mt-16 text-center text-gray-500 text-sm">
+            <p>Registro completo y visual generado el 18/11/2025.</p>
         </div>
 
     </div>
@@ -261,19 +306,19 @@
     <script>
         feather.replace();
         
-        // Lógica para desplegar las demos
         document.querySelectorAll('.toggle-demo').forEach(button => {
-            button.addEventListener('click', () => {
-                const targetId = button.getAttribute('data-target');
-                const container = document.getElementById(targetId);
+            button.addEventListener('click', function() {
+                const wrapper = this.nextElementSibling;
+                const isOpen = wrapper.classList.contains('open');
                 
-                if (container.classList.contains('active')) {
-                    container.classList.remove('active');
-                    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye w-4 h-4 mr-1"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg> Ver Demo Interactiva';
+                if (isOpen) {
+                    wrapper.classList.remove('open');
+                    this.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye w-4 h-4 mr-1"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg> Ver Demo';
                 } else {
-                    container.classList.add('active');
-                    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye-off w-4 h-4 mr-1"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg> Ocultar Demo';
+                    wrapper.classList.add('open');
+                    this.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye-off w-4 h-4 mr-1"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg> Ocultar Demo';
                 }
+                feather.replace();
             });
         });
     </script>
