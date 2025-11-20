@@ -11,10 +11,22 @@
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
         h1, h2, h3 { font-family: 'Playfair Display', serif; }
         
-        /* Estilos para el reproductor de música (aunque está oculto aquí, por si se activa) */
-        .music-player {
-            backdrop-filter: blur(10px);
-            background-color: rgba(28, 25, 23, 0.95);
+        /* Estilos para las demos embebidas */
+        .demo-container {
+            transition: max-height 0.5s ease-in-out, opacity 0.5s ease-in-out;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+        .demo-container.active {
+            max-height: 500px; /* Altura máxima aproximada */
+            opacity: 1;
+            margin-top: 1rem;
+        }
+        iframe {
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            background-color: white;
         }
     </style>
 </head>
@@ -25,334 +37,245 @@
         <header class="mb-12 text-center">
             <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/Escudo_de_Calzadilla_%28C%C3%A1ceres%29.svg/1173px-Escudo_de_Calzadilla_%28C%C3%A1ceres%29.svg.png" alt="Escudo" class="h-20 w-auto mx-auto mb-4 drop-shadow-md">
             <h1 class="text-4xl font-bold text-gray-900 mb-2">Registro de Cambios</h1>
-            <p class="text-gray-500">Historial completo de versiones del proyecto web "Guía de Calzadilla"</p>
+            <p class="text-gray-500">Historial completo y visual del proyecto web "Guía de Calzadilla"</p>
         </header>
 
-        <!-- Timeline: Contiene TODAS las versiones sin archivar -->
+        <!-- Timeline -->
         <div class="space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-gray-300 before:to-transparent">
 
             <!-- v2.2.5 (NUEVO - ACTUAL) -->
-            <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-                <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-indigo-600 text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
+            <div class="relative flex flex-col md:flex-row items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-indigo-600 text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10 mb-4 md:mb-0">
                     <i data-feather="check-circle" class="w-5 h-5"></i>
                 </div>
-                <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+                <div class="w-full md:w-[calc(50%-2.5rem)] bg-white p-6 rounded-xl shadow-lg border border-gray-100">
                     <div class="flex items-center justify-between mb-2">
                         <h3 class="font-bold text-gray-900 text-lg">v2.2.5 - Corrección Accesibilidad</h3>
                         <span class="text-xs font-bold bg-indigo-600 text-white px-2 py-1 rounded">Estable</span>
                     </div>
-                    <p class="text-gray-600 text-sm mb-4">Reparación completa de la lógica de las herramientas de asistencia.</p>
-                    <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
-                        <li><strong>Funcionalidad:</strong> Corregida la lógica de "Leer Página" (Web Speech API) y "Guía de Lectura" que no respondían.</li>
-                        <li><strong>Estabilidad:</strong> Eliminación de código residual y optimización de eventos JS.</li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- v2.2.4 -->
-             <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
-                <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-blue-600 text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
-                    <i data-feather="tool" class="w-5 h-5"></i>
-                </div>
-                <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white p-6 rounded-xl shadow border border-gray-100 opacity-90 hover:opacity-100 transition-opacity">
-                     <div class="flex items-center justify-between mb-2">
-                        <h3 class="font-bold text-gray-900 text-lg">v2.2.4 - Corrección Accesibilidad (Iteración)</h3>
-                        <span class="text-xs font-bold bg-blue-600 text-white px-2 py-1 rounded">Hotfix</span>
+                    <p class="text-gray-600 text-sm mb-4">Reparación completa de la lógica de las herramientas de asistencia (Voz y Guía).</p>
+                    
+                    <button class="text-indigo-600 text-sm font-bold hover:underline flex items-center toggle-demo" data-target="demo-v2-2-5">
+                        <i data-feather="eye" class="w-4 h-4 mr-1"></i> Ver Demo Interactiva
+                    </button>
+                    
+                    <div id="demo-v2-2-5" class="demo-container">
+                        <iframe class="w-full h-64" srcdoc='
+                            <body style="font-family:sans-serif; padding:20px; text-align:center;">
+                                <h2 style="color:#4f46e5;">Versión v2.2.5</h2>
+                                <p>Correcciones finales aplicadas.</p>
+                                <button style="background:#4f46e5; color:white; border:none; padding:8px 16px; border-radius:4px; margin-top:10px;">🔊 Leer Página (Funcional)</button>
+                                <div style="margin-top:20px; height:2px; background:blue; opacity:0.5;">(Guía de lectura visible)</div>
+                            </body>
+                        '></iframe>
                     </div>
-                     <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
-                         <li><strong>Funcionalidad:</strong> Corrección parcial de la lógica de "Leer Página".</li>
-                         <li><strong>UI:</strong> Ajustes menores en el menú de accesibilidad.</li>
-                     </ul>
                 </div>
             </div>
 
             <!-- v2.2.3 -->
-            <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
-                <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-blue-500 text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
+            <div class="relative flex flex-col md:flex-row items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
+                <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-blue-500 text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10 mb-4 md:mb-0">
                     <i data-feather="download" class="w-5 h-5"></i>
                 </div>
-                <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white p-6 rounded-xl shadow border border-gray-100 opacity-90 hover:opacity-100 transition-opacity">
+                <div class="w-full md:w-[calc(50%-2.5rem)] bg-white p-6 rounded-xl shadow border border-gray-100">
                     <h3 class="font-bold text-gray-900 text-lg mb-1">v2.2.3 - Exportación de Datos</h3>
-                    <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
-                        <li><strong>Formulario Inteligente:</strong> Al enviar una consulta, ahora se muestra un resumen JSON exportable.</li>
-                        <li><strong>Utilidades:</strong> Botones para copiar datos al portapapeles o abrir cliente de correo.</li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- v2.2.2 -->
-            <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
-                <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-orange-500 text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
-                    <i data-feather="trash-2" class="w-5 h-5"></i>
-                </div>
-                <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white p-6 rounded-xl shadow border border-gray-100 opacity-90 hover:opacity-100 transition-opacity">
-                    <h3 class="font-bold text-gray-900 text-lg mb-1">v2.2.2 - Limpieza de Código</h3>
-                    <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
-                        <li><strong>Simplificación:</strong> Eliminada la función de "Cursor Grande" para aligerar la experiencia de usuario.</li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- v2.2.1 -->
-            <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
-                <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-red-600 text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
-                    <i data-feather="tool" class="w-5 h-5"></i>
-                </div>
-                <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white p-6 rounded-xl shadow border border-gray-100 opacity-90 hover:opacity-100 transition-opacity">
-                    <h3 class="font-bold text-gray-900 text-lg mb-1">v2.2.1 - Hotfix de Diseño</h3>
-                    <span class="text-xs text-red-600 font-bold mb-3 block">Correcciones Urgentes</span>
-                    <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
-                        <li><strong>Modo Oscuro:</strong> Arreglados conflictos de CSS con `!important` para una visualización perfecta.</li>
-                        <li><strong>Overlap Hero:</strong> Corregido el solapamiento del texto "Turismo Rural" con el menú fijo.</li>
-                        <li><strong>JS Fix:</strong> Añadida comprobación de nulidad en `toggleClass` y botones de audio.</li>
-                    </ul>
+                    <p class="text-gray-600 text-sm mb-2">Formulario inteligente con capacidad de exportación JSON/Email.</p>
+                    
+                    <button class="text-blue-600 text-sm font-bold hover:underline flex items-center toggle-demo" data-target="demo-v2-2-3">
+                        <i data-feather="eye" class="w-4 h-4 mr-1"></i> Ver Demo Interactiva
+                    </button>
+                    
+                    <div id="demo-v2-2-3" class="demo-container">
+                        <iframe class="w-full h-64" srcdoc='
+                            <body style="font-family:sans-serif; padding:20px;">
+                                <h3 style="color:#2563eb;">Contacta</h3>
+                                <input type="text" placeholder="Nombre" style="display:block; width:100%; margin-bottom:10px; padding:5px;">
+                                <button style="background:#2563eb; color:white; border:none; padding:8px 16px; border-radius:4px;">Enviar Consulta</button>
+                                <div style="margin-top:10px; padding:10px; background:#f3f4f6; font-family:monospace; font-size:10px;">
+                                    { "status": "export_ready", "data": { ... } }
+                                </div>
+                            </body>
+                        '></iframe>
+                    </div>
                 </div>
             </div>
 
             <!-- v2.2.0 -->
-            <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
-                <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-gray-900 text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
+            <div class="relative flex flex-col md:flex-row items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
+                <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-gray-900 text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10 mb-4 md:mb-0">
                     <i data-feather="star" class="w-5 h-5"></i>
                 </div>
-                <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white p-6 rounded-xl shadow border border-gray-100 opacity-90 hover:opacity-100 transition-opacity">
+                <div class="w-full md:w-[calc(50%-2.5rem)] bg-white p-6 rounded-xl shadow border border-gray-100">
                     <h3 class="font-bold text-gray-900 text-lg mb-1">v2.2.0 - Edición Premium</h3>
-                    <span class="text-xs text-gray-900 font-bold mb-3 block">Rediseño Total</span>
-                    <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
-                        <li><strong>Tipografía:</strong> Inclusión de 'Playfair Display' para títulos elegantes.</li>
-                        <li><strong>Glassmorphism:</strong> Cabecera y reproductor con efecto translúcido.</li>
-                        <li><strong>Animaciones:</strong> Implementado efecto "Scroll Reveal" para aparición de elementos.</li>
-                        <li><strong>Hero:</strong> Nueva portada cinematográfica a pantalla completa.</li>
-                    </ul>
+                    <span class="text-xs text-gray-900 font-bold mb-3 block">Rediseño Total (Playfair Display & Glass)</span>
+                    
+                    <button class="text-gray-900 text-sm font-bold hover:underline flex items-center toggle-demo" data-target="demo-v2-2-0">
+                        <i data-feather="eye" class="w-4 h-4 mr-1"></i> Ver Demo Interactiva
+                    </button>
+                    
+                    <div id="demo-v2-2-0" class="demo-container">
+                        <iframe class="w-full h-64" srcdoc='
+                            <head><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap" rel="stylesheet"></head>
+                            <body style="font-family:sans-serif; padding:0; margin:0;">
+                                <div style="background:#1f2937; color:white; padding:15px; text-align:center; font-family:Playfair Display, serif;">
+                                    CALZADILLA
+                                    <div style="font-size:10px; font-family:sans-serif; margin-top:5px;">TURISMO RURAL AUTÉNTICO</div>
+                                </div>
+                                <div style="padding:20px; text-align:center;">
+                                    <h3 style="font-family:Playfair Display, serif;">Descubre el Alma de la Dehesa</h3>
+                                    <button style="background:#16a34a; color:white; border:none; padding:10px 20px; border-radius:20px; margin-top:10px;">Explorar</button>
+                                </div>
+                            </body>
+                        '></iframe>
+                    </div>
                 </div>
             </div>
             
-             <!-- v2.1.3 -->
-            <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
-                <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-green-700 text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
-                    <i data-feather="scissors" class="w-5 h-5"></i>
-                </div>
-                <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white p-6 rounded-xl shadow border border-gray-100 opacity-80 hover:opacity-100 transition-opacity">
-                    <h3 class="font-bold text-gray-900 text-lg mb-1">v2.1.3 - Eliminación de Enlace</h3>
-                    <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
-                        <li><strong>Chozos de Pastor:</strong> Eliminado el enlace "Ver ruta de senderismo" de la sección Chozos para simplificar el contenido.</li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- v2.1.2 -->
-            <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
-                <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-blue-600 text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
-                    <i data-feather="minus-circle" class="w-5 h-5"></i>
-                </div>
-                <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white p-6 rounded-xl shadow border border-gray-100 opacity-80 hover:opacity-100 transition-opacity">
-                    <div class="flex items-center justify-between mb-2">
-                        <h3 class="font-bold text-gray-900 text-lg">v2.1.2 - Limpieza de UI (Hero)</h3>
-                        <span class="text-xs font-bold bg-blue-600 text-white px-2 py-1 rounded">Ajuste</span>
-                    </div>
-                    <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
-                        <li><strong>Hero Limpio:</strong> Eliminados los botones de acción "Explorar" y "Web Oficial" de la portada.</li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- v2.1.1 -->
-            <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
-                <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-red-600 text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
-                    <i data-feather="tool" class="w-5 h-5"></i>
-                </div>
-                <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white p-6 rounded-xl shadow border border-gray-100 opacity-80 hover:opacity-100 transition-opacity">
-                    <h3 class="font-bold text-gray-900 text-lg mb-1">v2.1.1 - Correcciones Urgentes</h3>
-                    <span class="text-xs text-red-600 font-bold mb-3 block">Hotfix</span>
-                    <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
-                        <li><strong>Dark Mode:</strong> Arreglado conflicto de CSS que impedía que el modo oscuro se viera correctamente en tarjetas y fondo.</li>
-                        <li><strong>Overlap Hero:</strong> Corregido el solapamiento del texto "Turismo Rural" con el menú fijo.</li>
-                        <li><strong>JS Fix:</strong> Añadida comprobación de nulidad en `toggleClass` y botones de audio.</li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- v2.1.0 -->
-            <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
-                <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-gray-900 text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
-                    <i data-feather="star" class="w-5 h-5"></i>
-                </div>
-                <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white p-6 rounded-xl shadow border border-gray-100 opacity-90 hover:opacity-100 transition-opacity">
-                    <h3 class="font-bold text-gray-900 text-lg mb-1">v2.1.0 - Edición Premium (Inicial)</h3>
-                    <span class="text-xs text-gray-900 font-bold mb-3 block">Rediseño Total</span>
-                    <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
-                        <li><strong>Tipografía:</strong> Inclusión de 'Playfair Display' para títulos elegantes.</li>
-                        <li><strong>Glassmorphism:</strong> Cabecera y reproductor con efecto translúcido.</li>
-                        <li><strong>Animaciones:</strong> Implementado efecto "Scroll Reveal" para aparición de elementos.</li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- v2.0.0 (Maquetación en Cards) -->
-            <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
-                <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-purple-600 text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
+            <!-- v2.0.0 -->
+            <div class="relative flex flex-col md:flex-row items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
+                <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-purple-600 text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10 mb-4 md:mb-0">
                     <i data-feather="layout" class="w-5 h-5"></i>
                 </div>
-                <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white p-6 rounded-xl shadow border border-gray-100 opacity-90 hover:opacity-100 transition-opacity">
+                <div class="w-full md:w-[calc(50%-2.5rem)] bg-white p-6 rounded-xl shadow border border-gray-100">
                     <h3 class="font-bold text-gray-900 text-lg mb-1">v2.0.0 - Estructura en Tarjetas</h3>
-                    <span class="text-xs text-purple-600 font-bold mb-3 block">Maquetación</span>
-                    <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
-                        <li>Paso a un diseño basado en Cards (Tarjetas) y Grid (Rejillas).</li>
-                        <li>Efectos hover en tarjetas y uso de iconos para Gastronomía.</li>
-                    </ul>
+                    <p class="text-gray-600 text-sm mb-2">Cambio de listas a diseño Grid con Cards.</p>
+                    
+                    <button class="text-purple-600 text-sm font-bold hover:underline flex items-center toggle-demo" data-target="demo-v2-0-0">
+                        <i data-feather="eye" class="w-4 h-4 mr-1"></i> Ver Demo Interactiva
+                    </button>
+                    
+                    <div id="demo-v2-0-0" class="demo-container">
+                        <iframe class="w-full h-64" srcdoc='
+                            <body style="font-family:sans-serif; padding:20px; background:#f3f4f6;">
+                                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                                    <div style="background:white; padding:10px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1);">
+                                        <div style="height:60px; background:#ddd; margin-bottom:5px;"></div>
+                                        <b>Iglesia</b>
+                                    </div>
+                                    <div style="background:white; padding:10px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1);">
+                                        <div style="height:60px; background:#ddd; margin-bottom:5px;"></div>
+                                        <b>Ermita</b>
+                                    </div>
+                                </div>
+                            </body>
+                        '></iframe>
+                    </div>
                 </div>
             </div>
 
-            <!-- v1.9.0 (Funcionalidades) -->
-            <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
-                <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-green-600 text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
-                    <i data-feather="plus-circle" class="w-5 h-5"></i>
-                </div>
-                <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white p-6 rounded-xl shadow border border-gray-100 opacity-90 hover:opacity-100 transition-opacity">
-                    <h3 class="font-bold text-gray-900 text-lg mb-1">v1.9.0 - Contenido y Widgets</h3>
-                    <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
-                        <li>Añadido widget del Clima (simulado).</li>
-                        <li>Incluido un Formulario de Contacto.</li>
-                        <li>Añadidos iconos de Redes Sociales en el footer.</li>
-                    </ul>
-                </div>
-            </div>
-            
-            <!-- v1.8.0 (Música y Usabilidad) -->
-            <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
-                <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-teal-600 text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
+            <!-- v1.8.0 -->
+            <div class="relative flex flex-col md:flex-row items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
+                <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-teal-600 text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10 mb-4 md:mb-0">
                     <i data-feather="music" class="w-5 h-5"></i>
                 </div>
-                <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white p-6 rounded-xl shadow border border-gray-100 opacity-90 hover:opacity-100 transition-opacity">
+                <div class="w-full md:w-[calc(50%-2.5rem)] bg-white p-6 rounded-xl shadow border border-gray-100">
                     <h3 class="font-bold text-gray-900 text-lg mb-1">v1.8.0 - Música y Scroll</h3>
-                    <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
-                        <li>Integración de Reproductor de Música (Play/Pause, Siguiente) con canciones tranquilas.</li>
-                        <li>Menú de Accesibilidad ahora es scrollable.</li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- v1.7.0 (Escudo y Feedback) -->
-            <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
-                <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-blue-500 text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
-                    <i data-feather="check-circle" class="w-5 h-5"></i>
-                </div>
-                <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white p-6 rounded-xl shadow border border-gray-100 opacity-90 hover:opacity-100 transition-opacity">
-                    <h3 class="font-bold text-gray-900 text-lg mb-1">v1.7.0 - Feedback Visual</h3>
-                    <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
-                        <li>Implementación del marcado visual para las opciones de accesibilidad activas.</li>
-                        <li>Actualización del Escudo Oficial de Calzadilla.</li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- v1.6.0 -->
-            <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
-                <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-green-600 text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
-                    <i data-feather="mouse-pointer" class="w-5 h-5"></i>
-                </div>
-                <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white p-6 rounded-xl shadow border border-gray-100 opacity-90 hover:opacity-100 transition-opacity">
-                    <h3 class="font-bold text-gray-900 text-lg mb-1">v1.6.0 - Herramientas de Enfoque</h3>
-                    <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
-                        <li>**[ACCESIBILIDAD] Cursor Grande:** Añadida la opción para activar un cursor personalizado grande.</li>
-                        <li>**[ACCESIBILIDAD] Resaltar Títulos:** Añadida la opción para destacar todos los títulos.</li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- v1.5.0 -->
-            <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
-                <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-green-600 text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
-                    <i data-feather="image" class="w-5 h-5"></i>
-                </div>
-                <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white p-6 rounded-xl shadow border border-gray-100 opacity-90 hover:opacity-100 transition-opacity">
-                    <h3 class="font-bold text-gray-900 text-lg mb-1">v1.5.0 - Lightbox y Animaciones</h3>
-                    <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
-                        <li>**[FUNCIONALIDAD] Lightbox:** Implementación de visor de pantalla completa para imágenes.</li>
-                        <li>**[ANIMACIÓN]** Efectos de fade-in y zoom al abrir imágenes.</li>
-                    </ul>
+                    <p class="text-gray-600 text-sm mb-2">Integración de reproductor y menú scrollable.</p>
+                    
+                    <button class="text-teal-600 text-sm font-bold hover:underline flex items-center toggle-demo" data-target="demo-v1-8-0">
+                        <i data-feather="eye" class="w-4 h-4 mr-1"></i> Ver Demo Interactiva
+                    </button>
+                    
+                    <div id="demo-v1-8-0" class="demo-container">
+                        <iframe class="w-full h-64" srcdoc='
+                            <body style="font-family:sans-serif; padding:20px; position:relative; height:100%;">
+                                <p>Contenido de la página...</p>
+                                <div style="position:fixed; bottom:0; left:0; right:0; background:#333; color:white; padding:10px; display:flex; justify-content:space-between; align-items:center;">
+                                    <span>🎵 Música Ambiente</span>
+                                    <div>
+                                        <button style="background:none; border:none; color:white;">⏮</button>
+                                        <button style="background:white; border:none; color:black; border-radius:50%; width:25px; height:25px;">▶</button>
+                                        <button style="background:none; border:none; color:white;">⏭</button>
+                                    </div>
+                                </div>
+                            </body>
+                        '></iframe>
+                    </div>
                 </div>
             </div>
 
             <!-- v1.4.0 -->
-            <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
-                <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-green-600 text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
+            <div class="relative flex flex-col md:flex-row items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
+                <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-green-600 text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10 mb-4 md:mb-0">
                     <i data-feather="map" class="w-5 h-5"></i>
                 </div>
-                <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white p-6 rounded-xl shadow border border-gray-100 opacity-90 hover:opacity-100 transition-opacity">
-                    <h3 class="font-bold text-gray-900 text-lg mb-1">v1.4.0 - Geolocalización y Voz</h3>
-                    <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
-                        <li>**[MAPA] Interactivo:** Integración de Google Maps.</li>
-                        <li>**[ACCESIBILIDAD] Voz:** Añadida opción "Leer Página" (Speech Synthesis).</li>
-                        <li>**[CONTENIDO] Eventos:** Sección "Próximos Eventos" en la barra lateral.</li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- v1.3.0 -->
-            <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
-                <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-green-600 text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
-                    <i data-feather="arrow-up-circle" class="w-5 h-5"></i>
-                </div>
-                <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white p-6 rounded-xl shadow border border-gray-100 opacity-90 hover:opacity-100 transition-opacity">
-                    <h3 class="font-bold text-gray-900 text-lg mb-1">v1.3.0 - Usabilidad y Contenido</h3>
-                    <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
-                        <li>**[DISEÑO]** Añadido Escudo de Calzadilla.</li>
-                        <li>**[USABILIDAD]** Botón flotante "Volver Arriba".</li>
-                        <li>**[CONTENIDO]** Secciones "Cómo Llegar" y "Enlaces Útiles".</li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- v1.2.0 -->
-            <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
-                <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-green-600 text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
-                    <i data-feather="moon" class="w-5 h-5"></i>
-                </div>
-                <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white p-6 rounded-xl shadow border border-gray-100 opacity-90 hover:opacity-100 transition-opacity">
-                    <h3 class="font-bold text-gray-900 text-lg mb-1">v1.2.0 - Modos de Color</h3>
-                    <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
-                        <li>**[ACCESIBILIDAD]** Modo Oscuro y Contraste de Enlaces.</li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- v1.1.0 -->
-            <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
-                <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-green-600 text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
-                    <i data-feather="sliders" class="w-5 h-5"></i>
-                </div>
-                <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white p-6 rounded-xl shadow border border-gray-100 opacity-90 hover:opacity-100 transition-opacity">
-                    <h3 class="font-bold text-gray-900 text-lg mb-1">v1.1.0 - Accesibilidad Avanzada</h3>
-                    <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
-                        <li>**[ACCESIBILIDAD]** Menú desplegable con múltiples opciones (Escala de Grises, Fuente Legible, etc.).</li>
-                        <li>**[FUNCIONALIDAD]** Botón "Restablecer Ajustes".</li>
-                    </ul>
+                <div class="w-full md:w-[calc(50%-2.5rem)] bg-white p-6 rounded-xl shadow border border-gray-100">
+                    <h3 class="font-bold text-gray-900 text-lg mb-1">v1.4.0 - Geolocalización</h3>
+                    <p class="text-gray-600 text-sm mb-2">Mapa interactivo y Lector de Voz inicial.</p>
+                    
+                    <button class="text-green-600 text-sm font-bold hover:underline flex items-center toggle-demo" data-target="demo-v1-4-0">
+                        <i data-feather="eye" class="w-4 h-4 mr-1"></i> Ver Demo Interactiva
+                    </button>
+                    
+                    <div id="demo-v1-4-0" class="demo-container">
+                        <iframe class="w-full h-64" srcdoc='
+                            <body style="font-family:sans-serif; padding:20px;">
+                                <h4>Cómo Llegar</h4>
+                                <div style="width:100%; height:100px; background:#eee; display:flex; align-items:center; justify-content:center; color:#888; border:1px solid #ccc;">
+                                    [Mapa Google Maps Interactivo]
+                                </div>
+                                <button style="margin-top:10px;">🗣 Leer Página</button>
+                            </body>
+                        '></iframe>
+                    </div>
                 </div>
             </div>
 
             <!-- v1.0.0 -->
-            <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
-                <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-green-600 text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
+            <div class="relative flex flex-col md:flex-row items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
+                <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-gray-500 text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10 mb-4 md:mb-0">
                     <i data-feather="flag" class="w-5 h-5"></i>
                 </div>
-                <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white p-6 rounded-xl shadow border border-gray-100 opacity-90 hover:opacity-100 transition-opacity">
+                <div class="w-full md:w-[calc(50%-2.5rem)] bg-white p-6 rounded-xl shadow border border-gray-100">
                     <h3 class="font-bold text-gray-900 text-lg mb-1">v1.0.0 - Lanzamiento Inicial</h3>
-                    <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
-                        <li>**[BASE]** Creación de la guía web con Tailwind CSS.</li>
-                        <li>**[DISEÑO]** Responsive y multiplataforma.</li>
-                        <li>**[CONTENIDO]** Secciones iniciales: Qué Ver, Cultura, Gastronomía.</li>
-                    </ul>
+                    <p class="text-gray-600 text-sm mb-2">Estructura básica, diseño responsive y contenido inicial.</p>
+                    
+                    <button class="text-gray-500 text-sm font-bold hover:underline flex items-center toggle-demo" data-target="demo-v1-0-0">
+                        <i data-feather="eye" class="w-4 h-4 mr-1"></i> Ver Demo Interactiva
+                    </button>
+                    
+                    <div id="demo-v1-0-0" class="demo-container">
+                        <iframe class="w-full h-64" srcdoc='
+                            <body style="font-family:sans-serif; padding:20px;">
+                                <h1 style="color:#16a34a;">Guía de Calzadilla</h1>
+                                <p>Bienvenido a la web turística.</p>
+                                <ul>
+                                    <li>Qué Ver</li>
+                                    <li>Cultura</li>
+                                    <li>Gastronomía</li>
+                                </ul>
+                            </body>
+                        '></iframe>
+                    </div>
                 </div>
             </div>
 
         </div>
         
         <div class="mt-12 text-center">
-            <p class="text-sm text-gray-400">Registro completo de versiones (v1.0.0 - v2.2.5).</p>
+            <p class="text-sm text-gray-400">Historial completo generado el 18/11/2025.</p>
         </div>
 
     </div>
 
-    <script>feather.replace()</script>
+    <script>
+        feather.replace();
+        
+        // Lógica para desplegar las demos
+        document.querySelectorAll('.toggle-demo').forEach(button => {
+            button.addEventListener('click', () => {
+                const targetId = button.getAttribute('data-target');
+                const container = document.getElementById(targetId);
+                
+                if (container.classList.contains('active')) {
+                    container.classList.remove('active');
+                    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye w-4 h-4 mr-1"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg> Ver Demo Interactiva';
+                } else {
+                    container.classList.add('active');
+                    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye-off w-4 h-4 mr-1"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg> Ocultar Demo';
+                }
+            });
+        });
+    </script>
 </body>
 </html>
