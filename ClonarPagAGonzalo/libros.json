@@ -1,0 +1,92 @@
+[
+  {
+    "titulo": "Por si un día volvemos",
+    "autor": "María Dueñas",
+    "isbn": "9788408285584", 
+    "img_fallback": "https://imagessl2.casadellibro.com/a/l/t5/84/9788408285584.jpg"
+  },
+  {
+    "titulo": "La Última Huella",
+    "autor": "Maria Nieto",
+    "isbn": "9788419649238",
+    "img_fallback": "https://m.media-amazon.com/images/I/81xXy+s2+IL._AC_UF1000,1000_QL80_.jpg"
+  },
+  {
+    "titulo": "Rey de la Ira",
+    "autor": "Ana Huang",
+    "isbn": "9788408282736",
+    "img_fallback": "https://covers.openlibrary.org/b/isbn/9788408282736-L.jpg"
+  },
+  {
+    "titulo": "La Protegida",
+    "autor": "Rafael Tarradas Bultó",
+    "isbn": "9788467069750",
+    "img_fallback": "https://imagessl6.casadellibro.com/a/l/t5/50/9788467069750.jpg"
+  },
+  {
+    "titulo": "Perturbación",
+    "autor": "Rosa Blasco",
+    "isbn": "9788419167343",
+    "img_fallback": "https://m.media-amazon.com/images/I/81PjT-H+S+L._AC_UF894,1000_QL80_.jpg"
+  },
+  {
+    "titulo": "Corazón de Oro",
+    "autor": "Luz Gabás",
+    "isbn": "9788408280664",
+    "img_fallback": "https://imagessl9.casadellibro.com/a/l/t5/64/9788408280664.jpg"
+  },
+  {
+    "titulo": "La Saga de los Longevos",
+    "autor": "Eva García Sáenz de Urturi",
+    "isbn": "9788408253682",
+    "img_fallback": "https://imagessl0.casadellibro.com/a/l/t5/82/9788408253682.jpg"
+  },
+  {
+    "titulo": "El lejano país de los estanques",
+    "autor": "Lorenzo Silva",
+    "isbn": "9788423358829",
+    "img_fallback": "https://imagessl8.casadellibro.com/a/l/t5/29/9788423358829.jpg"
+  },
+  {
+    "titulo": "Mi Querida Lucía",
+    "autor": "La Vecina Rubia",
+    "isbn": "9788419651002",
+    "img_fallback": "https://m.media-amazon.com/images/I/81+mC0O7GCL._AC_UF894,1000_QL80_.jpg"
+  },
+  {
+    "titulo": "Carcoma",
+    "autor": "Layla Martínez",
+    "isbn": "9788418929003",
+    "img_fallback": "https://imagessl4.casadellibro.com/a/l/t5/03/9788418929003.jpg"
+  },
+  {
+    "titulo": "Mil cosas",
+    "autor": "Juan Tallón",
+    "isbn": "9788433999449",
+    "img_fallback": "https://imagessl9.casadellibro.com/a/l/t5/49/9788433999449.jpg"
+  },
+  {
+    "titulo": "Guía del club de lectura para matar vampiros",
+    "autor": "Grady Hendrix",
+    "isbn": "9788445009419",
+    "img_fallback": "https://imagessl0.casadellibro.com/a/l/t5/19/9788445009419.jpg"
+  },
+  {
+    "titulo": "Reina Roja",
+    "autor": "Juan Gómez-Jurado",
+    "isbn": "9788466664416",
+    "img_fallback": "https://imagessl6.casadellibro.com/a/l/t5/16/9788466664416.jpg"
+  },
+  {
+    "titulo": "El Cuco de Cristal",
+    "autor": "Javier Castillo",
+    "isbn": "9788491295700",
+    "img_fallback": "https://imagessl0.casadellibro.com/a/l/t5/00/9788491295700.jpg"
+  },
+  {
+    "titulo": "Todo arde",
+    "autor": "Juan Gómez-Jurado",
+    "isbn": "9788466675755",
+    "img_fallback": "https://imagessl5.casadellibro.com/a/l/t5/55/9788466675755.jpg"
+  }
+]

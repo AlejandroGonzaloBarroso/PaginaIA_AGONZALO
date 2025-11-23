@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audiolibros para todos - Clon</title>
+    <!-- Usamos Tailwind CSS para el estilizado rápido y responsivo -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Fuentes personalizadas para simular el estilo de la app */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #121212; /* Fondo oscuro base */
+            overflow-x: hidden;
+        }
+
+        /* Clase para el grid de libros inclinado o estático */
+        .book-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* 3 columnas en móvil */
+            gap: 8px;
+            opacity: 0.6; /* Un poco oscurecido para que resalte el texto */
+        }
+
+        @media (min-width: 768px) {
+            .book-grid {
+                grid-template-columns: repeat(5, 1fr); /* 5 columnas en tablet/desktop */
+                gap: 12px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .book-grid {
+                grid-template-columns: repeat(7, 1fr); /* 7 columnas en pantallas grandes */
+            }
+        }
+
+        /* Gradiente superpuesto (Overlay) - CRUCIAL para el diseño */
+        .overlay-gradient {
+            background: linear-gradient(
+                to bottom,
+                rgba(18, 18, 18, 0.2) 0%,
+                rgba(18, 18, 18, 0.6) 40%,
+                rgba(18, 18, 18, 1) 85%
+            );
+            position: absolute;
+            inset: 0;
+            z-index: 10;
+            pointer-events: none; /* Permite clicks a través del gradiente si fuera necesario */
+        }
+
+        /* Estilo de las portadas */
+        .book-cover {
+            width: 100%;
+            aspect-ratio: 2/3;
+            object-fit: cover;
+            border-radius: 2px;
+            transition: transform 0.3s ease;
+            background-color: #333; /* Placeholder color */
+        }
+        
+        /* Animación suave al cargar */
+        .fade-in {
+            animation: fadeIn 1s ease-in forwards;
+            opacity: 0;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 0.6; }
+        }
+
+        /* Color exacto del texto naranja */
+        .text-brand-orange {
+            color: #FF5A45; 
+        }
+    </style>
+</head>
+<body class="relative min-h-screen w-full overflow-hidden text-white">
+
+    <!-- 1. Fondo de Libros (Generado por JS) -->
+    <div id="grid-container" class="absolute inset-0 z-0 book-grid p-2 fade-in">
+        <!-- Los libros se insertarán aquí -->
+    </div>
+
+    <!-- 2. Capa de Oscurecimiento (Gradiente) -->
+    <div class="overlay-gradient"></div>
+
+    <!-- 3. Interfaz de Usuario (UI) -->
+    <div class="relative z-20 flex flex-col h-screen justify-between p-6 md:p-10">
+        
+        <!-- Header: Botón Entrar -->
+        <header class="flex justify-end w-full">
+            <button class="bg-white text-black font-bold py-2 px-6 rounded-full text-sm md:text-base hover:bg-gray-200 transition shadow-lg">
+                Entrar
+            </button>
+        </header>
+
+        <!-- Contenido Central/Inferior -->
+        <main class="flex flex-col items-center text-center mb-8 md:mb-16 max-w-2xl mx-auto w-full">
+            
+            <!-- Título Principal -->
+            <h1 class="text-4xl md:text-6xl font-extrabold mb-4 leading-tight text-brand-orange drop-shadow-lg">
+                Audiolibros<br>para todos
+            </h1>
+
+            <!-- Subtítulo -->
+            <p class="text-white text-base md:text-xl font-medium mb-8 md:mb-10 px-4 leading-relaxed opacity-90">
+                500.000+ historias más vendidas y originales. Cancela en cualquier momento.
+            </p>
+
+            <!-- Botones de Acción -->
+            <div class="w-full flex flex-col items-center gap-5">
+                <!-- Botón Principal -->
+                <button class="bg-white text-black font-bold py-4 px-8 rounded-full w-full max-w-xs md:max-w-sm text-lg shadow-xl hover:scale-105 transition transform duration-200">
+                    Crear una cuenta
+                </button>
+
+                <!-- Enlace Secundario -->
+                <button class="text-white font-bold text-base hover:underline tracking-wide">
+                    Explorar la app
+                </button>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- 4. Lógica JavaScript y Base de Datos JSON -->
+    <script>
+        // REFERENCIA A LA BASE DE DATOS EXTERNA
+        // El archivo 'libros.json' debe estar en la misma carpeta que este HTML.
+        const JSON_FILE = 'libros.json';
+
+        const container = document.getElementById('grid-container');
+
+        // Función para obtener URL de imagen (OpenLibrary o Fallback)
+        function getCoverUrl(book) {
+            // Intentamos usar la imagen directa primero si la definimos manual
+            if (book.img_fallback) return book.img_fallback;
+            // Si tiene ISBN, intentamos OpenLibrary
+            if (book.isbn) return `https://covers.openlibrary.org/b/isbn/${book.isbn}-L.jpg`;
+            // Fallback genérico
+            return `https://via.placeholder.com/300x450/333/fff?text=${encodeURIComponent(book.titulo)}`;
+        }
+
+        // Función principal para pintar los libros en pantalla
+        function renderBooks(booksData) {
+            container.innerHTML = ''; // Limpiar
+            
+            // Duplicamos el array varias veces para llenar la pantalla (efecto muro infinito)
+            let displayList = [...booksData, ...booksData, ...booksData];
+            
+            // Barajar aleatoriamente
+            displayList.sort(() => Math.random() - 0.5);
+
+            displayList.forEach(book => {
+                const img = document.createElement('img');
+                img.src = getCoverUrl(book);
+                img.alt = `${book.titulo} de ${book.autor}`;
+                img.className = 'book-cover hover:scale-105 hover:z-10 cursor-pointer shadow-md';
+                
+                // Manejo de error si la imagen no carga
+                img.onerror = function() { 
+                    this.src = `https://via.placeholder.com/300x450/222/888?text=${book.titulo.substring(0,10)}...`; 
+                };
+                
+                container.appendChild(img);
+            });
+        }
+
+        // Función asíncrona para cargar el JSON
+        async function init() {
+            try {
+                // Hacemos la petición al archivo JSON local
+                const response = await fetch(JSON_FILE);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                // Convertimos la respuesta a objeto JavaScript
+                const databaseLibros = await response.json();
+                
+                // Renderizamos con los datos cargados
+                renderBooks(databaseLibros);
+                
+                console.log("Base de datos cargada correctamente:", databaseLibros.length + " libros.");
+
+            } catch (error) {
+                console.error("Error cargando la base de datos JSON:", error);
+                container.innerHTML = `<div class="col-span-full text-center text-gray-500 mt-10">
+                    <p>No se pudo cargar la base de datos de libros (libros.json).</p>
+                    <p class="text-xs mt-2">Nota: Si estás abriendo esto localmente, asegúrate de usar un servidor local debido a las políticas de seguridad CORS del navegador.</p>
+                </div>`;
+            }
+        }
+
+        // Iniciar al cargar la ventana
+        window.onload = init;
+        
+        // Re-renderizar si cambia mucho el tamaño (opcional, requeriría guardar los datos en variable global)
+        // Para simplificar, en esta versión conectada recargamos solo al inicio.
+
+    </script>
+</body>
+</html>
