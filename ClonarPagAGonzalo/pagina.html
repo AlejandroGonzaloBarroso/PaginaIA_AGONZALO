@@ -1,0 +1,2327 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Audiolibros App</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* --- RESET & BASE --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #121212;
+            color: white;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* --- UTILIDADES --- */
+        .hidden {
+            display: none !important;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        :root {
+            --orange: #FF4F30;
+            --bg-dark: #121212;
+            --bg-card: #1F1F1F;
+            --glass: rgba(30, 30, 30, 0.8);
+        }
+
+        /* Botones */
+        .btn-primary {
+            background: white;
+            color: black;
+            width: 100%;
+            padding: 16px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 1rem;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.1s, background 0.2s;
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .btn-orange {
+            background: var(--orange);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 79, 48, 0.3);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: white;
+            border: 1px solid #555;
+            width: 100%;
+            padding: 16px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .btn-outline:active {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .btn-text {
+            background: transparent;
+            color: #ddd;
+            border: none;
+            font-weight: 600;
+            text-decoration: none;
+            padding: 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        /* --- LAYOUT SPA --- */
+        .app-container {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            z-index: 20;
+        }
+
+        .scroll-area {
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 140px;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* --- 1. VISTA LANDING (Login) --- */
+        #view-landing {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 50;
+            background: #0d0d0d;
+            overflow: hidden;
+        }
+
+        .landing-bg-container {
+            position: absolute;
+            top: -20%;
+            left: -20%;
+            width: 140%;
+            height: 140%;
+            transform: rotate(-5deg);
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        .landing-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            width: 100%;
+        }
+
+        .landing-item {
+            width: 100%;
+            aspect-ratio: 2/3;
+            background-color: #222;
+            border-radius: 6px;
+            background-size: cover;
+            background-position: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            transition: opacity 0.5s ease;
+        }
+
+        .landing-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(18, 18, 18, 0.2) 0%, rgba(18, 18, 18, 0.9) 60%, #121212 100%);
+            z-index: 2;
+        }
+
+        .landing-content {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            z-index: 10;
+            padding: 30px 24px 60px 24px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .top-login-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 20;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+        }
+
+        /* --- 2. VISTA HOME --- */
+        .header-home {
+            padding: 16px 20px 10px;
+            background: rgba(18, 18, 18, 0.95);
+            backdrop-filter: blur(20px);
+            position: sticky;
+            top: 0;
+            z-index: 30;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .pills {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+            scrollbar-width: none;
+        }
+
+        .pills::-webkit-scrollbar {
+            display: none;
+        }
+
+        .pill {
+            padding: 8px 20px;
+            border-radius: 20px;
+            border: 1px solid #444;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            cursor: pointer;
+            background: transparent;
+            color: #ddd;
+            transition: all 0.2s;
+        }
+
+        .pill.active {
+            background: white;
+            color: black;
+            border-color: white;
+            font-weight: 700;
+        }
+
+        /* Hero Card */
+        .hero-card {
+            margin: 20px;
+            background: #1a1a1a;
+            border-radius: 16px;
+            padding: 40px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .hero-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #333;
+            background-size: cover;
+            background-position: center;
+            opacity: 0.3;
+            filter: blur(30px);
+            transform: scale(1.1);
+            transition: background-image 0.5s ease;
+        }
+
+        .hero-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.8));
+        }
+
+        .hero-inner {
+            position: relative;
+            z-index: 2;
+            transition: opacity 0.3s ease;
+        }
+
+        .hero-dots {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 25px;
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+
+        .dot.active {
+            background: white;
+            width: 20px;
+            border-radius: 4px;
+        }
+
+        /* Listas */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            margin: 30px 0 15px;
+            align-items: center;
+        }
+
+        .books-row {
+            display: flex;
+            gap: 16px;
+            overflow-x: auto;
+            padding: 0 20px 20px 20px;
+            scrollbar-width: none;
+        }
+
+        .books-row::-webkit-scrollbar {
+            display: none;
+        }
+
+        .book-card {
+            min-width: 140px;
+            width: 140px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            cursor: pointer;
+            position: relative;
+            flex-shrink: 0;
+            transition: transform 0.1s;
+        }
+
+        .book-card:active {
+            transform: scale(0.98);
+        }
+
+        .cover-wrap {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1/1.5;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .cover-img {
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            background-color: #222;
+            transition: transform 0.3s ease;
+        }
+
+        .rank-badge {
+            position: absolute;
+            bottom: -10px;
+            left: -5px;
+            background: white;
+            color: black;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 1.5rem;
+            border-radius: 6px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
+            z-index: 5;
+        }
+
+        .ex-badge {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: var(--orange);
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 5px 10px;
+            border-radius: 0 0 0 8px;
+            z-index: 2;
+            color: white;
+            box-shadow: -2px 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        /* --- 3. VISTA DETALLE --- */
+        #page-detail {
+            background: #121212;
+            z-index: 100;
+            padding-bottom: 100px;
+        }
+
+        .detail-nav {
+            display: flex;
+            justify-content: space-between;
+            padding: 16px 20px;
+            position: sticky;
+            top: 0;
+            background: rgba(18, 18, 18, 0.8);
+            backdrop-filter: blur(15px);
+            z-index: 20;
+        }
+
+        .cover-large {
+            width: 240px;
+            aspect-ratio: 1/1.5;
+            margin: 20px auto 40px;
+            border-radius: 12px;
+            background-size: cover;
+            background-position: center;
+            background-color: #222;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            position: relative;
+            transform: perspective(1000px) rotateY(0deg);
+        }
+
+        .play-btn-big {
+            background: white;
+            color: black;
+            font-weight: 800;
+            font-size: 1.1rem;
+            padding: 18px;
+            border-radius: 40px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            border: none;
+            margin: 30px 0;
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.2s;
+            box-shadow: 0 5px 20px rgba(255, 255, 255, 0.15);
+        }
+
+        .play-btn-big:active {
+            transform: scale(0.98);
+        }
+
+        .meta-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            border-top: 1px solid #333;
+            border-bottom: 1px solid #333;
+            padding: 25px 0;
+            margin-bottom: 30px;
+        }
+
+        .meta-item {
+            border-right: 1px solid #333;
+            padding: 0 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 0.8rem;
+            color: #888;
+            align-items: center;
+            text-align: center;
+        }
+
+        .meta-item:last-child {
+            border-right: none;
+        }
+
+        .meta-val {
+            color: white;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.95rem;
+        }
+
+        /* --- 4. VISTA PERFIL --- */
+        .profile-header {
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #1a1a1a;
+        }
+
+        .avatar-circle {
+            width: 100px;
+            height: 100px;
+            background: #222;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 4px solid #1a1a1a;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 0;
+            color: #ddd;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .switch {
+            width: 50px;
+            height: 28px;
+            background: #444;
+            border-radius: 14px;
+            position: relative;
+            transition: 0.3s;
+        }
+
+        .switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            transition: 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .switch.active {
+            background: var(--orange);
+        }
+
+        .switch.active::after {
+            transform: translateX(22px);
+        }
+
+        /* --- 5. FULL PLAYER (NUEVO) --- */
+        #view-player {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #1a1a1a 0%, #000 100%);
+            z-index: 150;
+            display: flex;
+            flex-direction: column;
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        #view-player.active {
+            transform: translateY(0);
+        }
+
+        .player-header {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .player-art {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .art-large {
+            width: 80%;
+            max-width: 320px;
+            aspect-ratio: 1/1;
+            border-radius: 12px;
+            background-size: cover;
+            background-position: center;
+            background-color: #222;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .player-controls {
+            padding: 30px 24px 60px;
+            background: linear-gradient(to top, #000 0%, transparent 100%);
+        }
+
+        .progress-container {
+            margin-bottom: 30px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            position: relative;
+            cursor: pointer;
+            padding: 10px 0;
+            /* Area click mas grande */
+            background-clip: content-box;
+        }
+
+        .progress-fill {
+            height: 4px;
+            background: white;
+            border-radius: 2px;
+            width: 0%;
+            position: relative;
+            top: 10px;
+            /* Ajuste por padding */
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            right: -6px;
+            top: -4px;
+            width: 12px;
+            height: 12px;
+            background: white;
+            border-radius: 50%;
+            opacity: 1;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        .time-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: -5px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .main-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            padding: 0 10px;
+        }
+
+        .ctrl-btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.1s;
+            opacity: 0.9;
+        }
+
+        .ctrl-btn:active {
+            transform: scale(0.9);
+        }
+
+        .play-fab {
+            width: 72px;
+            height: 72px;
+            background: white;
+            border-radius: 50%;
+            color: black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(255, 255, 255, 0.2);
+            transition: transform 0.1s;
+        }
+
+        .play-fab:active {
+            transform: scale(0.95);
+        }
+
+        /* --- DOCK INFERIOR --- */
+        .bottom-dock {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            z-index: 100;
+        }
+
+        .mini-player {
+            margin: 0 10px 10px;
+            padding: 10px 16px;
+            background: rgba(30, 30, 30, 0.95);
+            backdrop-filter: blur(15px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transform: translateY(0);
+            transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .mini-player.hidden-mp {
+            display: none;
+        }
+
+        .mp-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            overflow: hidden;
+        }
+
+        .mp-cover {
+            width: 42px;
+            height: 42px;
+            border-radius: 6px;
+            background-color: #333;
+            flex-shrink: 0;
+            background-size: cover;
+        }
+
+        .nav-bar {
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0 25px 0;
+            background: linear-gradient(to top, #000 85%, rgba(0, 0, 0, 0) 100%);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 0.7rem;
+            color: #666;
+            gap: 6px;
+            cursor: pointer;
+            width: 25%;
+            transition: color 0.2s;
+        }
+
+        .nav-item.active {
+            color: white;
+        }
+
+        .nav-item i {
+            width: 24px;
+            height: 24px;
+            transition: transform 0.2s;
+        }
+
+        .nav-item.active i {
+            transform: translateY(-2px);
+        }
+
+        /* Modal Login/Bloqueo */
+        .auth-modal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .auth-box {
+            background: #1F1F1F;
+            width: 90%;
+            max-width: 360px;
+            padding: 35px 30px;
+            border-radius: 24px;
+            text-align: center;
+            border: 1px solid #333;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+        }
+
+        .input-line {
+            width: 100%;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            padding: 16px;
+            border-radius: 12px;
+            color: white;
+            margin-bottom: 15px;
+            font-size: 1rem;
+            transition: border-color 0.2s, background 0.2s;
+        }
+
+        .input-line:focus {
+            border-color: var(--orange);
+            background: #333;
+            outline: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- VISTA: LANDING -->
+    <div id="view-landing" class="">
+        <div class="landing-bg-container">
+            <div class="landing-grid" id="landingGrid"></div>
+        </div>
+        <div class="landing-overlay"></div>
+
+        <button class="top-login-btn" onclick="openLogin()">Entrar</button>
+
+        <div class="landing-content">
+            <h1 style="font-size: 3rem; font-weight: 800; color: var(--orange); line-height: 1; margin-bottom: 16px;">
+                Audiolibros<br>para todos</h1>
+            <p style="color: #ddd; margin-bottom: 30px; max-width: 400px;">500.000+ historias más vendidas y originales.
+                Cancela en cualquier momento.</p>
+
+            <button class="btn-primary" onclick="openRegister()">Crear una cuenta</button>
+            <button class="btn-text" onclick="guestLogin()">Explorar la app</button>
+        </div>
+
+        <!-- Modal de Login/Registro -->
+        <div id="login-modal" class="auth-modal hidden">
+            <div class="auth-box fade-in">
+                <h2 style="margin-bottom:10px" id="auth-title">Bienvenido</h2>
+                <p style="color:#aaa; margin-bottom:20px; font-size:0.9rem" id="auth-desc">Ingresa tus datos para
+                    continuar</p>
+
+                <input type="email" class="input-line" id="input-email" placeholder="Correo electrónico">
+                <input type="password" class="input-line" id="input-pass" placeholder="Contraseña">
+                <input type="password" class="input-line" id="input-pass-confirm" placeholder="Confirmar contraseña"
+                    style="display:none">
+                <input type="text" class="input-line" id="input-name" placeholder="Nombre completo"
+                    style="display:none">
+
+                <div id="error-message" style="color:#ff4f30; font-size:0.8rem; margin-bottom:10px; display:none"></div>
+
+                <button class="btn-primary btn-orange" style="margin-bottom:10px" id="auth-submit-btn"
+                    onclick="performLogin()">Iniciar Sesión</button>
+                <button class="btn-text" id="auth-switch-btn" onclick="switchToRegister()">¿No tienes cuenta?
+                    Regístrate</button>
+                <button class="btn-text" id="auth-recovery-btn" onclick="showPasswordRecovery()"
+                    style="display:none">¿Olvidaste tu contraseña?</button>
+                <button class="btn-text" onclick="closeLogin()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- APP CONTAINER -->
+    <div id="view-app" class="app-container hidden">
+
+        <div id="main-scroll" class="scroll-area">
+
+            <!-- PAGE: HOME -->
+            <div id="page-home">
+                <div class="header-home">
+                    <div class="header-top">
+                        <h1 style="font-size:1.6rem; font-weight:700">Inicio</h1>
+                        <div style="display:flex; align-items:center; gap:15px">
+                            <button id="header-login-btn" class="btn-text" onclick="navTo('landing')"
+                                style="padding:5px 10px; font-size:0.9rem; display:none">Iniciar sesión</button>
+                            <i data-lucide="bell" style="cursor:pointer"></i>
+                        </div>
+                    </div>
+                    <div class="pills">
+                        <button class="pill active" onclick="filterByCategory('all')">Inicio</button>
+                        <button class="pill" onclick="filterByCategory('Series')">Series</button>
+
+                        <button class="pill" onclick="filterByCategory('In English')">In English</button>
+                        <button class="pill" onclick="filterByCategory('En català')">En català</button>
+                    </div>
+                    <!-- Search Bar -->
+                    <div style="margin:15px 20px 0">
+                        <div style="position:relative">
+                            <input type="text" id="search-input" placeholder="Buscar libros, autores..."
+                                style="width:100%; background:#333; border:1px solid #444; padding:12px 45px 12px 15px; border-radius:25px; color:white; font-size:0.9rem"
+                                onkeyup="searchBooks(this.value)">
+                            <i data-lucide="search"
+                                style="position:absolute; right:15px; top:50%; transform:translateY(-50%); color:#666"
+                                size="20"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- HERO (Dynamic ID for CSS hook) -->
+                <div class="hero-card" id="hero-card-el" onclick="tryOpenDetail(1)">
+                    <div class="hero-inner">
+                        <div
+                            style="font-size:0.9rem; font-weight:800; color:#ddd; letter-spacing:1px; text-transform:uppercase; margin-bottom:5px">
+                            Lisa Jewell</div>
+                        <div
+                            style="font-size:1.8rem; font-weight:900; line-height:1.1; margin-bottom:10px; text-transform:uppercase">
+                            No le dejes entrar</div>
+                        <div style="font-size:0.8rem; color:#aaa; margin-bottom:15px">Exclusivo • Thriller • Bestseller
+                        </div>
+                        <div style="font-size:0.9rem; color:#fff; font-weight:500">¡Descubre el thriller más trepidante
+                            de Lisa Jewell!</div>
+                        <div class="hero-dots">
+                            <div class="dot active"></div>
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TOP 50 -->
+                <div class="section-header">
+                    <h2 style="font-size:1.3rem; font-weight:700">Top 50 hoy</h2>
+                    <div style="display:flex; gap:10px">
+                        <i data-lucide="chevron-left" style="color:#999; cursor:pointer"
+                            onclick="scrollRow('list-top50', -300)"></i>
+                        <i data-lucide="chevron-right" style="color:#999; cursor:pointer"
+                            onclick="scrollRow('list-top50', 300)"></i>
+                    </div>
+                </div>
+                <div class="books-row" id="list-top50"></div>
+
+                <!-- EMPIEZA POR AQUÍ -->
+                <div class="section-header" style="margin-top:10px">
+                    <h2 style="font-size:1.3rem; font-weight:700">Empieza por aquí</h2>
+                    <div style="display:flex; gap:10px">
+                        <i data-lucide="chevron-left" style="color:#999; cursor:pointer"
+                            onclick="scrollRow('list-start', -300)"></i>
+                        <i data-lucide="chevron-right" style="color:#999; cursor:pointer"
+                            onclick="scrollRow('list-start', 300)"></i>
+                    </div>
+                </div>
+                <div class="books-row" id="list-start"></div>
+            </div>
+
+            <!-- PAGE: DETAIL (Sin Nav Inferior) -->
+            <div id="page-detail" class="hidden">
+                <div class="detail-nav">
+                    <i data-lucide="arrow-left" onclick="navTo('home')" style="cursor:pointer"></i>
+                    <i data-lucide="more-vertical" style="cursor:pointer"></i>
+                </div>
+                <div id="detail-content"></div> <!-- Inyectado con JS -->
+            </div>
+
+            <!-- PAGE: PROFILE -->
+            <div id="page-profile" class="hidden">
+                <div class="profile-header">
+                    <h1 style="font-size:1.6rem; font-weight:700">Perfil</h1>
+                    <i data-lucide="settings" style="cursor:pointer"></i>
+                </div>
+
+                <!-- User Info Section -->
+                <div
+                    style="text-align:center; padding:30px 20px; background:linear-gradient(180deg, #1a1a1a 0%, #121212 100%); margin-bottom:20px">
+                    <div class="avatar-circle"
+                        style="width:80px; height:80px; margin:0 auto 15px; background:linear-gradient(135deg, #ff4f30, #ff6b47); display:flex; align-items:center; justify-content:center">
+                        <i data-lucide="user" size="40" style="color:white"></i>
+                    </div>
+                    <h2 style="font-size:1.5rem; margin-bottom:5px" id="profile-name">¡Hola!</h2>
+                    <p style="color:#888; font-size:0.9rem">Miembro desde Nov 2025</p>
+                </div>
+
+                <!-- Stats Section -->
+                <div
+                    style="display:grid; grid-template-columns:repeat(3, 1fr); gap:1px; background:#333; margin:0 20px 20px; border-radius:12px; overflow:hidden">
+                    <div style="background:#1f1f1f; padding:20px 10px; text-align:center">
+                        <div style="font-size:1.8rem; font-weight:700; color:var(--orange); margin-bottom:5px">0</div>
+                        <div style="font-size:0.8rem; color:#888">Libros leídos</div>
+                    </div>
+                    <div style="background:#1f1f1f; padding:20px 10px; text-align:center">
+                        <div style="font-size:1.8rem; font-weight:700; color:var(--orange); margin-bottom:5px">0h</div>
+                        <div style="font-size:0.8rem; color:#888">Tiempo total</div>
+                    </div>
+                    <div style="background:#1f1f1f; padding:20px 10px; text-align:center">
+                        <div style="font-size:1.8rem; font-weight:700; color:var(--orange); margin-bottom:5px">0</div>
+                        <div style="font-size:0.8rem; color:#888">Guardados</div>
+                    </div>
+                </div>
+
+                <!-- Guest View -->
+                <div id="profile-guest-actions">
+                    <div style="padding:0 20px">
+                        <button class="btn-primary" onclick="openLogin()" style="width:100%; margin-bottom:15px">Iniciar
+                            sesión para ver tus estadísticas</button>
+                        <div style="text-align:center; color:#888; font-size:0.9rem; margin-bottom:15px">¿Ya tienes una
+                            cuenta?</div>
+                        <button class="btn-outline" onclick="openLogin()" style="width:100%">Iniciar sesión</button>
+                    </div>
+                </div>
+
+                <!-- Logged View -->
+                <div id="profile-user-actions" class="hidden">
+                    <!-- Menu Items -->
+                    <div style="padding:0 20px">
+                        <div class="menu-item" style="border-bottom:1px solid #333" onclick="navTo('favorites')">
+                            <div style="display:flex; align-items:center; gap:15px">
+                                <div
+                                    style="width:40px; height:40px; background:#333; border-radius:50%; display:flex; align-items:center; justify-content:center">
+                                    <i data-lucide="heart" size="20" style="color:var(--orange)"></i>
+                                </div>
+                                <div>
+                                    <div style="font-weight:600; margin-bottom:2px">Mis favoritos</div>
+                                    <div style="font-size:0.8rem; color:#888">Libros que has guardado</div>
+                                </div>
+                            </div>
+                            <i data-lucide="chevron-right" size="20" style="color:#666"></i>
+                        </div>
+
+                        <div class="menu-item" style="border-bottom:1px solid #333">
+                            <div style="display:flex; align-items:center; gap:15px">
+                                <div
+                                    style="width:40px; height:40px; background:#333; border-radius:50%; display:flex; align-items:center; justify-content:center">
+                                    <i data-lucide="clock" size="20" style="color:var(--orange)"></i>
+                                </div>
+                                <div>
+                                    <div style="font-weight:600; margin-bottom:2px">Historial</div>
+                                    <div style="font-size:0.8rem; color:#888">Libros reproducidos</div>
+                                </div>
+                            </div>
+                            <i data-lucide="chevron-right" size="20" style="color:#666"></i>
+                        </div>
+
+                        <div class="menu-item" style="border-bottom:1px solid #333">
+                            <div style="display:flex; align-items:center; gap:15px">
+                                <div
+                                    style="width:40px; height:40px; background:#333; border-radius:50%; display:flex; align-items:center; justify-content:center">
+                                    <i data-lucide="download" size="20" style="color:var(--orange)"></i>
+                                </div>
+                                <div>
+                                    <div style="font-weight:600; margin-bottom:2px">Descargas</div>
+                                    <div style="font-size:0.8rem; color:#888">Libros descargados</div>
+                                </div>
+                            </div>
+                            <i data-lucide="chevron-right" size="20" style="color:#666"></i>
+                        </div>
+
+                        <div class="menu-item" style="border-bottom:1px solid #333">
+                            <div style="display:flex; align-items:center; gap:15px">
+                                <div
+                                    style="width:40px; height:40px; background:#333; border-radius:50%; display:flex; align-items:center; justify-content:center">
+                                    <i data-lucide="target" size="20" style="color:var(--orange)"></i>
+                                </div>
+                                <div>
+                                    <div style="font-weight:600; margin-bottom:2px">Objetivos</div>
+                                    <div style="font-size:0.8rem; color:#888">Metas de lectura</div>
+                                </div>
+                            </div>
+                            <i data-lucide="chevron-right" size="20" style="color:#666"></i>
+                        </div>
+
+                        <div class="menu-item">
+                            <div style="display:flex; align-items:center; gap:15px">
+                                <div
+                                    style="width:40px; height:40px; background:#333; border-radius:50%; display:flex; align-items:center; justify-content:center">
+                                    <i data-lucide="baby" size="20" style="color:var(--orange)"></i>
+                                </div>
+                                <div>
+                                    <div style="font-weight:600; margin-bottom:2px">Modo infantil</div>
+                                    <div style="font-size:0.8rem; color:#888">Contenido para niños</div>
+                                </div>
+                            </div>
+                            <div class="switch" id="kids-switch" onclick="toggleKidsMode()"></div>
+                        </div>
+                    </div>
+
+                    <!-- Logout Section -->
+                    <div style="padding:20px; margin-top:20px">
+                        <button class="btn-outline" onclick="performLogout()"
+                            style="width:100%; border-color: var(--orange); color: var(--orange)">Cerrar sesión</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGE: FAVORITES (NUEVA) -->
+            <div id="page-favorites" class="hidden" style="padding-top: 60px;">
+                <div class="header-home" style="position:fixed; top:0; width:100%; z-index:30;">
+                    <div class="header-top">
+                        <h1 style="font-size:1.6rem; font-weight:700">Mis Favoritos</h1>
+                        <i data-lucide="filter" style="cursor:pointer"></i>
+                    </div>
+                </div>
+                <div style="padding: 20px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;"
+                    id="favorites-grid">
+                    <!-- Injected via JS -->
+                </div>
+                <div id="no-favorites" class="hidden" style="text-align:center; padding: 50px 20px; color: #666;">
+                    <i data-lucide="heart" size="48" style="margin-bottom:15px; opacity:0.5"></i>
+                    <p>Aún no tienes libros guardados.</p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- FULL PLAYER OVERLAY -->
+        <div id="view-player">
+            <div class="player-header">
+                <i data-lucide="chevron-down" size="28" onclick="closePlayer()"></i>
+                <div style="font-size:0.8rem; letter-spacing:1px; color:#aaa">AHORA REPRODUCIENDO</div>
+                <i data-lucide="more-horizontal" size="24"></i>
+            </div>
+
+            <div class="player-art">
+                <div class="art-large" id="fp-art" style="background-image:url('')"></div>
+            </div>
+
+            <div class="player-controls">
+                <div style="margin-bottom:30px">
+                    <h2 style="font-size:1.5rem; margin-bottom:5px" id="fp-title">Título Libro</h2>
+                    <p style="color:#aaa" id="fp-author">Autor</p>
+                </div>
+
+                <div class="progress-container">
+                    <div class="progress-bar" id="fp-progress-bar" onclick="seekAudio(event)">
+                        <div class="progress-fill" id="fp-progress-fill"></div>
+                    </div>
+                    <div class="time-labels">
+                        <span id="fp-time-current">0:00</span>
+                        <span id="fp-time-total">0:00</span>
+                    </div>
+                </div>
+
+                <div class="main-controls">
+                    <button class="ctrl-btn"><i data-lucide="skip-back" size="28"></i></button>
+                    <button class="ctrl-btn" onclick="seekRelative(-15)"><i data-lucide="rotate-ccw"
+                            size="28"></i></button>
+                    <button class="play-fab" onclick="togglePlay()">
+                        <i id="fp-play-icon" data-lucide="play" fill="black" size="32" style="margin-left:4px"></i>
+                    </button>
+                    <button class="ctrl-btn" onclick="seekRelative(15)"><i data-lucide="rotate-cw"
+                            size="28"></i></button>
+                    <button class="ctrl-btn"><i data-lucide="skip-forward" size="28"></i></button>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; color:#666">
+                    <i data-lucide="moon" size="20"></i>
+                    <i data-lucide="cast" size="20"></i>
+                    <i data-lucide="list-music" size="20"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- BOTTOM DOCK -->
+        <div class="bottom-dock" id="dock">
+            <!-- Mini Player (Siempre visible si hay libro, click abre detalle) -->
+            <div class="mini-player hidden-mp" id="mini-player" onclick="openPlayer()">
+                <div class="mp-info">
+                    <div class="mp-cover" id="mp-cover" style="background-color:#333; background-size:cover"></div>
+                    <div>
+                        <div id="mp-title" style="font-weight:700; font-size:0.9rem">No le dejes entrar</div>
+                        <div style="font-size:0.7rem; color:#aaa">11:34:28 restante</div>
+                    </div>
+                </div>
+                <i id="play-icon-mini" data-lucide="play" fill="white" size="20"
+                    onclick="event.stopPropagation(); togglePlay()"></i>
+            </div>
+
+            <!-- Nav Bar (SIMPLIFICADA: SOLO INICIO Y PERFIL) -->
+            <nav class="nav-bar" id="nav-bar">
+                <div class="nav-item active" id="nav-home" onclick="navTo('home')"><i data-lucide="home"></i>Inicio
+                </div>
+                <div class="nav-item" id="nav-profile" onclick="navTo('profile')"><i data-lucide="user"></i>Perfil</div>
+            </nav>
+        </div>
+
+    </div>
+
+    <script>
+        // --- 1. BASE DE DATOS DE LIBROS ---
+        // Base de datos de audiolibros - las portadas se cargarán desde API
+        const books = [
+            // --- ESPAÑOL (Originales) ---
+            { id: 1, title: "No le dejes entrar", author: "Lisa Jewell", coverUrl: "", rating: "4,1", votes: "119", duration: "11h 34m", cat: "Novela", exclusive: true, lang: "es", desc: "¡Descubre el thriller más trepidante de Lisa Jewell! Es el hombre perfecto... ¿o tu peor pesadilla?" },
+            { id: 2, title: "Ande, ande, ande", author: "Megan Maxwell", coverUrl: "", rating: "4,5", votes: "1205", duration: "14h 45m", cat: "Romance", exclusive: false, lang: "es", desc: "Una comedia romántica navideña con el sello inconfundible de Megan Maxwell." },
+            { id: 3, title: "Cuando no queden más estrellas", author: "María Martínez", coverUrl: "", rating: "3,9", votes: "45", duration: "9h 12m", cat: "Ficción", exclusive: false, lang: "es", desc: "¿Cómo se ignora lo que late en tu corazón? Una historia conmovedora." },
+            { id: 4, title: "La última huella", author: "Marcos Nieto Pallarés", coverUrl: "", rating: "4,8", votes: "320", duration: "10h 20m", cat: "Misterio", exclusive: true, lang: "es", desc: "Un crimen sin resolver en los parajes más oscuros. ¿Quién miente?" },
+            { id: 5, title: "El paciente", author: "Juan Gómez-Jurado", coverUrl: "", rating: "4,9", votes: "5600", duration: "12h 05m", cat: "Thriller", exclusive: false, lang: "es", desc: "El Dr. Evans tiene que tomar una decisión imposible para salvar a su hija." },
+            { id: 6, title: "Dune", author: "Frank Herbert", coverUrl: "", rating: "4,9", votes: "8500", duration: "21h 02m", cat: "Sci-Fi", exclusive: true, lang: "es", isSeries: true, desc: "La épica de ciencia ficción definitiva. Arrakis te espera." },
+            { id: 7, title: "1984", author: "George Orwell", coverUrl: "", rating: "4,8", votes: "9000", duration: "11h 22m", cat: "Clásico", exclusive: false, lang: "es", desc: "El Gran Hermano te vigila. La distopía que definió el género." },
+            { id: 8, title: "Harry Potter y la piedra filosofal", author: "J.K. Rowling", coverUrl: "", rating: "4,9", votes: "15000", duration: "8h 18m", cat: "Fantasía", exclusive: true, lang: "es", isSeries: true, isKids: true, desc: "El niño que vivió llega a Hogwarts para cambiar el mundo mágico." },
+            { id: 9, title: "El Código Da Vinci", author: "Dan Brown", coverUrl: "", rating: "4,7", votes: "12000", duration: "16h 45m", cat: "Thriller", exclusive: false, lang: "es", isSeries: true, desc: "Un misterio ancestral que desafía las creencias de la humanidad." },
+            { id: 10, title: "Cien años de soledad", author: "Gabriel García Márquez", coverUrl: "", rating: "4,8", votes: "8900", duration: "14h 20m", cat: "Clásico", exclusive: true, lang: "es", desc: "La obra cumbre del realismo mágico latinoamericano." },
+            { id: 11, title: "La sombra del viento", author: "Carlos Ruiz Zafón", coverUrl: "", rating: "4,6", votes: "7800", duration: "15h 30m", cat: "Misterio", exclusive: false, lang: "es", isSeries: true, desc: "Un laberinto de secretos en la Barcelona posguerra." },
+            { id: 12, title: "Los pilares de la Tierra", author: "Ken Follett", coverUrl: "", rating: "4,9", votes: "9500", duration: "45h 30m", cat: "Histórica", exclusive: true, lang: "es", isSeries: true, desc: "La construcción de una catedral como símbolo de la lucha por el poder." },
+            { id: 13, title: "El alquimista", author: "Paulo Coelho", coverUrl: "", rating: "4,2", votes: "11000", duration: "7h 15m", cat: "Ficción", exclusive: false, lang: "es", desc: "Una leyenda atemporal sobre seguir tus sueños." },
+            { id: 14, title: "Crónica de una muerte anunciada", author: "Gabriel García Márquez", coverUrl: "", rating: "4,5", votes: "6500", duration: "5h 45m", cat: "Clásico", exclusive: true, lang: "es", desc: "Un asesinato anunciado que nadie pudo evitar." },
+            { id: 15, title: "El nombre de la rosa", author: "Umberto Eco", coverUrl: "", rating: "4,7", votes: "5400", duration: "18h 20m", cat: "Misterio", exclusive: false, lang: "es", desc: "Un asesinato en un monasterio medieval lleno de simbolismo." },
+            { id: 16, title: "La casa de los espíritus", author: "Isabel Allende", coverUrl: "", rating: "4,6", votes: "7200", duration: "13h 10m", cat: "Ficción", exclusive: true, lang: "es", isSeries: true, desc: "La saga de una familia a lo largo de varias generaciones." },
+            { id: 17, title: "El hobbit", author: "J.R.R. Tolkien", coverUrl: "", rating: "4,8", votes: "13000", duration: "11h 05m", cat: "Fantasía", exclusive: false, lang: "es", isSeries: true, isKids: true, desc: "La aventura que comenzó todo en la Tierra Media." },
+            { id: 18, title: "Rebelión en la granja", author: "George Orwell", coverUrl: "", rating: "4,7", votes: "8900", duration: "6h 30m", cat: "Clásico", exclusive: true, lang: "es", desc: "Una sátira política que sigue vigente hoy en día." },
+            { id: 19, title: "La chica del tren", author: "Paula Hawkins", coverUrl: "", rating: "4,3", votes: "10200", duration: "10h 15m", cat: "Thriller", exclusive: false, lang: "es", desc: "Un viaje en tren que cambiará todo para siempre." },
+            { id: 20, title: "Sapiens", author: "Yuval Noah Harari", coverUrl: "", rating: "4,6", votes: "15000", duration: "15h 40m", cat: "No Ficción", exclusive: true, lang: "es", desc: "Una breve historia de la humanidad desde la prehistoria hasta hoy." },
+            { id: 21, title: "Harry Potter y la cámara secreta", author: "J.K. Rowling", coverUrl: "", rating: "4,8", votes: "14000", duration: "9h 05m", cat: "Fantasía", exclusive: true, lang: "es", isSeries: true, isKids: true, desc: "El segundo año en Hogwarts trae nuevos peligros y misterios." },
+            { id: 22, title: "Harry Potter y el prisionero de Azkaban", author: "J.K. Rowling", coverUrl: "", rating: "4,9", votes: "14500", duration: "12h 15m", cat: "Fantasía", exclusive: true, lang: "es", isSeries: true, isKids: true, desc: "Sirius Black ha escapado y Harry está en peligro." },
+            { id: 23, title: "Juego de Tronos", author: "George R.R. Martin", coverUrl: "", rating: "4,8", votes: "20000", duration: "33h 45m", cat: "Fantasía", exclusive: false, lang: "es", isSeries: true, desc: "El invierno se acerca. La lucha por el Trono de Hierro comienza." },
+            { id: 24, title: "Choque de Reyes", author: "George R.R. Martin", coverUrl: "", rating: "4,7", votes: "18000", duration: "35h 10m", cat: "Fantasía", exclusive: false, lang: "es", isSeries: true, desc: "La guerra de los cinco reyes asola Poniente." },
+            { id: 25, title: "Tormenta de Espadas", author: "George R.R. Martin", coverUrl: "", rating: "4,9", votes: "19000", duration: "40h 20m", cat: "Fantasía", exclusive: false, lang: "es", isSeries: true, desc: "Traiciones y bodas sangrientas en el punto álgido de la guerra." },
+            { id: 26, title: "El Principito", author: "Antoine de Saint-Exupéry", coverUrl: "", rating: "4,9", votes: "25000", duration: "1h 50m", cat: "Infantil", exclusive: false, lang: "es", isKids: true, desc: "Lo esencial es invisible a los ojos." },
+            { id: 27, title: "Matilda", author: "Roald Dahl", coverUrl: "", rating: "4,8", votes: "8000", duration: "4h 15m", cat: "Infantil", exclusive: true, lang: "es", isKids: true, desc: "Una niña con poderes extraordinarios y una mente brillante." },
+            { id: 28, title: "Charlie y la fábrica de chocolate", author: "Roald Dahl", coverUrl: "", rating: "4,7", votes: "7500", duration: "3h 30m", cat: "Infantil", exclusive: false, lang: "es", isKids: true, desc: "El billete dorado te abre las puertas a un mundo de dulces." },
+            { id: 29, title: "Sherlock Holmes: Estudio en escarlata", author: "Arthur Conan Doyle", coverUrl: "", rating: "4,6", votes: "9000", duration: "5h 20m", cat: "Misterio", exclusive: false, lang: "es", isSeries: true, desc: "La primera aventura del detective más famoso del mundo." },
+            { id: 30, title: "Drácula", author: "Bram Stoker", coverUrl: "", rating: "4,7", votes: "8500", duration: "16h 10m", cat: "Clásico", exclusive: false, lang: "es", desc: "El conde llega a Londres sediento de sangre." },
+            { id: 31, title: "Frankenstein", author: "Mary Shelley", coverUrl: "", rating: "4,5", votes: "7000", duration: "8h 45m", cat: "Clásico", exclusive: false, lang: "es", desc: "El monstruo creado por la ciencia busca su lugar en el mundo." },
+            { id: 32, title: "Orgullo y prejuicio", author: "Jane Austen", coverUrl: "", rating: "4,8", votes: "12000", duration: "11h 30m", cat: "Romance", exclusive: false, lang: "es", desc: "El clásico romance entre Elizabeth Bennet y el Sr. Darcy." },
+            { id: 33, title: "Cumbres borrascosas", author: "Emily Brontë", coverUrl: "", rating: "4,6", votes: "9500", duration: "13h 20m", cat: "Romance", exclusive: false, lang: "es", desc: "Una historia de amor y venganza en los páramos ingleses." },
+            { id: 34, title: "Los juegos del hambre", author: "Suzanne Collins", coverUrl: "", rating: "4,7", votes: "16000", duration: "10h 40m", cat: "Ficción", exclusive: true, lang: "es", isSeries: true, desc: "Katniss Everdeen se ofrece voluntaria para salvar a su hermana." },
+            { id: 35, title: "En llamas", author: "Suzanne Collins", coverUrl: "", rating: "4,8", votes: "15500", duration: "11h 10m", cat: "Ficción", exclusive: true, lang: "es", isSeries: true, desc: "La chispa de la rebelión se enciende en Panem." },
+
+            // --- IN ENGLISH (Nuevos) ---
+            { id: 101, title: "The Great Gatsby", author: "F. Scott Fitzgerald", coverUrl: "", rating: "4,4", votes: "25000", duration: "4h 50m", cat: "Classic", exclusive: false, lang: "en", desc: "The story of the mysteriously wealthy Jay Gatsby and his love for the beautiful Daisy Buchanan." },
+            { id: 102, title: "Atomic Habits", author: "James Clear", coverUrl: "", rating: "4,9", votes: "35000", duration: "5h 35m", cat: "Non-Fiction", exclusive: true, lang: "en", desc: "An easy & proven way to build good habits & break bad ones." },
+            { id: 103, title: "Becoming", author: "Michelle Obama", coverUrl: "", rating: "4,8", votes: "28000", duration: "19h 03m", cat: "Biography", exclusive: true, lang: "en", desc: "In a life filled with meaning and accomplishment, Michelle Obama has emerged as one of the most iconic and compelling women of our era." },
+            { id: 104, title: "It Ends with Us", author: "Colleen Hoover", coverUrl: "", rating: "4,7", votes: "42000", duration: "11h 10m", cat: "Romance", exclusive: false, lang: "en", desc: "A brave and heartbreaking novel that digs its claws into you and doesn't let go, long after you've finished it." },
+            { id: 105, title: "The Psychology of Money", author: "Morgan Housel", coverUrl: "", rating: "4,8", votes: "18000", duration: "5h 48m", cat: "Finance", exclusive: false, lang: "en", desc: "Timeless lessons on wealth, greed, and happiness." },
+            { id: 106, title: "Project Hail Mary", author: "Andy Weir", coverUrl: "", rating: "4,9", votes: "22000", duration: "16h 10m", cat: "Sci-Fi", exclusive: true, lang: "en", desc: "A lone astronaut must save the earth from disaster in this incredible adventure." },
+            { id: 107, title: "Rich Dad Poor Dad", author: "Robert Kiyosaki", coverUrl: "", rating: "4,7", votes: "31000", duration: "6h 09m", cat: "Finance", exclusive: false, lang: "en", desc: "What the Rich Teach Their Kids About Money That the Poor and Middle Class Do Not!" },
+            { id: 108, title: "The Midnight Library", author: "Matt Haig", coverUrl: "", rating: "4,3", votes: "19000", duration: "8h 50m", cat: "Fiction", exclusive: false, lang: "en", desc: "Between life and death there is a library, and within that library, the shelves go on forever." },
+            { id: 109, title: "Can't Hurt Me", author: "David Goggins", coverUrl: "", rating: "4,9", votes: "26000", duration: "13h 37m", cat: "Biography", exclusive: true, lang: "en", desc: "Master Your Mind and Defy the Odds." },
+            { id: 110, title: "Sapiens: A Brief History of Humankind", author: "Yuval Noah Harari", coverUrl: "", rating: "4,6", votes: "29000", duration: "15h 18m", cat: "History", exclusive: false, lang: "en", desc: "Explore the history of our species." },
+
+            // --- EN CATALÀ (Nuevos) ---
+            { id: 201, title: "La plaça del Diamant", author: "Mercè Rodoreda", coverUrl: "", rating: "4,8", votes: "5000", duration: "8h 20m", cat: "Clàssic", exclusive: true, lang: "ca", desc: "La història de la Colometa, un símbol de la resistència i la vida quotidiana a la Barcelona de postguerra." },
+            { id: 202, title: "Mirall trencat", author: "Mercè Rodoreda", coverUrl: "", rating: "4,7", votes: "4200", duration: "12h 15m", cat: "Clàssic", exclusive: false, lang: "ca", desc: "L'auge i la caiguda d'una família benestant de Barcelona." },
+            { id: 203, title: "Camí de sirga", author: "Jesús Moncada", coverUrl: "", rating: "4,9", votes: "3100", duration: "14h 30m", cat: "Històrica", exclusive: true, lang: "ca", desc: "La vida a Mequinensa abans de ser submergida per les aigües del pantà." },
+            { id: 204, title: "La pell freda", author: "Albert Sánchez Piñol", coverUrl: "", rating: "4,6", votes: "6000", duration: "9h 45m", cat: "Ficció", exclusive: false, lang: "ca", desc: "Un far, una illa deserta i criatures misterioses que surten del mar." },
+            { id: 205, title: "Jo confesso", author: "Jaume Cabré", coverUrl: "", rating: "4,9", votes: "4500", duration: "28h 10m", cat: "Ficció", exclusive: true, lang: "ca", desc: "Una obra monumental sobre el mal, la culpa i la música." },
+            { id: 206, title: "Victus", author: "Albert Sánchez Piñol", coverUrl: "", rating: "4,7", votes: "5800", duration: "18h 20m", cat: "Històrica", exclusive: false, lang: "ca", desc: "Barcelona, 1714. El setge que va canviar la història." },
+            { id: 207, title: "El violí d'Auschwitz", author: "Maria Àngels Anglada", coverUrl: "", rating: "4,5", votes: "3200", duration: "4h 10m", cat: "Històrica", exclusive: false, lang: "ca", desc: "La música com a esperança enmig de l'horror." },
+            { id: 208, title: "Aloma", author: "Mercè Rodoreda", coverUrl: "", rating: "4,4", votes: "2900", duration: "5h 30m", cat: "Clàssic", exclusive: false, lang: "ca", desc: "El pas de l'adolescència a la maduresa en una Barcelona prebèl·lica." },
+            { id: 209, title: "Les veus del Pamano", author: "Jaume Cabré", coverUrl: "", rating: "4,8", votes: "3800", duration: "22h 15m", cat: "Misteri", exclusive: true, lang: "ca", desc: "Secrets del passat que ressonen en el present a les valls del Pirineu." },
+            { id: 210, title: "Canto jo i la muntanya balla", author: "Irene Solà", coverUrl: "", rating: "4,7", votes: "4100", duration: "6h 40m", cat: "Ficció", exclusive: false, lang: "ca", desc: "Una història on parlen les dones, els homes, els fantasmes i la terra mateixa." },
+
+            // --- SERIES (Más ejemplos) ---
+            { id: 301, title: "Harry Potter y el cáliz de fuego", author: "J.K. Rowling", coverUrl: "", rating: "4,9", votes: "15200", duration: "20h 10m", cat: "Fantasía", exclusive: true, lang: "es", isSeries: true, isKids: true, desc: "El Torneo de los Tres Magos trae peligros mortales a Hogwarts." },
+            { id: 302, title: "Harry Potter y la Orden del Fénix", author: "J.K. Rowling", coverUrl: "", rating: "4,8", votes: "14800", duration: "25h 30m", cat: "Fantasía", exclusive: true, lang: "es", isSeries: true, isKids: true, desc: "La rebelión comienza en el año más oscuro de Harry." },
+            { id: 303, title: "Harry Potter y el misterio del príncipe", author: "J.K. Rowling", coverUrl: "", rating: "4,9", votes: "15100", duration: "18h 20m", cat: "Fantasía", exclusive: true, lang: "es", isSeries: true, isKids: true, desc: "Voldemort aprieta su cerco sobre el mundo muggle y mágico." },
+            { id: 304, title: "Harry Potter y las Reliquias de la Muerte", author: "J.K. Rowling", coverUrl: "", rating: "4,9", votes: "16000", duration: "21h 15m", cat: "Fantasía", exclusive: true, lang: "es", isSeries: true, isKids: true, desc: "El final épico de la saga. Todo termina aquí." },
+            { id: 305, title: "Canción de Hielo y Fuego: Festín de Cuervos", author: "George R.R. Martin", coverUrl: "", rating: "4,6", votes: "17000", duration: "32h 10m", cat: "Fantasía", exclusive: false, lang: "es", isSeries: true, desc: "La guerra ha dejado Poniente diezmado, pero nuevas amenazas surgen." },
+            { id: 306, title: "Canción de Hielo y Fuego: Danza de Dragones", author: "George R.R. Martin", coverUrl: "", rating: "4,7", votes: "17500", duration: "38h 40m", cat: "Fantasía", exclusive: false, lang: "es", isSeries: true, desc: "El destino de los dragones y del Norte se decide ahora." },
+            { id: 307, title: "Trilogía del Baztán: El guardián invisible", author: "Dolores Redondo", coverUrl: "", rating: "4,7", votes: "9500", duration: "12h 30m", cat: "Thriller", exclusive: true, lang: "es", isSeries: true, desc: "Amaia Salazar investiga un crimen en los bosques de Navarra." },
+            { id: 308, title: "Trilogía del Baztán: Legado en los huesos", author: "Dolores Redondo", coverUrl: "", rating: "4,8", votes: "9200", duration: "13h 15m", cat: "Thriller", exclusive: true, lang: "es", isSeries: true, desc: "El peligro acecha más cerca de lo que Amaia imagina." },
+            { id: 309, title: "Trilogía del Baztán: Ofrenda a la tormenta", author: "Dolores Redondo", coverUrl: "", rating: "4,8", votes: "9800", duration: "14h 20m", cat: "Thriller", exclusive: true, lang: "es", isSeries: true, desc: "El desenlace trepidante de la trilogía del Baztán." },
+            { id: 310, title: "Reina Roja", author: "Juan Gómez-Jurado", coverUrl: "", rating: "4,9", votes: "18000", duration: "10h 50m", cat: "Thriller", exclusive: false, lang: "es", isSeries: true, desc: "Antonia Scott es la persona más inteligente de la Tierra. Y eso es un problema." },
+            { id: 311, title: "Loba Negra", author: "Juan Gómez-Jurado", coverUrl: "", rating: "4,8", votes: "16500", duration: "11h 20m", cat: "Thriller", exclusive: false, lang: "es", isSeries: true, desc: "La continuación de Reina Roja. Más peligro, más acción." },
+            { id: 312, title: "Rey Blanco", author: "Juan Gómez-Jurado", coverUrl: "", rating: "4,9", votes: "17000", duration: "11h 45m", cat: "Thriller", exclusive: false, lang: "es", isSeries: true, desc: "El final de la trilogía. No podrás parar de escuchar." }
+        ];
+
+        // --- ESTADO ---
+        let isLogged = false;
+        let isPlaying = false;
+        let isRegisterMode = false;
+        let currentFilter = 'all';
+        let searchQuery = '';
+        let currentBookId = null;
+        let audioProgress = 0; // 0 to 100
+        let audioInterval = null;
+        let isKidsMode = false; // Estado local sincronizado con localStorage
+
+        // Hero carousel state
+        let currentHeroIndex = 0;
+        let heroInterval = null;
+        const featuredBooks = [1, 5, 6, 8, 12, 20]; // IDs of featured books for hero rotation
+
+        // --- INICIO ---
+        // --- INICIO ---
+        window.onload = () => {
+            lucide.createIcons();
+
+            // Cargar estado Kids Mode
+            isKidsMode = localStorage.getItem('kids_mode') === 'true';
+            if (isKidsMode) {
+                document.getElementById('kids-switch').classList.add('active');
+            }
+
+            // Generar grids iniciales
+            renderLandingGrid(40);
+            renderHomeLists();
+            renderFilteredBooks();
+
+            // Cargar portadas desde API
+            fetchBookCovers();
+
+            // Chequear Login
+            checkSession();
+
+            // Iniciar rotación automática del hero
+            startHeroRotation();
+
+            console.log("App ready. Loading book covers from API...");
+        };
+
+        // --- API IMÁGENES ---
+        async function fetchBookCovers() {
+            console.log('Fetching book covers from Open Library API...');
+
+            for (let book of books) {
+                try {
+                    // Primero intentar búsqueda por título y autor
+                    const searchResponse = await fetch(`https://openlibrary.org/search.json?title=${encodeURIComponent(book.title)}&author=${encodeURIComponent(book.author)}&limit=1&fields=key,title,author_name,cover_i,isbn`);
+                    const searchData = await searchResponse.json();
+
+                    if (searchData.docs && searchData.docs.length > 0) {
+                        const result = searchData.docs[0];
+
+                        if (result.cover_i) {
+                            // Usar cover_id de Open Library
+                            const coverUrl = `https://covers.openlibrary.org/b/id/${result.cover_i}-L.jpg`;
+                            book.coverUrl = coverUrl;
+                            updateBookImageInDOM(book.id, coverUrl);
+
+                            // Si es el libro 1, actualizar Hero y mini player
+                            if (book.id === 1) {
+                                updateHeroBackground(coverUrl);
+                                document.getElementById('mp-cover').style.backgroundImage = `url('${coverUrl}')`;
+                            }
+
+                            console.log(`✓ Found cover for "${book.title}"`);
+                        } else if (result.isbn && result.isbn.length > 0) {
+                            // Intentar por ISBN si no hay cover_i
+                            const isbn = result.isbn[0];
+                            const isbnUrl = `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg`;
+
+                            // Verificar si la imagen existe
+                            const imgTest = new Image();
+                            imgTest.onload = () => {
+                                book.coverUrl = isbnUrl;
+                                updateBookImageInDOM(book.id, isbnUrl);
+                                if (book.id === 1) {
+                                    updateHeroBackground(isbnUrl);
+                                    document.getElementById('mp-cover').style.backgroundImage = `url('${isbnUrl}')`;
+                                }
+                                console.log(`✓ Found ISBN cover for "${book.title}"`);
+                            };
+                            imgTest.onerror = () => {
+                                console.log(`✗ No cover found for "${book.title}"`);
+                            };
+                            imgTest.src = isbnUrl;
+                        } else {
+                            console.log(`✗ No cover data for "${book.title}"`);
+                        }
+                    } else {
+                        // Intentar búsqueda más amplia solo por título
+                        const titleSearchResponse = await fetch(`https://openlibrary.org/search.json?title=${encodeURIComponent(book.title)}&limit=3&fields=key,title,author_name,cover_i,isbn`);
+                        const titleSearchData = await titleSearchResponse.json();
+
+                        if (titleSearchData.docs && titleSearchData.docs.length > 0) {
+                            // Buscar coincidencia más cercana por autor
+                            let bestMatch = titleSearchData.docs[0];
+                            for (let doc of titleSearchData.docs) {
+                                if (doc.author_name && doc.author_name.some(author =>
+                                    author.toLowerCase().includes(book.author.toLowerCase().split(' ')[0]) ||
+                                    book.author.toLowerCase().includes(author.toLowerCase())
+                                )) {
+                                    bestMatch = doc;
+                                    break;
+                                }
+                            }
+
+                            if (bestMatch.cover_i) {
+                                const coverUrl = `https://covers.openlibrary.org/b/id/${bestMatch.cover_i}-L.jpg`;
+                                book.coverUrl = coverUrl;
+                                updateBookImageInDOM(book.id, coverUrl);
+                                if (book.id === 1) {
+                                    updateHeroBackground(coverUrl);
+                                    document.getElementById('mp-cover').style.backgroundImage = `url('${coverUrl}')`;
+                                }
+                                console.log(`✓ Found alternative cover for "${book.title}"`);
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error(`Error fetching cover for "${book.title}":`, error);
+                }
+
+                // Pequeña pausa para no sobrecargar la API
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+
+            console.log('Book cover loading completed');
+        }
+
+        function updateBookImageInDOM(id, url) {
+            // Actualizar en listas home
+            const els = document.querySelectorAll(`.book-cover-${id}`);
+            els.forEach(el => el.style.backgroundImage = `url('${url}')`);
+
+            // Actualizar en landing (aleatorio)
+            const landingItems = document.querySelectorAll('.landing-item');
+            // Simple update logic for landing grid visual effect
+            if (landingItems.length > 0) {
+                // Randomly update some landing items to populate grid with loaded covers
+                const randomIdx = Math.floor(Math.random() * landingItems.length);
+                landingItems[randomIdx].style.backgroundImage = `url('${url}')`;
+            }
+        }
+
+        function updateHeroBackground(url) {
+            // Inject dynamic style rule for pseudo element
+            const style = document.createElement('style');
+            style.innerHTML = `.hero-card::before { background-image: url('${url}') !important; }`;
+            document.head.appendChild(style);
+        }
+
+        // --- SESIÓN ---
+        function checkSession() {
+            const session = localStorage.getItem('storytel_user');
+            if (session) {
+                isLogged = true;
+                document.getElementById('view-landing').classList.add('hidden');
+                document.getElementById('view-app').classList.remove('hidden');
+                updateProfileUI();
+            } else {
+                isLogged = false;
+                // Si estamos en landing, ok. Si estamos en app, asegurar estado.
+                updateProfileUI();
+            }
+        }
+
+        function performLogin() {
+            const email = document.getElementById('input-email').value;
+            const password = document.getElementById('input-pass').value;
+            const errorMsg = document.getElementById('error-message');
+
+            // Validación básica
+            if (!email || !password) {
+                errorMsg.textContent = 'Por favor, completa todos los campos';
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            if (!validateEmail(email)) {
+                errorMsg.textContent = 'Por favor, ingresa un correo válido';
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            if (password.length < 6) {
+                errorMsg.textContent = 'La contraseña debe tener al menos 6 caracteres';
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            // Verificar si el usuario existe (simulado)
+            const users = JSON.parse(localStorage.getItem('storytel_users') || '{}');
+
+            if (users[email]) {
+                // Login exitoso
+                localStorage.setItem('storytel_user', email);
+                localStorage.setItem('storytel_name', users[email].name);
+                isLogged = true;
+                closeLogin();
+                document.getElementById('view-landing').classList.add('hidden');
+                document.getElementById('view-app').classList.remove('hidden');
+                updateProfileUI();
+                navTo('home');
+            } else {
+                errorMsg.textContent = 'Usuario no encontrado. ¿Quieres registrarte?';
+                errorMsg.style.display = 'block';
+            }
+        }
+
+        function performLogout() {
+            localStorage.removeItem('storytel_user');
+            isLogged = false;
+            localStorage.removeItem('kids_mode');
+            document.getElementById('kids-switch').classList.remove('active');
+            navTo('landing');
+        }
+
+        function guestLogin() {
+            isLogged = false;
+            document.getElementById('view-landing').classList.add('hidden');
+            document.getElementById('view-app').classList.remove('hidden');
+            navTo('home');
+        }
+
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+
+        function switchToRegister() {
+            isRegisterMode = !isRegisterMode;
+            const title = document.getElementById('auth-title');
+            const desc = document.getElementById('auth-desc');
+            const submitBtn = document.getElementById('auth-submit-btn');
+            const switchBtn = document.getElementById('auth-switch-btn');
+            const recoveryBtn = document.getElementById('auth-recovery-btn');
+            const passConfirm = document.getElementById('input-pass-confirm');
+            const nameField = document.getElementById('input-name');
+            const errorMsg = document.getElementById('error-message');
+
+            errorMsg.style.display = 'none';
+
+            if (isRegisterMode) {
+                title.innerText = 'Crear cuenta';
+                desc.innerText = 'Regístrate para acceder a todos los contenidos';
+                submitBtn.innerText = 'Registrarse';
+                submitBtn.onclick = performRegister;
+                switchBtn.innerText = '¿Ya tienes cuenta? Inicia sesión';
+                recoveryBtn.style.display = 'none';
+                passConfirm.style.display = 'block';
+                nameField.style.display = 'block';
+            } else {
+                title.innerText = 'Bienvenido';
+                desc.innerText = 'Ingresa tus datos para continuar';
+                submitBtn.innerText = 'Iniciar Sesión';
+                submitBtn.onclick = performLogin;
+                switchBtn.innerText = '¿No tienes cuenta? Regístrate';
+                recoveryBtn.style.display = 'block';
+                passConfirm.style.display = 'none';
+                nameField.style.display = 'none';
+            }
+        }
+
+        function performRegister() {
+            const email = document.getElementById('input-email').value;
+            const password = document.getElementById('input-pass').value;
+            const passwordConfirm = document.getElementById('input-pass-confirm').value;
+            const name = document.getElementById('input-name').value;
+            const errorMsg = document.getElementById('error-message');
+
+            // Validación
+            if (!email || !password || !passwordConfirm || !name) {
+                errorMsg.textContent = 'Por favor, completa todos los campos';
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            if (!validateEmail(email)) {
+                errorMsg.textContent = 'Por favor, ingresa un correo válido';
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            if (password.length < 6) {
+                errorMsg.textContent = 'La contraseña debe tener al menos 6 caracteres';
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            if (password !== passwordConfirm) {
+                errorMsg.textContent = 'Las contraseñas no coinciden';
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            // Verificar si el usuario ya existe
+            const users = JSON.parse(localStorage.getItem('storytel_users') || '{}');
+            if (users[email]) {
+                errorMsg.textContent = 'Este correo ya está registrado';
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            // Crear nuevo usuario
+            users[email] = {
+                name: name,
+                password: btoa(password), // Simple encoding (no production)
+                registeredAt: new Date().toISOString()
+            };
+
+            localStorage.setItem('storytel_users', JSON.stringify(users));
+
+            // Login automático
+            localStorage.setItem('storytel_user', email);
+            localStorage.setItem('storytel_name', name);
+            isLogged = true;
+            closeLogin();
+            document.getElementById('view-landing').classList.add('hidden');
+            document.getElementById('view-app').classList.remove('hidden');
+            updateProfileUI();
+            navTo('home');
+        }
+
+        function showPasswordRecovery() {
+            const title = document.getElementById('auth-title');
+            const desc = document.getElementById('auth-desc');
+            const submitBtn = document.getElementById('auth-submit-btn');
+            const switchBtn = document.getElementById('auth-switch-btn');
+            const recoveryBtn = document.getElementById('auth-recovery-btn');
+            const passConfirm = document.getElementById('input-pass-confirm');
+            const nameField = document.getElementById('input-name');
+            const passField = document.getElementById('input-pass');
+            const errorMsg = document.getElementById('error-message');
+
+            // Hide password and confirm fields
+            passField.style.display = 'none';
+            passConfirm.style.display = 'none';
+            nameField.style.display = 'none';
+            recoveryBtn.style.display = 'none';
+
+            title.innerText = 'Recuperar contraseña';
+            desc.innerText = 'Ingresa tu correo y te enviaremos las instrucciones';
+            submitBtn.innerText = 'Enviar correo';
+            submitBtn.onclick = performPasswordRecovery;
+            switchBtn.innerText = 'Volver al login';
+            errorMsg.style.display = 'none';
+        }
+
+        function performPasswordRecovery() {
+            const email = document.getElementById('input-email').value;
+            const errorMsg = document.getElementById('error-message');
+
+            if (!email) {
+                errorMsg.textContent = 'Por favor, ingresa tu correo electrónico';
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            if (!validateEmail(email)) {
+                errorMsg.textContent = 'Por favor, ingresa un correo válido';
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            // Verificar si el usuario existe
+            const users = JSON.parse(localStorage.getItem('storytel_users') || '{}');
+
+            if (users[email]) {
+                // Simular envío de correo
+                errorMsg.textContent = `Se ha enviado un correo de recuperación a ${email}. (Simulado)`;
+                errorMsg.style.color = '#4CAF50';
+                errorMsg.style.display = 'block';
+
+                // Guardar código de recuperación (simulado)
+                const recoveryCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+                localStorage.setItem('recovery_code', recoveryCode);
+                localStorage.setItem('recovery_email', email);
+
+                setTimeout(() => {
+                    showCodeVerification();
+                }, 2000);
+            } else {
+                errorMsg.textContent = 'Este correo no está registrado en nuestro sistema';
+                errorMsg.style.color = '#ff4f30';
+                errorMsg.style.display = 'block';
+            }
+        }
+
+        function showCodeVerification() {
+            const title = document.getElementById('auth-title');
+            const desc = document.getElementById('auth-desc');
+            const submitBtn = document.getElementById('auth-submit-btn');
+            const switchBtn = document.getElementById('auth-switch-btn');
+            const emailField = document.getElementById('input-email');
+            const errorMsg = document.getElementById('error-message');
+
+            emailField.style.display = 'none';
+
+            title.innerText = 'Verificar código';
+            desc.innerText = 'Ingresa el código de 6 dígitos que recibiste en tu correo';
+            submitBtn.innerText = 'Verificar';
+            submitBtn.onclick = verifyRecoveryCode;
+            switchBtn.innerText = 'Volver';
+
+            // Add code input field
+            const codeInput = document.createElement('input');
+            codeInput.type = 'text';
+            codeInput.id = 'input-code';
+            codeInput.className = 'input-line';
+            codeInput.placeholder = 'Código de 6 dígitos';
+            codeInput.maxLength = 6;
+            codeInput.style.display = 'block';
+
+            // Insert after email field
+            emailField.parentNode.insertBefore(codeInput, emailField.nextSibling);
+        }
+
+        function verifyRecoveryCode() {
+            const code = document.getElementById('input-code').value;
+            const storedCode = localStorage.getItem('recovery_code');
+            const errorMsg = document.getElementById('error-message');
+
+            if (code === storedCode) {
+                errorMsg.textContent = 'Código verificado. Redirigiendo...';
+                errorMsg.style.color = '#4CAF50';
+                errorMsg.style.display = 'block';
+
+                // Clear recovery data
+                localStorage.removeItem('recovery_code');
+                localStorage.removeItem('recovery_email');
+
+                setTimeout(() => {
+                    resetLoginForm();
+                }, 1500);
+            } else {
+                errorMsg.textContent = 'Código incorrecto. Intenta nuevamente.';
+                errorMsg.style.color = '#ff4f30';
+                errorMsg.style.display = 'block';
+            }
+        }
+
+        function resetLoginForm() {
+            // Remove code input if exists
+            const codeInput = document.getElementById('input-code');
+            if (codeInput) codeInput.remove();
+
+            // Reset all fields
+            document.getElementById('input-email').value = '';
+            document.getElementById('input-pass').value = '';
+            document.getElementById('input-pass-confirm').value = '';
+            document.getElementById('input-name').value = '';
+
+            // Show all fields again
+            document.getElementById('input-email').style.display = 'block';
+            document.getElementById('input-pass').style.display = 'block';
+
+            // Reset to login mode
+            isRegisterMode = false;
+            switchToRegister();
+
+            const errorMsg = document.getElementById('error-message');
+            errorMsg.textContent = 'Contraseña recuperada exitosamente. Puedes iniciar sesión.';
+            errorMsg.style.color = '#4CAF50';
+            errorMsg.style.display = 'block';
+        }
+
+        function openLogin() {
+            document.getElementById('auth-title').innerText = "Bienvenido";
+            document.getElementById('auth-desc').innerText = "Ingresa tus datos para continuar";
+            document.getElementById('login-modal').classList.remove('hidden');
+        }
+
+        function openRegister() {
+            // Open modal in register mode
+            document.getElementById('login-modal').classList.remove('hidden');
+            if (!isRegisterMode) {
+                switchToRegister();
+            }
+        }
+
+        function closeLogin() {
+            document.getElementById('login-modal').classList.add('hidden');
+        }
+
+        // --- NAVEGACIÓN ---
+
+
+        function restrictedAction() {
+            // SHOW TOAST ALERT
+            showToast('Debes iniciar sesión para acceder a este contenido');
+        }
+
+        function showToast(message) {
+            // Crear elemento toast si no existe
+            let toast = document.getElementById('toast-alert');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'toast-alert';
+                toast.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    left: 50%;
+                    transform: translateX(-50%) translateY(-100px);
+                    background: #FF4F30;
+                    color: white;
+                    padding: 12px 24px;
+                    border-radius: 30px;
+                    font-weight: 600;
+                    z-index: 1000;
+                    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+                    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                `;
+                toast.innerHTML = `<i data-lucide="alert-circle" size="20"></i> <span></span>`;
+                document.body.appendChild(toast);
+                lucide.createIcons();
+            }
+
+            toast.querySelector('span').innerText = message;
+            toast.style.transform = 'translateX(-50%) translateY(20px)';
+
+            setTimeout(() => {
+                toast.style.transform = 'translateX(-50%) translateY(-100px)';
+            }, 3000);
+        }
+
+
+
+        function filterByCategory(category) {
+            currentFilter = category;
+
+            // Update active pill
+            document.querySelectorAll('.pill').forEach(pill => pill.classList.remove('active'));
+            event.target.classList.add('active');
+
+            renderFilteredBooks();
+        }
+
+        function searchBooks(query) {
+            searchQuery = query.toLowerCase();
+            renderFilteredBooks();
+        }
+
+        function renderFilteredBooks() {
+            let filteredBooks = books;
+
+            // Apply category filter
+            if (currentFilter !== 'all') {
+                filteredBooks = filteredBooks.filter(book => {
+                    if (currentFilter === 'Series') return book.isSeries === true;
+
+                    if (currentFilter === 'In English') return book.lang === 'en';
+                    if (currentFilter === 'En català') return book.lang === 'ca';
+                    return true;
+                });
+            }
+
+            // Apply search filter
+            if (searchQuery) {
+                filteredBooks = filteredBooks.filter(book =>
+                    book.title.toLowerCase().includes(searchQuery) ||
+                    book.author.toLowerCase().includes(searchQuery) ||
+                    book.cat.toLowerCase().includes(searchQuery)
+                );
+            }
+
+            renderHomeListsWithBooks(filteredBooks);
+        }
+
+        function renderHomeListsWithBooks(bookList) {
+            // Si Kids Mode está activo, filtrar extra por seguridad
+            if (isKidsMode) {
+                bookList = bookList.filter(b => b.isKids === true);
+            }
+
+            const topList = document.getElementById('list-top50');
+            const startList = document.getElementById('list-start');
+
+            let topHTML = '';
+            bookList.forEach((b, i) => {
+                const ex = b.exclusive ? '<div class="ex-badge">Solo en Storytel</div>' : '';
+                topHTML += `
+                    <div class="book-card" onclick="tryOpenDetail(${b.id})">
+                        <div class="cover-wrap">
+                            <div class="cover-img book-cover-${b.id}" style="background-color:#333"></div>
+                            ${ex}
+                            <div class="logo-badge-sm" style="position:absolute; bottom:6px; right:6px; width:22px; height:22px; background:rgba(255,255,255,0.9); border-radius:50%; display:flex; align-items:center; justify-content:center">
+                                <svg viewBox="0 0 24 24" fill="#1E90FF" style="width:12px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                            </div>
+                            <div class="rank-badge">${i + 1}</div>
+                        </div>
+                        <div style="font-weight:700; font-size:0.9rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-top:15px">${b.title}</div>
+                        <div style="font-size:0.8rem; color:#aaa">${b.author}</div>
+                        <div style="font-size:0.7rem; color:#777">Audio • ${b.duration}</div>
+                    </div>`;
+            });
+            topList.innerHTML = topHTML;
+
+            let startHTML = '';
+            [...bookList].reverse().slice(0, 8).forEach(b => {
+                startHTML += `
+                    <div class="book-card" onclick="tryOpenDetail(${b.id})">
+                        <div class="cover-wrap">
+                            <div class="cover-img book-cover-${b.id}" style="background-color:#333"></div>
+                        </div>
+                        <div style="font-weight:700; font-size:0.9rem; margin-top:5px">${b.title}</div>
+                        <div style="font-size:0.8rem; color:#aaa">${b.author}</div>
+                    </div>`;
+            });
+            startList.innerHTML = startHTML;
+
+            // Load images for filtered books
+            bookList.forEach(book => {
+                if (book.coverUrl) {
+                    updateBookImageInDOM(book.id, book.coverUrl);
+                }
+            });
+        }
+
+        function renderHomeLists() {
+            const topList = document.getElementById('list-top50');
+            const startList = document.getElementById('list-start');
+
+            let topHTML = '';
+            books.forEach((b, i) => {
+                const ex = b.exclusive ? '<div class="ex-badge">Solo en Storytel</div>' : '';
+                topHTML += `
+                    <div class="book-card" onclick="tryOpenDetail(${b.id})">
+                        <div class="cover-wrap">
+                            <div class="cover-img book-cover-${b.id}" style="background-color:#333"></div>
+                            ${ex}
+                            <div class="logo-badge-sm" style="position:absolute; bottom:6px; right:6px; width:22px; height:22px; background:rgba(255,255,255,0.9); border-radius:50%; display:flex; align-items:center; justify-content:center">
+                                <svg viewBox="0 0 24 24" fill="#1E90FF" style="width:12px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                            </div>
+                            <div class="rank-badge">${i + 1}</div>
+                        </div>
+                        <div style="font-weight:700; font-size:0.9rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-top:15px">${b.title}</div>
+                        <div style="font-size:0.8rem; color:#aaa">${b.author}</div>
+                        <div style="font-size:0.7rem; color:#777">Audio • ${b.duration}</div>
+                    </div>`;
+            });
+            topList.innerHTML = topHTML;
+
+            let startHTML = '';
+            [...books].reverse().forEach(b => {
+                startHTML += `
+                    <div class="book-card" onclick="tryOpenDetail(${b.id})">
+                        <div class="cover-wrap">
+                            <div class="cover-img book-cover-${b.id}" style="background-color:#333"></div>
+                        </div>
+                        <div style="font-weight:700; font-size:0.9rem; margin-top:5px">${b.title}</div>
+                        <div style="font-size:0.8rem; color:#aaa">${b.author}</div>
+                    </div>`;
+            });
+            startList.innerHTML = startHTML;
+        }
+
+        // --- NAVEGACIÓN ---
+        function navTo(page) {
+            if (page === 'landing') {
+                document.getElementById('view-landing').classList.remove('hidden');
+                document.getElementById('view-app').classList.add('hidden');
+                return;
+            }
+
+            ['page-home', 'page-detail', 'page-profile', 'page-favorites'].forEach(id => document.getElementById(id).classList.add('hidden'));
+
+            // Mostrar barra nav solo en Home, Perfil y Favoritos
+            document.getElementById('nav-bar').classList.remove('hidden');
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+
+            if (page === 'home') {
+                document.getElementById('page-home').classList.remove('hidden');
+                document.getElementById('nav-home').classList.add('active');
+                renderHomeLists(); // Refresh lists
+            } else if (page === 'profile') {
+                if (!isLogged) {
+                    restrictedAction();
+                    // No cambiar de página si no está logueado
+                    return;
+                }
+                document.getElementById('page-profile').classList.remove('hidden');
+                document.getElementById('nav-profile').classList.add('active');
+                updateProfileUI();
+            } else if (page === 'favorites') {
+                if (!isLogged) {
+                    restrictedAction();
+                    return;
+                }
+                document.getElementById('page-favorites').classList.remove('hidden');
+                renderFavorites();
+            }
+            window.scrollTo(0, 0);
+        }
+
+        function renderFavorites() {
+            const grid = document.getElementById('favorites-grid');
+            const noFavs = document.getElementById('no-favorites');
+
+            // Encontrar libros guardados
+            const savedBooks = books.filter(b => localStorage.getItem(`saved_${b.id}`) === 'true');
+
+            if (savedBooks.length === 0) {
+                grid.innerHTML = '';
+                noFavs.classList.remove('hidden');
+                return;
+            }
+
+            noFavs.classList.add('hidden');
+            let html = '';
+            savedBooks.forEach(b => {
+                html += `
+                    <div class="book-card" onclick="openBookDetail(${b.id})" style="width:100%">
+                        <div class="cover-wrap">
+                            <div class="cover-img book-cover-${b.id}" style="background-image:url('${b.coverUrl}'); background-color:#333"></div>
+                        </div>
+                        <div style="font-weight:700; font-size:0.9rem; margin-top:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">${b.title}</div>
+                        <div style="font-size:0.8rem; color:#aaa">${b.author}</div>
+                    </div>`;
+            });
+            grid.innerHTML = html;
+        }
+
+        function tryOpenDetail(id) {
+            if (!isLogged) {
+                restrictedAction();
+            } else {
+                openBookDetail(id);
+            }
+        }
+
+        function openBookDetail(id) {
+            const book = books.find(b => b.id === id);
+            if (!book) return;
+
+            // Ocultar Nav Inferior en detalle
+            document.getElementById('nav-bar').classList.add('hidden');
+
+            const isSaved = localStorage.getItem(`saved_${id}`) === 'true';
+            const heartIcon = isSaved ? `<i data-lucide="heart" fill="#FF4F30" size="16"></i> Guardado` : `<i data-lucide="heart" size="16"></i> Guardar`;
+            const heartClass = isSaved ? 'text-orange' : '';
+
+            // Usar URL de la API si existe, sino un placeholder gris oscuro
+            const bgStyle = book.coverUrl ? `background-image: url('${book.coverUrl}')` : `background-color: #333`;
+
+            document.getElementById('detail-content').innerHTML = `
+                <div class="cover-large" style="${bgStyle}">
+                    ${book.exclusive ? '<div class="ex-badge" style="position:absolute; top:0; right:0; font-size:0.7rem; padding:6px 12px; border-radius:0 8px 0 8px">Solo en Storytel</div>' : ''}
+                    <div class="logo-badge-sm" style="position:absolute; bottom:10px; right:10px; width:32px; height:32px; background:rgba(255,255,255,0.9); border-radius:50%; display:flex; align-items:center; justify-content:center">
+                        <svg viewBox="0 0 24 24" fill="#1E90FF" style="width:20px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    </div>
+                </div>
+                
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; padding:0 10px">
+                    <div style="display:flex; gap:5px; align-items:center; color:var(--orange); font-weight:bold">
+                        <i data-lucide="star" fill="var(--orange)" size="16"></i> ${book.rating} 
+                        <span style="color:#999; font-weight:400">(${book.votes})</span>
+                    </div>
+                    <div onclick="toggleSaved(this, ${book.id})" class="${heartClass}" style="display:flex; gap:5px; align-items:center; background:#222; padding:6px 14px; border-radius:20px; cursor:pointer; border:1px solid #333; transition:0.2s">
+                        ${heartIcon}
+                    </div>
+                </div>
+
+                <h1 style="font-size:1.8rem; text-align:left; line-height:1.2; margin-bottom:8px">${book.title}</h1>
+                <div style="text-align:left; color:#aaa; font-size:0.95rem; margin-bottom:20px">
+                    Por: <span style="color:white">${book.author}</span>
+                </div>
+
+                <button class="play-btn-big" onclick="openPlayer()">
+                    <i id="play-icon-big" data-lucide="${isPlaying ? 'pause' : 'play'}" fill="black"></i> ${isPlaying ? 'Pausar' : 'Escuchar'}
+                </button>
+
+                <div class="meta-grid">
+                    <div class="meta-item"><span>Idioma</span><span class="meta-val"><i data-lucide="globe" size="14"></i> Español</span></div>
+                    <div class="meta-item"><span>Duración</span><span class="meta-val"><i data-lucide="clock" size="14"></i> ${book.duration}</span></div>
+                    <div class="meta-item"><span>Categoría</span><span class="meta-val">${book.cat} <i data-lucide="chevron-right" size="14"></i></span></div>
+                </div>
+
+                <p style="text-align:left; color:#ccc; line-height:1.6; margin-bottom:40px">${book.desc}</p>
+            `;
+
+            // Update Mini Player immediately when opening detail
+            currentBookId = book.id;
+            document.getElementById('mp-title').innerText = book.title;
+            if (book.coverUrl) document.getElementById('mp-cover').style.backgroundImage = `url('${book.coverUrl}')`;
+
+            // Show Mini Player only if logged in
+            if (isLogged) {
+                document.getElementById('mini-player').classList.remove('hidden-mp');
+            }
+
+            // Update Full Player State
+            loadBookIntoPlayer(book);
+
+            lucide.createIcons();
+
+            ['page-home', 'page-profile', 'page-favorites'].forEach(id => document.getElementById(id).classList.add('hidden'));
+            document.getElementById('page-detail').classList.remove('hidden');
+            window.scrollTo(0, 0);
+        }
+
+        // --- UTILS ---
+        function updateProfileUI() {
+            const name = isLogged ? localStorage.getItem('storytel_name') || localStorage.getItem('storytel_user').split('@')[0] : '¡Hola!';
+            document.getElementById('profile-name').innerText = isLogged ? `¡Hola, ${name}!` : '¡Hola!';
+
+            const navProfile = document.getElementById('nav-profile');
+            const headerLoginBtn = document.getElementById('header-login-btn');
+
+            if (isLogged) {
+                document.getElementById('profile-guest-actions').classList.add('hidden');
+                document.getElementById('profile-user-actions').classList.remove('hidden');
+
+                // Show Profile Nav, Hide Header Login
+                if (navProfile) navProfile.style.display = 'flex';
+                if (headerLoginBtn) headerLoginBtn.style.display = 'none';
+            } else {
+                document.getElementById('profile-guest-actions').classList.remove('hidden');
+                document.getElementById('profile-user-actions').classList.add('hidden');
+
+                // Hide Profile Nav, Show Header Login
+                if (navProfile) navProfile.style.display = 'none';
+                if (headerLoginBtn) headerLoginBtn.style.display = 'block';
+            }
+        }
+
+        function toggleKidsMode() {
+            const el = document.getElementById('kids-switch');
+            el.classList.toggle('active');
+            const isActive = el.classList.contains('active');
+            localStorage.setItem('kids_mode', isActive);
+        }
+
+        function performLogout() {
+            localStorage.removeItem('storytel_user');
+            localStorage.removeItem('storytel_name');
+            isLogged = false;
+            currentBookId = null;
+
+            // Hide mini-player on logout
+            document.getElementById('mini-player').classList.add('hidden-mp');
+
+            updateProfileUI();
+            navTo('home');
+        }
+
+        function scrollRow(id, amount) {
+            const row = document.getElementById(id);
+            if (row) {
+                row.scrollBy({ left: amount, behavior: 'smooth' });
+            }
+        }
+
+        function toggleSaved(el, id) {
+            el.classList.toggle('text-orange');
+            const isSaved = el.classList.contains('text-orange');
+            localStorage.setItem(`saved_${id}`, isSaved);
+            el.innerHTML = isSaved ? `<i data-lucide="heart" fill="#FF4F30" size="16"></i> Guardado` : `<i data-lucide="heart" size="16"></i> Guardar`;
+            lucide.createIcons();
+        }
+
+        function togglePlay() {
+            if (!isLogged) {
+                restrictedAction();
+                return;
+            }
+
+            isPlaying = !isPlaying;
+            updatePlayIcons();
+
+            if (isPlaying) {
+                // Simular reproducción
+                if (!audioInterval) {
+                    audioInterval = setInterval(() => {
+                        audioProgress += 0.1; // avance rápido para demo
+                        if (audioProgress >= 100) {
+                            audioProgress = 0;
+                            isPlaying = false;
+                            updatePlayIcons();
+                            clearInterval(audioInterval);
+                            audioInterval = null;
+                        }
+                        updateProgressBar();
+                    }, 1000);
+                }
+            } else {
+                if (audioInterval) {
+                    clearInterval(audioInterval);
+                    audioInterval = null;
+                }
+            }
+        }
+
+        function openPlayer() {
+            document.getElementById('view-player').classList.add('active');
+        }
+
+        function closePlayer() {
+            document.getElementById('view-player').classList.remove('active');
+        }
+
+        function updatePlayIcons() {
+            const iconName = isPlaying ? 'pause' : 'play';
+            const label = isPlaying ? 'Pausar' : 'Escuchar';
+
+            // Big button
+            const btnBig = document.getElementById('play-icon-big');
+            if (btnBig) {
+                btnBig.parentElement.innerHTML = `<i data-lucide="${iconName}" fill="black"></i> ${label}`;
+            }
+
+            // Full player
+            const fpIcon = document.getElementById('fp-play-icon');
+            if (fpIcon) {
+                // Re-crear el icono para asegurar que Lucide lo renderice bien si se cambia el atributo
+                // O simplemente cambiar el contenido SVG si fuera manual, pero con Lucide es mejor reemplazar
+                // Aquí simplificamos cambiando atributos y llamando createIcons
+                fpIcon.setAttribute('data-lucide', iconName);
+            }
+
+            // Mini player
+            const mpIcon = document.getElementById('play-icon-mini');
+            if (mpIcon) {
+                mpIcon.setAttribute('data-lucide', iconName);
+            }
+
+            lucide.createIcons();
+        }
+
+        function updateProgressBar() {
+            const fill = document.getElementById('fp-progress-fill');
+            if (fill) fill.style.width = `${audioProgress}%`;
+
+            // Update time labels (simulated)
+            const currentSec = Math.floor((audioProgress / 100) * 3600); // Assume 1h total for demo
+            const totalSec = 3600;
+
+            document.getElementById('fp-time-current').innerText = formatTime(currentSec);
+            document.getElementById('fp-time-total').innerText = formatTime(totalSec);
+        }
+
+        function formatTime(seconds) {
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            const s = seconds % 60;
+            return `${h > 0 ? h + ':' : ''}${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+
+        function loadBookIntoPlayer(book) {
+            document.getElementById('fp-title').innerText = book.title;
+            document.getElementById('fp-author').innerText = book.author;
+            document.getElementById('fp-art').style.backgroundImage = `url('${book.coverUrl || ''}')`;
+
+            // Mini player update
+            document.getElementById('mini-player').classList.remove('hidden-mp');
+            document.getElementById('mp-title').innerText = book.title;
+            document.getElementById('mp-cover').style.backgroundImage = `url('${book.coverUrl || ''}')`;
+        }
+
+        function openPlayer() {
+            document.getElementById('view-player').classList.add('active');
+        }
+
+        function closePlayer() {
+            document.getElementById('view-player').classList.remove('active');
+        }
+
+        function seekAudio(event) {
+            const bar = document.getElementById('fp-progress-bar');
+            const rect = bar.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const width = rect.width;
+            const pct = Math.max(0, Math.min(100, (x / width) * 100));
+
+            audioProgress = pct;
+            updateProgressBar();
+        }
+
+        function seekRelative(seconds) {
+            // Simular salto
+            audioProgress += (seconds / 3600) * 100;
+            if (audioProgress < 0) audioProgress = 0;
+            if (audioProgress > 100) audioProgress = 100;
+            updateProgressBar();
+        }
+
+        function renderLandingGrid(count) {
+            const grid = document.getElementById('landingGrid');
+            let html = '';
+            // Generar placeholders iniciales
+            for (let i = 0; i < count; i++) {
+                // Asignar clase 'landing-item' para actualización posterior
+                html += `<div class="landing-item" style="background-color:#222"></div>`;
+            }
+            grid.innerHTML = html;
+        }
+
+        // --- HERO CAROUSEL ---
+        function startHeroRotation() {
+            // Cambiar cada 5 segundos
+            heroInterval = setInterval(() => {
+                currentHeroIndex = (currentHeroIndex + 1) % featuredBooks.length;
+                updateHeroCard();
+            }, 5000);
+        }
+
+        function updateHeroCard() {
+            const bookId = featuredBooks[currentHeroIndex];
+            const book = books.find(b => b.id === bookId);
+            if (!book) return;
+
+            const heroCard = document.getElementById('hero-card-el');
+            const heroInner = heroCard.querySelector('.hero-inner');
+
+            // Update onclick
+            heroCard.onclick = () => tryOpenDetail(book.id);
+
+            // Prepare badges
+            const badges = [];
+            if (book.exclusive) badges.push('Exclusivo');
+            badges.push(book.cat);
+            if (book.rating >= 4.8) badges.push('Bestseller');
+
+            // Update content with fade effect
+            heroInner.style.opacity = '0';
+
+            setTimeout(() => {
+                heroInner.innerHTML = `
+                    <div style="font-size:0.9rem; font-weight:800; color:#ddd; letter-spacing:1px; text-transform:uppercase; margin-bottom:5px">
+                        ${book.author}
+                    </div>
+                    <div style="font-size:1.8rem; font-weight:900; line-height:1.1; margin-bottom:10px; text-transform:uppercase">
+                        ${book.title}
+                    </div>
+                    <div style="font-size:0.8rem; color:#aaa; margin-bottom:15px">
+                        ${badges.join(' • ')}
+                    </div>
+                    <div style="font-size:0.9rem; color:#fff; font-weight:500">
+                        ${book.desc.substring(0, 80)}...
+                    </div>
+                    <div class="hero-dots">
+                        ${featuredBooks.map((_, i) => `<div class="dot ${i === currentHeroIndex ? 'active' : ''}"></div>`).join('')}
+                    </div>
+                `;
+
+                heroInner.style.opacity = '1';
+
+                // Update background
+                if (book.coverUrl) {
+                    updateHeroBackground(book.coverUrl);
+                }
+            }, 300);
+        }
+
+    </script>
+</body>
+
+</html>
