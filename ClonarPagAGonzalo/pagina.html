@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 
@@ -9,7 +8,7 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         /* --- RESET & BASE --- */
-         /* --- RESET & BASE --- */
+        /* --- RESET & BASE --- */
         * {
             margin: 0;
             padding: 0;
@@ -703,7 +702,7 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            z-index: 100;
+            z-index: 50;
         }
 
         .mini-player {
@@ -1082,7 +1081,7 @@
                     </div>
 
                     <!-- Logout Section -->
-                    <div style="padding:20px; margin-top:20px">
+                    <div style="padding:20px;">
                         <button class="btn-outline" onclick="performLogout()"
                             style="width:100%; border-color: var(--orange); color: var(--orange)">Cerrar sesión</button>
                     </div>
@@ -1094,13 +1093,15 @@
     </div>
 
     <!-- PAGE: HISTORY (NUEVA) -->
-    <div id="page-history" class="hidden" style="padding-top: 60px;">
-        <div class="header-home" style="position:fixed; top:0; width:100%; z-index:30;">
-            <div class="header-top">
+    <div id="page-history" class="hidden"
+        style="position: fixed; top: 0; left: 0; width: 100%; overflow-y: auto; height: 100vh; z-index: 100; background: #121212;">
+        <div class="header-home" style="background: #121212;">
+            <div class="header-top" style="display: flex; align-items: center; gap: 15px;">
+                <i data-lucide="arrow-left" onclick="navTo('profile')" style="cursor: pointer;"></i>
                 <h1 style="font-size:1.6rem; font-weight:700">Historial</h1>
             </div>
         </div>
-        <div id="history-list" style="padding: 20px;">
+        <div id="history-list" style="padding: 20px; padding-bottom: 120px;">
             <!-- Injected via JS -->
             <div id="no-history" class="hidden" style="text-align:center; padding:40px; color:#888;">
                 <i data-lucide="clock" size="48" style="margin-bottom:15px; opacity:0.5"></i>
@@ -1110,13 +1111,15 @@
     </div>
 
     <!-- PAGE: DOWNLOADS (NUEVA) -->
-    <div id="page-downloads" class="hidden" style="padding-top: 60px;">
-        <div class="header-home" style="position:fixed; top:0; width:100%; z-index:30;">
-            <div class="header-top">
+    <div id="page-downloads" class="hidden"
+        style="position: fixed; top: 0; left: 0; width: 100%; overflow-y: auto; height: 100vh; z-index: 100; background: #121212;">
+        <div class="header-home" style="background: #121212;">
+            <div class="header-top" style="display: flex; align-items: center; gap: 15px;">
+                <i data-lucide="arrow-left" onclick="navTo('profile')" style="cursor: pointer;"></i>
                 <h1 style="font-size:1.6rem; font-weight:700">Descargas</h1>
             </div>
         </div>
-        <div id="downloads-list" style="padding: 20px;">
+        <div id="downloads-list" style="padding: 20px; padding-bottom: 120px;">
             <!-- Injected via JS -->
             <div id="no-downloads" class="hidden" style="text-align:center; padding:40px; color:#888;">
                 <i data-lucide="download" size="48" style="margin-bottom:15px; opacity:0.5"></i>
@@ -1126,22 +1129,28 @@
     </div>
 
     <!-- PAGE: GOALS (NUEVA) -->
-    <div id="page-goals" class="hidden" style="padding-top: 60px;">
-        <div class="header-home" style="position:fixed; top:0; width:100%; z-index:30;">
-            <div class="header-top">
+    <div id="page-goals" class="hidden"
+        style="position: fixed; top: 0; left: 0; width: 100%; overflow-y: auto; height: 100vh; z-index: 100; background: #121212;">
+        <div class="header-home" style="background: #121212;">
+            <div class="header-top" style="display: flex; align-items: center; gap: 15px;">
+                <i data-lucide="arrow-left" onclick="navTo('profile')" style="cursor: pointer;"></i>
                 <h1 style="font-size:1.6rem; font-weight:700">Objetivos</h1>
             </div>
         </div>
-        <div id="goals-content" style="padding: 20px;">
+        <div id="goals-container" style="padding: 20px; padding-bottom: 120px;">
             <!-- Injected via JS -->
         </div>
     </div>
 
     <!-- PAGE: FAVORITES (NUEVA) -->
-    <div id="page-favorites" class="hidden" style="padding-top: 60px;">
-        <div class="header-home" style="position:fixed; top:0; width:100%; z-index:30;">
-            <div class="header-top">
-                <h1 style="font-size:1.6rem; font-weight:700">Mis Favoritos</h1>
+    <div id="page-favorites" class="hidden"
+        style="position: fixed; top: 0; left: 0; width: 100%; overflow-y: auto; height: 100vh; z-index: 100; background: #121212;">
+        <div class="header-home" style="background: #121212;">
+            <div class="header-top" style="display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <i data-lucide="arrow-left" onclick="navTo('profile')" style="cursor: pointer;"></i>
+                    <h1 style="font-size:1.6rem; font-weight:700">Mis Favoritos</h1>
+                </div>
                 <i data-lucide="filter" style="cursor:pointer"></i>
             </div>
         </div>
@@ -2317,16 +2326,18 @@
                 const book = books.find(b => b.id === id);
                 if (book) {
                     html += `
-                <div class="book-card" onclick="openBookDetail(${book.id})" style="width:100%; display:flex; flex-direction:row; gap:15px; margin-bottom:15px; align-items:center">
-                    <div class="cover-wrap" style="width:60px; min-width:60px; aspect-ratio:1/1;">
+                <div class="book-card" style="width:100%; display:flex; flex-direction:row; gap:15px; margin-bottom:15px; align-items:center">
+                    <div class="cover-wrap" style="width:60px; min-width:60px; aspect-ratio:1/1; cursor:pointer" onclick="tryOpenDetail(${book.id})">
                         <div class="cover-img book-cover-${book.id}" style="background-image:url('${book.coverUrl}'); background-color:#333; border-radius:4px"></div>
                     </div>
-                    <div style="flex:1; overflow:hidden">
+                    <div style="flex:1; overflow:hidden; cursor:pointer" onclick="tryOpenDetail(${book.id})">
                         <div style="font-weight:700; font-size:0.95rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">${book.title}</div>
                         <div style="font-size:0.85rem; color:#aaa">${book.author}</div>
                         <div style="font-size:0.75rem; color:#666; margin-top:4px">Escuchado recientemente</div>
                     </div>
-                    <i data-lucide="play-circle" style="color:var(--orange)"></i>
+                    <div onclick="tryOpenDetail(${book.id})" style="padding:10px; cursor:pointer; display:flex; align-items:center; justify-content:center;">
+                        <i data-lucide="play-circle" style="color:var(--orange)"></i>
+                    </div>
                 </div>`;
                 }
             });
@@ -2353,41 +2364,65 @@
             const list = document.getElementById('downloads-list');
             const noDownloads = document.getElementById('no-downloads');
 
+            // Wait for books to be loaded
+            if (books.length === 0) {
+                setTimeout(renderDownloads, 200);
+                return;
+            }
+
             const downloadsStr = localStorage.getItem('storytel_downloads') || '';
-            const downloadIds = downloadsStr.split(',').filter(id => id).map(Number);
+            const downloadIds = downloadsStr.split(',').filter(id => id).map(id => parseInt(id));
 
             if (downloadIds.length === 0) {
-                list.innerHTML = '';
-                list.appendChild(noDownloads);
+                // Show empty state
+                const container = document.getElementById('downloads-books-container');
+                if (container) container.remove();
                 noDownloads.classList.remove('hidden');
                 return;
             }
 
+            // Hide empty state
             noDownloads.classList.add('hidden');
-            let html = '';
 
+            // Generate HTML
+            let html = '';
             downloadIds.forEach(id => {
                 const book = books.find(b => b.id === id);
                 if (book) {
                     html += `
-                <div class="book-card" onclick="openBookDetail(${book.id})" style="width:100%; display:flex; flex-direction:row; gap:15px; margin-bottom:15px; align-items:center">
-                    <div class="cover-wrap" style="width:60px; min-width:60px; aspect-ratio:1/1;">
-                        <div class="cover-img book-cover-${book.id}" style="background-image:url('${book.coverUrl}'); background-color:#333; border-radius:4px"></div>
+                <div class="book-card" onclick="tryOpenDetail(${book.id})" style="width:100%; display:flex !important; flex-direction:row; gap:15px; margin-bottom:15px; align-items:center; background:#1a1a1a; padding:10px; border-radius:8px;">
+                    <div class="cover-wrap" style="width:60px; min-width:60px; aspect-ratio:1/1.5; flex-shrink:0;">
+                        <div class="cover-img book-cover-${book.id}" style="background-image:url('${book.coverUrl}'); background-color:#333; border-radius:4px; width:100%; height:100%; background-size:cover; background-position:center;"></div>
                     </div>
-                    <div style="flex:1; overflow:hidden">
-                        <div style="font-weight:700; font-size:0.95rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">${book.title}</div>
-                        <div style="font-size:0.85rem; color:#aaa">${book.author}</div>
-                        <div style="font-size:0.75rem; color:#4CAF50; margin-top:4px"><i data-lucide="check" size="12"></i> Descargado</div>
+                    <div style="flex:1; overflow:hidden; min-width:0;">
+                        <div style="font-weight:700; font-size:0.95rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:white;">${book.title}</div>
+                        <div style="font-size:0.85rem; color:#aaa; margin-top:4px;">${book.author}</div>
+                        <div style="font-size:0.75rem; color:#4CAF50; margin-top:4px; display:flex; align-items:center; gap:4px;"><i data-lucide="check" size="12"></i> Descargado</div>
                     </div>
-                    <div onclick="event.stopPropagation(); toggleDownload(this, ${book.id})" style="padding:10px">
-                        <i data-lucide="trash-2" style="color:#666"></i>
+                    <div onclick="event.stopPropagation(); toggleDownload(this, ${book.id})" style="padding:10px; cursor:pointer;">
+                        <i data-lucide="trash-2" size="20" style="color:#999;"></i>
                     </div>
                 </div>`;
                 }
             });
 
-            list.innerHTML = html;
-            list.appendChild(noDownloads);
+            // Create or get container
+            let booksContainer = document.getElementById('downloads-books-container');
+            if (!booksContainer) {
+                booksContainer = document.createElement('div');
+                booksContainer.id = 'downloads-books-container';
+                booksContainer.style.cssText = 'display: block !important; width: 100%; min-height: 100px; visibility: visible; opacity: 1;';
+                list.insertBefore(booksContainer, noDownloads);
+            }
+
+            // Insert HTML
+            booksContainer.innerHTML = html;
+
+            // Force visibility
+            booksContainer.style.display = 'block';
+            booksContainer.style.visibility = 'visible';
+            booksContainer.style.opacity = '1';
+
             lucide.createIcons();
         }
 
@@ -2420,12 +2455,13 @@
                 const isDownloaded = downloadIds.includes(idStr);
                 dlBtn.innerHTML = isDownloaded ? `<i data-lucide="check" size="20"></i> Descargado` : `<i data-lucide="download" size="20"></i> Descargar`;
                 dlBtn.style.color = isDownloaded ? '#4CAF50' : 'white';
+                lucide.createIcons(); // Update icons
             }
         }
 
         // --- GOALS ---
         function renderGoals() {
-            const container = document.getElementById('goals-content');
+            const container = document.getElementById('goals-container');
 
             // Calculate stats
             const historyStr = localStorage.getItem('storytel_history') || '';
@@ -2671,6 +2707,33 @@
                 return;
             }
             player.toggle();
+        }
+
+        function seekRelative(seconds) {
+            if (!isLogged || !player.audio) {
+                restrictedAction();
+                return;
+            }
+            player.audio.currentTime = Math.max(0, Math.min(player.audio.duration, player.audio.currentTime + seconds));
+        }
+
+        function playPrevious() {
+            // For now, just seek to beginning
+            if (!isLogged || !player.audio) return;
+            player.audio.currentTime = 0;
+        }
+
+        function playNext() {
+            // For now, just show a toast
+            showToast('Siguiente libro aún no implementado');
+        }
+
+        function seekAudio(event) {
+            if (!isLogged || !player.audio) return;
+            const bar = event.currentTarget;
+            const rect = bar.getBoundingClientRect();
+            const percent = (event.clientX - rect.left) / rect.width;
+            player.audio.currentTime = percent * player.audio.duration;
         }
 
         function openPlayer() {
