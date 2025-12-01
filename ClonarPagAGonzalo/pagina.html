@@ -136,6 +136,12 @@
             overflow: hidden;
         }
 
+        /* Ocultar bottom-dock cuando landing está visible */
+        #view-landing:not(.hidden)+*+.bottom-dock,
+        #view-landing:not(.hidden)+.bottom-dock {
+            display: none;
+        }
+
         .landing-bg-container {
             position: absolute;
             top: -20%;
@@ -703,6 +709,12 @@
             left: 0;
             width: 100%;
             z-index: 50;
+        }
+
+        /* Ocultar el dock cuando está visible la vista landing */
+        #view-landing:not(.hidden)~.bottom-dock,
+        #view-landing:not(.hidden)~* .bottom-dock {
+            display: none !important;
         }
 
         .mini-player {
