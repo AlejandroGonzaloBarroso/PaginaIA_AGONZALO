@@ -1,0 +1,1484 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visor de Documentación - Advanced Documentation Manager</title>
+    <meta name="description"
+        content="Visor y editor avanzado de documentación con soporte para múltiples archivos, edición en tiempo real y descarga">
+
+    <!-- Monaco Editor -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+
+    <!-- Marked.js for Markdown rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <!-- Highlight.js for syntax highlighting in preview -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500;600&display=swap"
+        rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: hsl(222, 22%, 10%);
+            --bg-secondary: hsl(222, 22%, 12%);
+            --bg-tertiary: hsl(222, 22%, 15%);
+            --bg-hover: hsl(222, 22%, 18%);
+            --bg-active: hsl(222, 22%, 20%);
+            --text-primary: hsl(0, 0%, 95%);
+            --text-secondary: hsl(0, 0%, 70%);
+            --text-tertiary: hsl(0, 0%, 50%);
+            --accent-primary: hsl(267, 84%, 65%);
+            --accent-secondary: hsl(197, 84%, 60%);
+            --accent-gradient: linear-gradient(135deg, hsl(267, 84%, 65%), hsl(197, 84%, 60%));
+            --border-color: hsl(222, 22%, 25%);
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-sm);
+            position: relative;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--accent-gradient);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .search-box {
+            position: relative;
+            width: 400px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.75rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            transition: var(--transition);
+            font-family: 'Inter', sans-serif;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px hsla(267, 84%, 65%, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-tertiary);
+            pointer-events: none;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.625rem 1.25rem;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn-primary {
+            background: var(--accent-gradient);
+            color: white;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-hover);
+        }
+
+        .btn-icon {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-icon:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        /* Main Layout */
+        .main-container {
+            display: flex;
+            height: calc(100vh - 65px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+        }
+
+        .sidebar.collapsed {
+            width: 0;
+            overflow: hidden;
+        }
+
+        .sidebar-header {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sidebar-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+        }
+
+        .file-tree {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.5rem;
+        }
+
+        .file-tree::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .file-tree::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .file-tree::-webkit-scrollbar-thumb {
+            background: var(--bg-hover);
+            border-radius: 4px;
+        }
+
+        .tree-item {
+            padding: 0.5rem 0.75rem;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 2px;
+            user-select: none;
+        }
+
+        .tree-item:hover {
+            background: var(--bg-hover);
+        }
+
+        .tree-item.active {
+            background: var(--accent-gradient);
+            color: white;
+        }
+
+        .tree-item-icon {
+            font-size: 1rem;
+        }
+
+        .tree-item-name {
+            font-size: 0.875rem;
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Content Area */
+        .content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .tabs-container {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            padding: 0 1rem;
+            gap: 0.5rem;
+            overflow-x: auto;
+        }
+
+        .tab {
+            padding: 0.75rem 1.25rem;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.875rem;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tab:hover {
+            color: var(--text-primary);
+            background: var(--bg-hover);
+        }
+
+        .tab.active {
+            color: var(--accent-primary);
+            border-bottom-color: var(--accent-primary);
+        }
+
+        .editor-toolbar {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0.75rem 1rem;
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .toolbar-separator {
+            width: 1px;
+            height: 24px;
+            background: var(--border-color);
+            margin: 0 0.5rem;
+        }
+
+        .editor-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #monaco-editor {
+            width: 100%;
+            height: 100%;
+        }
+
+        .preview-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem;
+            background: var(--bg-primary);
+        }
+
+        .preview-content {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--bg-secondary);
+            padding: 2rem;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+        }
+
+        .preview-content h1,
+        .preview-content h2,
+        .preview-content h3 {
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+            line-height: 1.3;
+        }
+
+        .preview-content h1 {
+            font-size: 2rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .preview-content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+            color: var(--text-secondary);
+        }
+
+        .preview-content code {
+            background: var(--bg-tertiary);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Fira Code', monospace;
+        }
+
+        .preview-content pre {
+            background: var(--bg-tertiary);
+            padding: 1rem;
+            border-radius: var(--radius-sm);
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        .preview-content ul,
+        .preview-content ol {
+            margin-left: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .preview-content li {
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        /* Empty State */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--text-tertiary);
+            gap: 1rem;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            opacity: 0.3;
+        }
+
+        .empty-state-text {
+            font-size: 1.125rem;
+            font-weight: 500;
+        }
+
+        /* Status Bar */
+        .status-bar {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            padding: 0.5rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-tertiary);
+        }
+
+        .status-item {
+            display: flex;
+            gap: 1rem;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-color);
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .toast.success {
+            border-left: 4px solid hsl(142, 76%, 56%);
+        }
+
+        .toast.error {
+            border-left: 4px solid hsl(0, 84%, 60%);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Drop Zone */
+        .drop-zone {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: hsla(222, 22%, 10%, 0.95);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            backdrop-filter: blur(5px);
+        }
+
+        .drop-zone.active {
+            display: flex;
+        }
+
+        .drop-zone-content {
+            text-align: center;
+            padding: 3rem;
+            border: 3px dashed var(--accent-primary);
+            border-radius: var(--radius-lg);
+            background: var(--bg-secondary);
+        }
+
+        .drop-zone-icon {
+            font-size: 4rem;
+            color: var(--accent-primary);
+            margin-bottom: 1rem;
+        }
+
+        .drop-zone-text {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        /* User Profile */
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 1rem;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--accent-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .user-name {
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .btn-logout {
+            padding: 0.5rem 1rem;
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.875rem;
+        }
+
+        .btn-logout:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        /* Auth Modal */
+        .auth-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, hsla(267, 84%, 20%, 0.3), hsla(222, 22%, 10%, 0.95), hsla(197, 84%, 25%, 0.3));
+            backdrop-filter: blur(20px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            animation: overlayFadeIn 0.4s ease;
+        }
+
+        @keyframes overlayFadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .auth-modal {
+            background: linear-gradient(135deg, hsla(222, 22%, 14%, 0.95), hsla(222, 22%, 12%, 0.98));
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px hsla(267, 84%, 65%, 0.1);
+            width: 90%;
+            max-width: 480px;
+            padding: 3rem;
+            border: 1px solid hsla(267, 84%, 65%, 0.15);
+            animation: modalSlideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-modal::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 200px;
+            background: radial-gradient(ellipse at top, hsla(267, 84%, 65%, 0.15), transparent 70%);
+            pointer-events: none;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-80px) scale(0.95);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .auth-header h2 {
+            font-size: 2rem;
+            margin-bottom: 0.75rem;
+            background: linear-gradient(135deg, hsl(267, 84%, 75%), hsl(197, 84%, 70%));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 800;
+        }
+
+        .auth-header p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .auth-tabs {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+            background: hsla(222, 22%, 8%, 0.6);
+            border-radius: 12px;
+            padding: 0.4rem;
+            border: 1px solid hsla(267, 84%, 65%, 0.1);
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-radius: 10px;
+            transition: var(--transition);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .auth-tab:hover:not(.active) {
+            background: hsla(267, 84%, 65%, 0.08);
+            color: var(--text-primary);
+        }
+
+        .auth-tab.active {
+            background: linear-gradient(135deg, hsl(267, 84%, 60%), hsl(197, 84%, 55%));
+            color: white;
+            box-shadow: 0 4px 12px hsla(267, 84%, 65%, 0.3);
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        .form-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .form-input {
+            padding: 0.875rem 1.125rem;
+            background: hsla(222, 22%, 8%, 0.6);
+            border: 1.5px solid hsla(267, 84%, 65%, 0.15);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            font-family: 'Inter', sans-serif;
+            transition: var(--transition);
+        }
+
+        .form-input:hover {
+            border-color: hsla(267, 84%, 65%, 0.3);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: hsl(267, 84%, 65%);
+            box-shadow: 0 0 0 4px hsla(267, 84%, 65%, 0.12);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-tertiary);
+        }
+
+        .btn-auth {
+            padding: 1rem 1.5rem;
+            background: linear-gradient(135deg, hsl(267, 84%, 62%), hsl(197, 84%, 58%));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: 'Inter', sans-serif;
+            margin-top: 0.75rem;
+            box-shadow: 0 4px 14px hsla(267, 84%, 65%, 0.35);
+        }
+
+        .btn-auth:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px hsla(267, 84%, 65%, 0.5);
+        }
+
+        .error-message {
+            background: hsla(0, 84%, 60%, 0.1);
+            border: 1px solid hsl(0, 84%, 60%);
+            color: hsl(0, 84%, 70%);
+            padding: 0.75rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.875rem;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .success-message {
+            background: hsla(142, 76%, 56%, 0.1);
+            border: 1px solid hsl(142, 76%, 56%);
+            color: hsl(142, 76%, 66%);
+            padding: 0.75rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.875rem;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        .password-strength {
+            height: 4px;
+            border-radius: 2px;
+            background: var(--bg-tertiary);
+            margin-top: 0.25rem;
+            overflow: hidden;
+        }
+
+        .password-strength-bar {
+            height: 100%;
+            transition: var(--transition);
+            border-radius: 2px;
+        }
+
+        .password-strength-bar.weak {
+            width: 33%;
+            background: hsl(0, 84%, 60%);
+        }
+
+        .password-strength-bar.medium {
+            width: 66%;
+            background: hsl(45, 100%, 51%);
+        }
+
+        .password-strength-bar.strong {
+            width: 100%;
+            background: hsl(142, 76%, 56%);
+        }
+
+        /* Guest Mode */
+        .guest-mode-section {
+            margin-top: 1.5rem;
+        }
+
+        .auth-divider {
+            display: flex;
+            align-items: center;
+            margin: 1.5rem 0;
+            color: var(--text-tertiary);
+            font-size: 0.85rem;
+        }
+
+        .auth-divider::before,
+        .auth-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, hsla(267, 84%, 65%, 0.2), transparent);
+        }
+
+        .auth-divider span {
+            padding: 0 1rem;
+            opacity: 0.7;
+        }
+
+        .btn-guest {
+            width: 100%;
+            padding: 0.875rem 1.25rem;
+            background: hsla(222, 22%, 10%, 0.4);
+            border: 1px solid hsla(267, 84%, 65%, 0.2);
+            border-radius: 12px;
+            color: var(--text-secondary);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            transition: var(--transition);
+        }
+
+        .btn-guest:hover {
+            background: hsla(267, 84%, 65%, 0.08);
+            border-color: hsla(267, 84%, 65%, 0.4);
+            color: var(--text-primary);
+            transform: translateY(-2px);
+        }
+
+        .btn-guest-icon {
+            font-size: 1.1rem;
+        }
+
+        .btn-guest-badge {
+            background: hsla(267, 84%, 65%, 0.1);
+            color: hsl(267, 84%, 75%);
+            font-size: 0.75rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            border: 1px solid hsla(267, 84%, 65%, 0.2);
+            font-weight: 600;
+            margin-left: auto;
+        }
+
+        /* Hidden */
+        #file-input {
+            display: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 240px;
+                position: fixed;
+                left: -240px;
+                top: 0;
+                height: 100vh;
+                z-index: 1000;
+                transition: left 0.3s ease;
+            }
+
+            .sidebar.active {
+                left: 0;
+            }
+
+            .search-box {
+                width: 200px;
+            }
+
+            .header {
+                padding: 0.75rem 1rem;
+            }
+
+            .auth-modal {
+                padding: 1.5rem;
+            }
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        .sidebar-overlay.active {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Sidebar Overlay for Mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Authentication Overlay -->
+    <div class="auth-overlay" id="authOverlay">
+        <div class="auth-modal">
+            <div class="auth-header">
+                <h2>🔐 DocViewer Pro</h2>
+                <p>Inicia sesión o regístrate para continuar</p>
+            </div>
+
+            <div class="auth-tabs">
+                <button class="auth-tab active" id="loginTabBtn">Iniciar Sesión</button>
+                <button class="auth-tab" id="registerTabBtn">Registrarse</button>
+            </div>
+
+            <div class="error-message" id="authError"></div>
+            <div class="success-message" id="authSuccess"></div>
+
+            <!-- Login Form -->
+            <form class="auth-form" id="loginForm">
+                <div class="form-group">
+                    <label class="form-label" for="loginUsername">Usuario o Email</label>
+                    <input type="text" class="form-input" id="loginUsername" placeholder="Ingresa tu usuario" required
+                        autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="loginPassword">Contraseña</label>
+                    <input type="password" class="form-input" id="loginPassword" placeholder="Ingresa tu contraseña"
+                        required autocomplete="current-password">
+                </div>
+                <button type="submit" class="btn-auth">Iniciar Sesión</button>
+            </form>
+
+            <!-- Register Form -->
+            <form class="auth-form" id="registerForm" style="display: none;">
+                <div class="form-group">
+                    <label class="form-label" for="registerUsername">Usuario</label>
+                    <input type="text" class="form-input" id="registerUsername" placeholder="Elige un nombre de usuario"
+                        required autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="registerEmail">Email</label>
+                    <input type="email" class="form-input" id="registerEmail" placeholder="tu@email.com" required
+                        autocomplete="email">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="registerPassword">Contraseña</label>
+                    <input type="password" class="form-input" id="registerPassword"
+                        placeholder="Crea una contraseña segura" required autocomplete="new-password">
+                    <div class="password-strength">
+                        <div class="password-strength-bar" id="passwordStrengthBar"></div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="registerPasswordConfirm">Confirmar Contraseña</label>
+                    <input type="password" class="form-input" id="registerPasswordConfirm"
+                        placeholder="Confirma tu contraseña" required autocomplete="new-password">
+                </div>
+                <button type="submit" class="btn-auth">Registrarse</button>
+            </form>
+
+            <!-- Guest Mode Section -->
+            <div class="guest-mode-section">
+                <div class="auth-divider">
+                    <span>o</span>
+                </div>
+                <button type="button" id="guestModeBtn" class="btn-guest">
+                    <span class="btn-guest-icon">👁</span>
+                    <span>Continuar sin registro</span>
+                    <span class="btn-guest-badge">Solo lectura</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Drop Zone -->
+    <div class="drop-zone" id="dropZone">
+        <div class="drop-zone-content">
+            <div class="drop-zone-icon">📁</div>
+            <div class="drop-zone-text">Suelta archivos aquí para cargarlos</div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <div class="logo">
+                <div class="logo-icon">📚</div>
+                <span>DocViewer Pro</span>
+            </div>
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" class="search-input" id="searchInput" placeholder="Buscar en archivos...">
+            </div>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-secondary" id="uploadBtn">
+                📤 Subir Archivos
+            </button>
+            <button class="btn btn-primary" id="downloadBtn">
+                💾 Descargar
+            </button>
+            <button class="btn-icon" id="toggleSidebar" title="Toggle sidebar">
+                ☰
+            </button>
+            <button class="btn-icon" id="themeToggle" title="Cambiar tema">
+                🌙
+            </button>
+            <div class="user-profile" id="userProfile" style="display: none;">
+                <div class="user-avatar" id="userAvatar"></div>
+                <span class="user-name" id="userName"></span>
+                <button class="btn-logout" id="logoutBtn">Cerrar Sesión</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hidden file input -->
+    <input type="file" id="file-input" multiple
+        accept=".txt,.md,.js,.html,.css,.json,.xml,.yml,.yaml,.py,.java,.cpp,.c,.h,.cs,.php,.rb,.go,.rs,.swift,.kt">
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <span class="sidebar-title">Archivos</span>
+                <button class="btn-icon" id="addFileBtn" title="Agregar archivo">➕</button>
+            </div>
+            <div class="file-tree" id="fileTree">
+                <!-- Files will be populated here -->
+            </div>
+            <div class="empty-state-text">Selecciona o carga un archivo para comenzar</div>
+            <button class="btn btn-primary" onclick="document.getElementById('file-input').click()">
+                📤 Subir Archivos
+            </button>
+    </div>
+    <div id="monaco-editor" style="display: none;"></div>
+    <div class="preview-container" id="previewContainer" style="display: none;">
+        <div class="preview-content" id="previewContent"></div>
+    </div>
+    </div>
+
+    <div class="status-bar">
+        <div class="status-item">
+            <span id="statusText">Listo</span>
+        </div>
+        <div class="status-item">
+            <span id="fileInfo">Sin archivo</span>
+            <span>|</span>
+            <span id="cursorPos">Ln 1, Col 1</span>
+        </div>
+    </div>
+    </main>
+    </div>
+
+    <script>
+        // Application State
+        let editor;
+        let currentFile = null;
+        let files = [];
+        let currentView = 'editor';
+        let isDarkTheme = true;
+
+        // Initialize Monaco Editor
+        require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' } });
+
+        require(['vs/editor/editor.main'], function () {
+            editor = monaco.editor.create(document.getElementById('monaco-editor'), {
+                value: '',
+                language: 'markdown',
+                theme: 'vs-dark',
+                automaticLayout: true,
+                fontSize: 14,
+                fontFamily: "'Fira Code', monospace",
+                lineNumbers: 'on',
+                minimap: { enabled: true },
+                scrollBeyondLastLine: false,
+                wordWrap: 'on',
+                formatOnPaste: true,
+                formatOnType: true,
+            });
+
+            editor.onDidChangeCursorPosition((e) => {
+                updateCursorPosition(e.position.lineNumber, e.position.column);
+            });
+
+            editor.onDidChangeModelContent(() => {
+                if (currentFile) {
+                    currentFile.modified = true;
+                    updateFileTree();
+                    if (currentView === 'preview') {
+                        updatePreview();
+                    }
+                }
+            });
+
+            addSampleFiles();
+        });
+
+        // Sample Files
+        function addSampleFiles() {
+            const sampleFiles = [
+                {
+                    name: 'README.md',
+                    type: 'markdown',
+                    content: `# Bienvenido a DocViewer Pro
+
+## Características principales
+
+- **Editor de código avanzado** con resaltado de sintaxis
+- **Vista previa en tiempo real** para archivos Markdown
+- **Búsqueda rápida** en el contenido de los archivos
+- **Descarga individual** de archivos
+- **Carga múltiple** de archivos mediante drag & drop
+- **Interfaz moderna** con animaciones suaves
+
+## Cómo usar
+
+1. Sube archivos usando el botón "Subir Archivos" o arrastra archivos a la ventana
+2. Selecciona un archivo del árbol lateral
+3. Edita el contenido en el editor
+4. Usa la vista previa para ver el resultado
+5. Descarga los archivos modificados
+
+## Formatos soportados
+
+- Markdown (.md)
+- JavaScript (.js)
+- HTML (.html)
+- CSS (.css)
+- JSON (.json)
+- Python (.py)
+- Y muchos más...
+
+¡Disfruta editando tus documentos! 🚀`
+                },
+                {
+                    name: 'ejemplo.js',
+                    type: 'javascript',
+                    content: `// Ejemplo de código JavaScript
+
+class DocumentManager {
+    constructor() {
+        this.files = [];
+        this.currentFile = null;
+    }
+
+    addFile(file) {
+        this.files.push(file);
+        console.log(\`Archivo agregado: \${file.name}\`);
+    }
+
+    removeFile(fileName) {
+        this.files = this.files.filter(f => f.name !== fileName);
+        console.log(\`Archivo eliminado: \${fileName}\`);
+    }
+
+    getFile(fileName) {
+        return this.files.find(f => f.name === fileName);
+    }
+}
+
+// Uso
+const manager = new DocumentManager();
+manager.addFile({ name: 'test.txt', content: 'Hello World' });`
+                },
+                {
+                    name: 'estilos.css',
+                    type: 'css',
+                    content: `/* Estilos de ejemplo */
+
+:root {
+    --primary-color: #6366f1;
+    --secondary-color: #8b5cf6;
+    --background: #1e1e2e;
+    --text-color: #ffffff;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: var(--background);
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.btn {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}`
+                }
+            ];
+
+            sampleFiles.forEach(file => {
+                files.push({
+                    name: file.name,
+                    content: file.content,
+                    type: file.type,
+                    modified: false
+                });
+            });
+
+            updateFileTree();
+        }
+
+        // File Tree Management
+        function updateFileTree() {
+            const fileTree = document.getElementById('fileTree');
+            fileTree.innerHTML = '';
+
+            files.forEach((file, index) => {
+                const item = document.createElement('div');
+                item.className = `tree-item${currentFile === file ? ' active' : ''}`;
+                item.innerHTML = `
+                    <span class="tree-item-icon">${getFileIcon(file.type)}</span>
+                    <span class="tree-item-name">${file.name}${file.modified ? ' •' : ''}</span>
+                `;
+                item.onclick = () => openFile(file);
+                fileTree.appendChild(item);
+            });
+        }
+
+        function getFileIcon(type) {
+            const icons = {
+                'markdown': '📝',
+                'javascript': '🟨',
+                'css': '🎨',
+                'html': '🌐',
+                'json': '📋',
+                'python': '🐍',
+                'default': '📄'
+            };
+            return icons[type] || icons.default;
+        }
+
+        function getLanguage(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            const languages = {
+                'md': 'markdown',
+                'js': 'javascript',
+                'ts': 'typescript',
+                'html': 'html',
+                'css': 'css',
+                'json': 'json',
+                'py': 'python',
+                'java': 'java',
+                'cpp': 'cpp',
+                'c': 'c',
+                'cs': 'csharp',
+                'php': 'php',
+                'rb': 'ruby',
+                'go': 'go',
+                'rs': 'rust',
+                'swift': 'swift',
+                'kt': 'kotlin',
+                'xml': 'xml',
+                'yml': 'yaml',
+                document.getElementById('previewTab').classList.remove('active');
+                document.getElementById('monaco-editor').style.display = currentFile ? 'block' : 'none';
+                document.getElementById('previewContainer').style.display = 'none';
+                document.getElementById('emptyState').style.display = currentFile ? 'none' : 'flex';
+            };
+
+            document.getElementById('previewTab').onclick = () => {
+                currentView = 'preview';
+                document.getElementById('previewTab').classList.add('active');
+                document.getElementById('editorTab').classList.remove('active');
+                document.getElementById('monaco-editor').style.display = 'none';
+                document.getElementById('previewContainer').style.display = 'block';
+                document.getElementById('emptyState').style.display = 'none';
+                updatePreview();
+            };
+
+            function updatePreview() {
+                const content = editor ? editor.getValue() : '';
+                const previewContent = document.getElementById('previewContent');
+
+                if (currentFile && currentFile.name.endsWith('.md')) {
+                    previewContent.innerHTML = marked.parse(content);
+                    previewContent.querySelectorAll('pre code').forEach((block) => {
+                        hljs.highlightElement(block);
+                    });
+                } else {
+                    previewContent.innerHTML = `<pre><code>${escapeHtml(content)}</code></pre>`;
+                }
+            }
+
+            function escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            // File Operations
+            function saveFile() {
+                if (currentFile && editor) {
+                    currentFile.content = editor.getValue();
+                    currentFile.modified = false;
+                    updateFileTree();
+                    showToast('Archivo guardado', 'success');
+                }
+            }
+
+            function downloadFile() {
+                if (currentFile) {
+                    const blob = new Blob([editor.getValue()], { type: 'text/plain' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = currentFile.name;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    showToast('Archivo descargado', 'success');
+                }
+            }
+
+            // File Upload
+            document.getElementById('uploadBtn').onclick = () => {
+                document.getElementById('file-input').click();
+            };
+
+            document.getElementById('file-input').onchange = (e) => {
+                handleFiles(e.target.files);
+            };
+
+            function handleFiles(fileList) {
+                Array.from(fileList).forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const newFile = {
+                            name: file.name,
+                            content: e.target.result,
+                            type: getLanguage(file.name),
+                            modified: false
+                        };
+                        files.push(newFile);
+                        updateFileTree();
+                        openFile(newFile);
+                    };
+                    reader.readAsText(file);
+                });
+            }
+
+            // Drag and Drop
+            document.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                document.getElementById('dropZone').classList.add('active');
+            });
+
+            document.addEventListener('dragleave', (e) => {
+                if (e.relatedTarget === null) {
+                    document.getElementById('dropZone').classList.remove('active');
+                }
+            });
+
+            document.addEventListener('drop', (e) => {
+                e.preventDefault();
+                document.getElementById('dropZone').classList.remove('active');
+                handleFiles(e.dataTransfer.files);
+            });
+
+            // Toolbar Actions
+            document.getElementById('saveBtn').onclick = saveFile;
+            document.getElementById('downloadBtn').onclick = downloadFile;
+            document.getElementById('undoBtn').onclick = () => editor?.trigger('keyboard', 'undo');
+            document.getElementById('redoBtn').onclick = () => editor?.trigger('keyboard', 'redo');
+            document.getElementById('findBtn').onclick = () => editor?.trigger('keyboard', 'actions.find');
+
+            // Toggle Sidebar
+            document.getElementById('toggleSidebar').onclick = () => {
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.getElementById('sidebarOverlay');
+
+                if (window.innerWidth <= 768) {
+                    sidebar.classList.toggle('active');
+                    overlay.classList.toggle('active');
+                } else {
+                    sidebar.style.display = sidebar.style.display === 'none' ? 'flex' : 'none';
+                }
+            };
+
+            document.getElementById('sidebarOverlay').onclick = () => {
+                document.getElementById('sidebar').classList.remove('active');
+                document.getElementById('sidebarOverlay').classList.remove('active');
+            };
+
+            // Search
+            document.getElementById('searchInput').oninput = (e) => {
+                const query = e.target.value.toLowerCase();
+                const items = document.querySelectorAll('.tree-item');
+                items.forEach(item => {
+                    const name = item.querySelector('.tree-item-name').textContent.toLowerCase();
+                    item.style.display = name.includes(query) ? 'flex' : 'none';
+                });
+            };
+
+            // Theme Toggle
+            document.getElementById('themeToggle').onclick = () => {
+                isDarkTheme = !isDarkTheme;
+                if (editor) {
+                    monaco.editor.setTheme(isDarkTheme ? 'vs-dark' : 'vs-light');
+                }
+                document.getElementById('themeToggle').textContent = isDarkTheme ? '🌙' : '☀️';
+            };
+
+            // Keyboard Shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (e.ctrlKey || e.metaKey) {
+                    if (e.key === 's') {
+                        e.preventDefault();
+                        saveFile();
+                    }
+                }
+            });
+
+            // Cursor Position
+            function updateCursorPosition(line, col) {
+                document.getElementById('cursorPos').textContent = `Ln ${line}, Col ${col}`;
+            }
+
+            // Toast Notifications
+            function showToast(message, type = 'success') {
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.innerHTML = `<span>${type === 'success' ? '✓' : '✗'}</span><span>${message}</span>`;
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 3000);
+            }
+    </script>
+
+    <!-- Authentication Script -->
+    <script src="auth.js"></script>
+
+</body>
+
+</html>
