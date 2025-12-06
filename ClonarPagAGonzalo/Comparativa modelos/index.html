@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LM Studio Benchmark Hub</title>
+    <!-- Fuentes e Iconos -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --bg-dark: #09090b;
+            --bg-card: #18181b;
+            --bg-card-hover: #27272a;
+            --primary: #8b5cf6; /* Violeta */
+            --primary-glow: rgba(139, 92, 246, 0.5);
+            --secondary: #06b6d4; /* Cyan */
+            --accent: #ec4899; /* Rosa */
+            --text-main: #fafafa;
+            --text-muted: #a1a1aa;
+            --border: #3f3f46;
+            --radius: 16px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.15) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(6, 182, 212, 0.15) 0%, transparent 20%);
+        }
+
+        /* --- SIDEBAR --- */
+        aside {
+            width: 280px;
+            background: rgba(24, 24, 27, 0.6);
+            backdrop-filter: blur(12px);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+            z-index: 10;
+        }
+
+        .brand {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 40px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        nav button {
+            background: transparent;
+            border: none;
+            width: 100%;
+            padding: 14px 16px;
+            text-align: left;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin-bottom: 8px;
+        }
+
+        nav button:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-main);
+        }
+
+        nav button.active {
+            background: linear-gradient(90deg, rgba(139, 92, 246, 0.2) 0%, transparent 100%);
+            color: var(--primary);
+            border-left: 3px solid var(--primary);
+        }
+
+        nav button i { width: 20px; }
+
+        /* --- MAIN CONTENT --- */
+        main {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+
+        header {
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        p.subtitle { color: var(--text-muted); }
+
+        /* --- SECTIONS --- */
+        section { display: none; animation: fadeIn 0.5s ease; }
+        section.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- DASHBOARD CARDS --- */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .kpi-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 24px;
+            border-radius: var(--radius);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s;
+        }
+
+        .kpi-card:hover { transform: translateY(-2px); border-color: var(--primary); }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+
+        .kpi-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            font-family: 'Space Grotesk', sans-serif;
+            color: var(--text-main);
+            margin: 10px 0 5px 0;
+        }
+
+        .kpi-label { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+
+        /* --- CHARTS --- */
+        .charts-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .chart-wrapper {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 24px;
+            border-radius: var(--radius);
+        }
+
+        /* --- MODEL LIST --- */
+        .model-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .model-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .model-card:hover {
+            border-color: var(--secondary);
+            box-shadow: 0 0 20px rgba(6, 182, 212, 0.1);
+        }
+
+        .model-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding-bottom: 16px;
+        }
+
+        .model-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tag {
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.1);
+            color: var(--text-muted);
+        }
+
+        .chat-box {
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            padding: 16px;
+            font-size: 0.9rem;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .msg-user { color: var(--secondary); margin-bottom: 8px; font-weight: 500; }
+        .msg-ai { color: var(--text-muted); line-height: 1.5; }
+
+        .metrics-bar {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .metric-pill {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            background: rgba(139, 92, 246, 0.1);
+            color: #d8b4fe;
+            padding: 8px 14px;
+            border-radius: 8px;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+        }
+
+        /* --- TUTORIAL --- */
+        .tutorial-step {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .tutorial-step::before {
+            content: '';
+            position: absolute;
+            left: 24px; top: 60px; bottom: -30px;
+            width: 2px;
+            background: var(--border);
+            z-index: 0;
+        }
+
+        .tutorial-step:last-child::before { display: none; }
+
+        .step-number {
+            width: 50px; height: 50px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: white;
+            z-index: 1;
+            flex-shrink: 0;
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+
+        .step-content {
+            flex: 1;
+            background: var(--bg-card);
+            padding: 24px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+        }
+
+        .step-content h3 { color: var(--text-main); margin-bottom: 10px; }
+        .step-content p { color: var(--text-muted); line-height: 1.6; margin-bottom: 15px; }
+
+        .code-snippet {
+            background: #000;
+            padding: 12px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            color: var(--secondary);
+            border: 1px solid var(--border);
+            display: inline-block;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-dark); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+    </style>
+</head>
+<body>
+
+    <!-- MENÚ LATERAL -->
+    <aside>
+        <div class="brand">
+            <i data-lucide="zap"></i> LM BENCH
+        </div>
+        <nav>
+            <button class="active" onclick="showSection('dashboard', this)">
+                <i data-lucide="layout-dashboard"></i> Dashboard
+            </button>
+            <button onclick="showSection('models', this)">
+                <i data-lucide="cpu"></i> Modelos & Tests
+            </button>
+            <button onclick="showSection('tutorial', this)">
+                <i data-lucide="apple"></i> Tutorial Mac
+            </button>
+        </nav>
+    </aside>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main>
+        
+        <!-- SECCIÓN 1: DASHBOARD -->
+        <section id="dashboard" class="active">
+            <header>
+                <h1>Resumen de Rendimiento</h1>
+                <p class="subtitle">Análisis comparativo de latencia y throughput en Apple Silicon / Mac.</p>
+            </header>
+
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-label">Tests Totales</div>
+                    <div class="kpi-value" id="total-tests">0</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Modelo Más Rápido</div>
+                    <div class="kpi-value" style="font-size: 1.5rem; color: var(--secondary);" id="fastest-model">-</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Velocidad Media</div>
+                    <div class="kpi-value" id="avg-speed">0 <span style="font-size:1rem; color:var(--text-muted)">tok/s</span></div>
+                </div>
+            </div>
+
+            <div class="charts-container">
+                <div class="chart-wrapper">
+                    <h3 style="margin-bottom: 20px; font-weight: 500;">Throughput (Tokens/seg)</h3>
+                    <canvas id="speedChart"></canvas>
+                </div>
+                <div class="chart-wrapper">
+                    <h3 style="margin-bottom: 20px; font-weight: 500;">Latencia (Primer Token)</h3>
+                    <canvas id="latencyChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 2: MODELOS DETALLADOS -->
+        <section id="models">
+            <header>
+                <h1>Explorador de Modelos</h1>
+                <p class="subtitle">Detalle de cada interacción, respuesta y consumo de recursos.</p>
+            </header>
+            <div id="models-container" class="model-grid">
+                <!-- Se inyecta con JS -->
+            </div>
+        </section>
+
+        <!-- SECCIÓN 3: TUTORIAL -->
+        <section id="tutorial">
+            <header>
+                <h1>Instalación en macOS</h1>
+                <p class="subtitle">Guía paso a paso para ejecutar LLMs locales con LM Studio.</p>
+            </header>
+
+            <div class="tutorial-step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h3>Descarga e Instalación</h3>
+                    <p>Accede al sitio oficial y descarga la versión optimizada para tu chip (M1/M2/M3 o Intel).</p>
+                    <div class="code-snippet">🔗 lmstudio.ai</div>
+                    <p style="margin-top:15px">Una vez descargado el <code>.dmg</code>, arrastra el logo a la carpeta de <strong>Aplicaciones</strong>.</p>
+                </div>
+            </div>
+
+            <div class="tutorial-step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h3>Buscar Modelos (The Hub)</h3>
+                    <p>En la barra lateral izquierda, haz clic en el icono de la <strong>Lupa</strong>.</p>
+                    <p>Busca modelos populares como <code>Llama 3</code>, <code>Mistral</code> o <code>Qwen</code>. Filtra por compatibilidad a la derecha.</p>
+                    <p><em>Tip: Busca versiones "GGUF" con cuantización Q4_K_M para el mejor balance velocidad/calidad.</em></p>
+                </div>
+            </div>
+
+            <div class="tutorial-step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h3>Cargar y Chatear</h3>
+                    <p>Ve a la pestaña de <strong>Chat</strong> (burbuja de diálogo). Selecciona el modelo descargado en la barra superior central.</p>
+                    <p>Espera a que la barra de carga verde se complete (carga en RAM) y ¡listo! Ya funciona 100% offline.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // Inicializar Iconos Lucide
+        lucide.createIcons();
+
+        // ---------------- DATOS JSON ----------------
+        const rawData = [
+            {
+                "modelo": "deepseek/deepseek-r1-0528-qwen3-8b",
+                "tipo_contenido": "Chat (Adivinanza: Agua/Mojo)",
+                "interaccion": { "usuario": "Me ves en el agua, pero nunca me mojo. ¿Qué soy?", "respuesta_modelo": "La respuesta es: una barca o un barco..." },
+                "metricas_rendimiento": { "tokens_por_segundo": 12.18, "tokens_usados": 464, "tiempo_primer_token_segundos": 0.40 }
+            },
+            {
+                "modelo": "google/gemma-3-12b",
+                "tipo_contenido": "Chat (Adivinanza: Agua/Mojo)",
+                "interaccion": { "usuario": "Me ves en el agua, pero nunca me mojo. ¿Qué soy?", "respuesta_modelo": "La respuesta es la sombra..." },
+                "metricas_rendimiento": { "tokens_por_segundo": 14.22, "tokens_usados": 236, "tiempo_primer_token_segundos": 0.58 }
+            },
+            {
+                "modelo": "ibm/granite-4-h-tiny",
+                "tipo_contenido": "Chat (Adivinanza: Sube/Baja)",
+                "interaccion": { "usuario": "¿Qué sube pero nunca baja?", "respuesta_modelo": "La respuesta a la rima es: 'una montaña'..." },
+                "metricas_rendimiento": { "tokens_por_segundo": 43.12, "tokens_usados": 146, "tiempo_primer_token_segundos": 0.23 }
+            },
+            {
+                "modelo": "google/gemma-3-12b",
+                "tipo_contenido": "Chat (Adivinanza: Sube/Baja)",
+                "interaccion": { "usuario": "¿Qué sube pero nunca baja?", "respuesta_modelo": "La respuesta es la edad..." },
+                "metricas_rendimiento": { "tokens_por_segundo": 14.33, "tokens_usados": 237, "tiempo_primer_token_segundos": 1.07 }
+            },
+            {
+                "modelo": "ibm/granite-4-h-tiny",
+                "tipo_contenido": "Chat (Adivinanza: Agua/Mojo)",
+                "interaccion": { "usuario": "Me ves en el agua, pero nunca me mojo. ¿Qué soy?", "respuesta_modelo": "La respuesta a tu rima es 'un reflejo'..." },
+                "metricas_rendimiento": { "tokens_por_segundo": 42.77, "tokens_usados": 169, "tiempo_primer_token_segundos": 0.49 }
+            },
+            {
+                "modelo": "openai/gpt-oss-20b",
+                "tipo_contenido": "Chat (Adivinanza: Sube/Baja)",
+                "interaccion": { "usuario": "¿Qué sube pero nunca baja?", "respuesta_modelo": "La respuesta es la edad..." },
+                "metricas_rendimiento": { "tokens_por_segundo": 33.60, "tokens_usados": 74, "tiempo_primer_token_segundos": 13.81 }
+            },
+            {
+                "modelo": "mistralai/ministral-3-14b-reasoning",
+                "tipo_contenido": "Chat (Adivinanza: Boca/Oído)",
+                "interaccion": { "usuario": "No tengo boca y hablo... ¿Qué soy?", "respuesta_modelo": "El eco..." },
+                "metricas_rendimiento": { "tokens_por_segundo": 9.09, "tokens_usados": 169, "tiempo_primer_token_segundos": 1.39 }
+            },
+            {
+                "modelo": "deepseek/deepseek-r1-0528-qwen3-8b",
+                "tipo_contenido": "Chat (Adivinanza: Boca/Oído)",
+                "interaccion": { "usuario": "No tengo boca y hablo... ¿Qué soy?", "respuesta_modelo": "La respuesta es: una campana..." },
+                "metricas_rendimiento": { "tokens_por_segundo": 12.11, "tokens_usados": 568, "tiempo_primer_token_segundos": 1.03 }
+            },
+            {
+                "modelo": "qwen/qwen3-vl-8b",
+                "tipo_contenido": "Chat (Adivinanza: Sube/Baja)",
+                "interaccion": { "usuario": "¿Qué sube pero nunca baja?", "respuesta_modelo": "La edad..." },
+                "metricas_rendimiento": { "tokens_por_segundo": 12.31, "tokens_usados": 336, "tiempo_primer_token_segundos": 4.79 }
+            },
+            {
+                "modelo": "openai/gpt-oss-20b",
+                "tipo_contenido": "Chat (Adivinanza: Agua/Mojo)",
+                "interaccion": { "usuario": "Me ves en el agua, pero nunca me mojo. ¿Qué soy?", "respuesta_modelo": "Es tu reflejo..." },
+                "metricas_rendimiento": { "tokens_por_segundo": 33.75, "tokens_usados": 77, "tiempo_primer_token_segundos": 0.78 }
+            },
+            {
+                "modelo": "qwen/qwen3-vl-8b",
+                "tipo_contenido": "Chat (Adivinanza: Boca/Oído)",
+                "interaccion": { "usuario": "No tengo boca y hablo... ¿Qué soy?", "respuesta_modelo": "Un eco..." },
+                "metricas_rendimiento": { "tokens_por_segundo": 12.13, "tokens_usados": 312, "tiempo_primer_token_segundos": 4.76 }
+            },
+            {
+                "modelo": "mistralai/ministral-3-14b-reasoning",
+                "tipo_contenido": "Chat (Adivinanza: Agua/Mojo)",
+                "interaccion": { "usuario": "Me ves en el agua, pero nunca me mojo. ¿Qué soy?", "respuesta_modelo": "El reflejo..." },
+                "metricas_rendimiento": { "tokens_por_segundo": 9.04, "tokens_usados": 128, "tiempo_primer_token_segundos": 0.74 }
+            },
+            {
+                "modelo": "mistralai/ministral-3-14b-reasoning",
+                "tipo_contenido": "Chat (Adivinanza: Sube/Baja)",
+                "interaccion": { "usuario": "¿Qué sube pero nunca baja?", "respuesta_modelo": "El precio..." },
+                "metricas_rendimiento": { "tokens_por_segundo": 9.00, "tokens_usados": 193, "tiempo_primer_token_segundos": 1.07 }
+            },
+            {
+                "modelo": "qwen/qwen3-vl-8b",
+                "tipo_contenido": "Chat (Adivinanza: Agua/Mojo)",
+                "interaccion": { "usuario": "Me ves en el agua, pero nunca me mojo. ¿Qué soy?", "respuesta_modelo": "Tu reflejo..." },
+                "metricas_rendimiento": { "tokens_por_segundo": 12.22, "tokens_usados": 354, "tiempo_primer_token_segundos": 2.95 }
+            },
+            {
+                "modelo": "openai/gpt-oss-20b",
+                "tipo_contenido": "Chat (Adivinanza: Boca/Oído)",
+                "interaccion": { "usuario": "No tengo boca y hablo... ¿Qué soy?", "respuesta_modelo": "Es el eco..." },
+                "metricas_rendimiento": { "tokens_por_segundo": 34.02, "tokens_usados": 93, "tiempo_primer_token_segundos": 0.90 }
+            },
+            {
+                "modelo": "google/gemma-3-12b",
+                "tipo_contenido": "Chat (Adivinanza: Boca/Oído)",
+                "interaccion": { "usuario": "no tengo oídos y escucho... ¿Qué soy?", "respuesta_modelo": "La respuesta es el eco..." },
+                "metricas_rendimiento": { "tokens_por_segundo": 13.96, "tokens_usados": 308, "tiempo_primer_token_segundos": 0.78 }
+            },
+            {
+                "modelo": "ibm/granite-4-h-tiny",
+                "tipo_contenido": "Chat (Adivinanza: Boca/Oído)",
+                "interaccion": { "usuario": "No tengo boca y hablo... ¿Qué soy?", "respuesta_modelo": "La respuesta a esta rima es 'el viento'..." },
+                "metricas_rendimiento": { "tokens_por_segundo": 43.03, "tokens_usados": 233, "tiempo_primer_token_segundos": 0.21 }
+            },
+            {
+                "modelo": "deepseek/deepseek-r1-0528-qwen3-8b",
+                "tipo_contenido": "Chat (Adivinanza: Sube/Baja)",
+                "interaccion": { "usuario": "¿Qué sube pero nunca baja?", "respuesta_modelo": "La respuesta común... es 'la vida'..." },
+                "metricas_rendimiento": { "tokens_por_segundo": 11.92, "tokens_usados": 1940, "tiempo_primer_token_segundos": 0.95 }
+            }
+        ];
+
+        // ---------------- LOGICA APP ----------------
+        
+        function showSection(id, btn) {
+            document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            
+            if(btn) {
+                document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            }
+        }
+
+        function processMetrics() {
+            const stats = {};
+            rawData.forEach(d => {
+                const name = d.modelo.split('/')[1] || d.modelo;
+                if(!stats[name]) stats[name] = { tps: [], lat: [], count: 0 };
+                stats[name].tps.push(d.metricas_rendimiento.tokens_por_segundo);
+                stats[name].lat.push(d.metricas_rendimiento.tiempo_primer_token_segundos);
+                stats[name].count++;
+            });
+
+            const labels = Object.keys(stats);
+            const avgTPS = labels.map(l => stats[l].tps.reduce((a,b)=>a+b,0) / stats[l].count);
+            const avgLat = labels.map(l => stats[l].lat.reduce((a,b)=>a+b,0) / stats[l].count);
+
+            // KPIs
+            const total = rawData.length;
+            const fastModel = labels[avgTPS.indexOf(Math.max(...avgTPS))];
+            const globalSpeed = (avgTPS.reduce((a,b)=>a+b,0) / labels.length).toFixed(2);
+
+            document.getElementById('total-tests').innerText = total;
+            document.getElementById('fastest-model').innerText = fastModel;
+            document.getElementById('avg-speed').innerText = globalSpeed;
+
+            return { labels, avgTPS, avgLat };
+        }
+
+        function renderCharts() {
+            const data = processMetrics();
+            const ctxSpeed = document.getElementById('speedChart').getContext('2d');
+            const ctxLat = document.getElementById('latencyChart').getContext('2d');
+
+            // Config común
+            const commonOptions = {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { grid: { color: '#3f3f46' }, ticks: { color: '#a1a1aa' } },
+                    x: { grid: { display: false }, ticks: { color: '#a1a1aa' } }
+                }
+            };
+
+            new Chart(ctxSpeed, {
+                type: 'bar',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        data: data.avgTPS,
+                        backgroundColor: ['#8b5cf6', '#06b6d4', '#ec4899', '#f59e0b', '#10b981'],
+                        borderRadius: 8
+                    }]
+                },
+                options: commonOptions
+            });
+
+            new Chart(ctxLat, {
+                type: 'line',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        data: data.avgLat,
+                        borderColor: '#ec4899',
+                        backgroundColor: 'rgba(236, 72, 153, 0.2)',
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: '#fff',
+                        pointRadius: 6
+                    }]
+                },
+                options: commonOptions
+            });
+        }
+
+        function renderModels() {
+            const container = document.getElementById('models-container');
+            container.innerHTML = rawData.map(item => {
+                const name = item.modelo.split('/')[1] || item.modelo;
+                const task = item.tipo_contenido.replace('Chat', '').replace(/[()]/g, '');
+                
+                return `
+                <div class="model-card">
+                    <div class="model-header">
+                        <div class="model-title">
+                            <i data-lucide="box" size="18"></i> ${name}
+                        </div>
+                        <span class="tag">${task}</span>
+                    </div>
+                    <div class="chat-box">
+                        <div class="msg-user">USER: ${item.interaccion.usuario}</div>
+                        <div class="msg-ai">${item.interaccion.respuesta_modelo}</div>
+                    </div>
+                    <div class="metrics-bar">
+                        <div class="metric-pill">
+                            <i data-lucide="zap" size="14"></i>
+                            ${item.metricas_rendimiento.tokens_por_segundo} t/s
+                        </div>
+                        <div class="metric-pill">
+                            <i data-lucide="timer" size="14"></i>
+                            ${item.metricas_rendimiento.tiempo_primer_token_segundos}s init
+                        </div>
+                        <div class="metric-pill">
+                            <i data-lucide="file-text" size="14"></i>
+                            ${item.metricas_rendimiento.tokens_usados} tokens
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+            
+            // Re-render icons for new elements
+            lucide.createIcons();
+        }
+
+        // Init
+        renderCharts();
+        renderModels();
+    </script>
+</body>
+</html>
