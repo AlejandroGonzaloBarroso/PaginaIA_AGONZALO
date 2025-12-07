@@ -1,789 +1,236 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Guía de Configuración - NVIDIA Jetson Nano</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <title>Guía Completa Jetson Orin Nano y LLM</title>
+    <!-- Carga de Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary-color: #76b900;
-            --secondary-color: #1a1a1a;
-            --accent-color: #00d4ff;
-            --text-primary: #ffffff;
-            --text-secondary: #b0b0b0;
-            --bg-dark: #0a0a0a;
-            --bg-card: #1a1a1a;
-            --border-color: #2a2a2a;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, var(--bg-dark) 0%, #1a1a1a 100%);
-            color: var(--text-primary);
-            line-height: 1.6;
-            min-height: 100vh;
+            background-color: #1f2937; /* Fondo gris oscuro */
+            background-image: radial-gradient(#374151 1px, transparent 1px);
+            background-size: 20px 20px;
         }
-
-        .container {
+        .container-wrapper {
             max-width: 1400px;
-            margin: 0 auto;
-            padding: 2rem;
+            margin-left: auto;
+            margin-right: auto;
         }
-
-        header {
-            text-align: center;
-            margin-bottom: 4rem;
-            padding: 3rem 0;
-            background: linear-gradient(135deg, rgba(118, 185, 0, 0.1) 0%, rgba(0, 212, 255, 0.1) 100%);
-            border-radius: 20px;
-            border: 1px solid var(--border-color);
-            position: relative;
-            overflow: hidden;
-        }
-
-        header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" fill="none"/><path d="M0 0L100 100M100 0L0 100" stroke="rgba(118,185,0,0.05)" stroke-width="1"/></svg>');
-            opacity: 0.3;
-        }
-
-        h1 {
-            font-size: 3.5rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 1rem;
-            position: relative;
-        }
-
-        .subtitle {
-            font-size: 1.3rem;
-            color: var(--text-secondary);
-            font-weight: 300;
-            position: relative;
-        }
-
-        .logo {
-            width: 150px;
-            margin-bottom: 1.5rem;
-            filter: drop-shadow(0 0 20px rgba(118, 185, 0, 0.3));
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 6px;
-            background: var(--bg-card);
-            border-radius: 10px;
-            margin: 2rem 0;
-            overflow: hidden;
-            position: sticky;
-            top: 20px;
-            z-index: 100;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--primary-color) 0%, var(--accent-color) 100%);
-            width: 0%;
-            transition: width 0.3s ease;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(118, 185, 0, 0.5);
-        }
-
-        .step-counter {
-            text-align: center;
-            font-size: 1rem;
-            color: var(--text-secondary);
-            margin-top: 0.5rem;
-            font-weight: 500;
-        }
-
-        .steps-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
-        }
-
-        .step-card {
-            background: var(--bg-card);
-            border-radius: 20px;
-            padding: 2rem;
-            border: 1px solid var(--border-color);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            opacity: 0;
-            transform: translateY(30px);
-            animation: fadeInUp 0.6s ease forwards;
-            position: relative;
-            overflow: hidden;
-            display: grid;
-            grid-template-columns: 1fr 400px;
-            gap: 2rem;
-            align-items: start;
-        }
-
-        .step-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, var(--primary-color) 0%, var(--accent-color) 100%);
-            transform: scaleX(0);
-            transform-origin: left;
-            transition: transform 0.6s ease;
-        }
-
-        .step-card.viewed::before {
-            transform: scaleX(1);
-        }
-
-        .step-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary-color);
-            box-shadow: 0 20px 60px rgba(118, 185, 0, 0.15);
-        }
-
-        @keyframes fadeInUp {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .step-content {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .step-header {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-        }
-
-        .step-number {
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
-            color: white;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            font-weight: 700;
-            flex-shrink: 0;
-            box-shadow: 0 8px 25px rgba(118, 185, 0, 0.3);
-        }
-
-        .step-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .step-description {
-            color: var(--text-secondary);
-            font-size: 1.1rem;
-            line-height: 1.8;
-            margin-top: 1rem;
-            padding-left: calc(50px + 1.5rem);
-            /* Align with title text */
-        }
-
-        .image-container {
-            border-radius: 15px;
-            overflow: hidden;
-            background: var(--bg-dark);
-            border: 1px solid var(--border-color);
+        .gallery-item {
             cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            height: 300px;
-            /* Fixed height for consistency */
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            border: 1px solid #374151; /* Borde sutil */
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
         }
-
-        .image-container::after {
-            content: '🔍 Click para ampliar';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
-            color: white;
-            padding: 1rem;
-            text-align: center;
-            font-size: 0.9rem;
-            opacity: 0;
+        .gallery-item:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+            border-color: #4f46e5; /* Resaltar borde en hover */
+        }
+        .modal {
+            background-color: rgba(0, 0, 0, 0.95);
             transition: opacity 0.3s ease;
         }
-
-        .image-container:hover::after {
-            opacity: 1;
-        }
-
-        .image-container:hover {
-            transform: scale(1.02);
-            box-shadow: 0 15px 50px rgba(0, 212, 255, 0.2);
-            border-color: var(--accent-color);
-        }
-
-        .step-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-            transition: all 0.3s ease;
-        }
-
-        .image-container:hover .step-image {
-            filter: brightness(1.1);
-        }
-
-        /* Modal para ampliar imagen */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.95);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(10px);
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            max-width: 95%;
-            max-height: 95vh;
-            position: relative;
-            animation: zoomIn 0.3s ease;
-        }
-
-        @keyframes zoomIn {
-            from {
-                transform: scale(0.8);
-                opacity: 0;
-            }
-
-            to {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-
-        .modal img {
-            max-width: 100%;
-            max-height: 95vh;
-            border-radius: 10px;
-            box-shadow: 0 25px 100px rgba(0, 0, 0, 0.5);
-        }
-
-        .close-modal {
-            position: absolute;
-            top: -50px;
-            right: 0;
-            font-size: 2.5rem;
-            color: white;
-            cursor: pointer;
-            background: rgba(255, 255, 255, 0.1);
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-        }
-
-        .close-modal:hover {
-            background: var(--primary-color);
-            transform: rotate(90deg);
-        }
-
-        footer {
-            text-align: center;
-            margin-top: 5rem;
-            padding: 3rem 0;
-            border-top: 1px solid var(--border-color);
-            color: var(--text-secondary);
-        }
-
-        .footer-content {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            align-items: center;
-        }
-
-        .footer-links {
-            display: flex;
-            gap: 2rem;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .footer-links a {
-            color: var(--primary-color);
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
-
-        .footer-links a:hover {
-            color: var(--accent-color);
-        }
-
-        /* Responsive */
-        @media (max-width: 900px) {
-            .step-card {
-                grid-template-columns: 1fr;
-                gap: 1.5rem;
-            }
-
-            .image-container {
-                height: 250px;
-                width: 100%;
-            }
-
-            .step-description {
-                padding-left: 0;
-            }
-        }
-
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 2.5rem;
-            }
-
-            .subtitle {
-                font-size: 1.1rem;
-            }
-
-            .step-card {
-                padding: 1.5rem;
-            }
-
-            .step-title {
-                font-size: 1.4rem;
-            }
-
-            .container {
-                padding: 1rem;
-            }
-        }
-
-        /* Animation delays for sequential appearance */
-        .step-card:nth-child(1) {
-            animation-delay: 0.1s;
-        }
-
-        .step-card:nth-child(2) {
-            animation-delay: 0.15s;
-        }
-
-        .step-card:nth-child(3) {
-            animation-delay: 0.2s;
-        }
-
-        .step-card:nth-child(4) {
-            animation-delay: 0.25s;
-        }
-
-        .step-card:nth-child(5) {
-            animation-delay: 0.3s;
+        .category-header {
+            border-left: 6px solid #10b981; /* Verde esmeralda para acento */
+            background-color: #374151;
+            color: #f3f4f6;
         }
     </style>
 </head>
+<body class="p-4 sm:p-8">
 
-<body>
-    <div class="container">
-        <header>
-            <svg class="logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 50">
-                <text x="0" y="35" font-family="Inter, sans-serif" font-size="24" font-weight="700"
-                    fill="#76b900">NVIDIA</text>
-                <text x="100" y="35" font-family="Inter, sans-serif" font-size="18" font-weight="300"
-                    fill="#ffffff">Jetson Nano</text>
-            </svg>
-            <h1>Guía de Configuración</h1>
-            <p class="subtitle">NVIDIA Jetson Nano - Paso a Paso</p>
+    <div class="container-wrapper">
+        <!-- Encabezado Principal -->
+        <header class="text-center mb-12 p-8 rounded-2xl shadow-2xl bg-gradient-to-r from-gray-900 to-gray-800 border border-indigo-700">
+            <h1 class="text-5xl font-extrabold text-white mb-2 tracking-tight">
+                <span class="text-indigo-400">J E T S O N</span> O R I N N A N O
+            </h1>
+            <p class="text-xl text-green-400 font-medium mt-3">Guía de Configuración: De Hardware a Inteligencia Artificial Local</p>
         </header>
 
-        <div class="progress-bar">
-            <div class="progress-fill" id="progressFill"></div>
+        <!-- Galería de Imágenes -->
+        <div id="image-gallery" class="space-y-16">
+            <!-- Las categorías y las tarjetas se inyectarán aquí con JavaScript -->
         </div>
-        <div class="step-counter" id="stepCounter">Paso 0 de 44</div>
-
-        <div class="steps-grid" id="stepsGrid">
-            <!-- Steps will be generated by JavaScript -->
-        </div>
-
-        <footer>
-            <div class="footer-content">
-                <p>&copy; 2025 Configuración Jetson Nano - Guía Paso a Paso</p>
-                <div class="footer-links">
-                    <a href="https://developer.nvidia.com/embedded/jetson-nano" target="_blank">NVIDIA Jetson</a>
-                    <a href="https://developer.nvidia.com/embedded/learn/get-started-jetson-nano-devkit"
-                        target="_blank">Documentación Oficial</a>
-                </div>
-            </div>
-        </footer>
     </div>
 
-    <!-- Modal para ampliar imagen -->
-    <div class="modal" id="imageModal">
-        <div class="modal-content">
-            <span class="close-modal" id="closeModal">&times;</span>
-            <img id="modalImage" src="" alt="Imagen ampliada">
+    <!-- Modal para la Vista Ampliada -->
+    <div id="image-modal" class="modal fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none">
+        <div class="bg-gray-900 p-6 rounded-xl shadow-2xl max-w-6xl w-11/12 transform transition-all duration-300 scale-95 border border-indigo-500">
+            <!-- Botón de Cerrar Modal -->
+            <div class="flex justify-end">
+                <button id="close-modal-btn" class="text-indigo-400 hover:text-white text-4xl font-light leading-none transition-colors duration-200">&times;</button>
+            </div>
+            <!-- Contenido del Modal -->
+            <div class="p-4 text-center">
+                <img id="modal-image" src="" alt="Imagen ampliada" class="w-full h-auto max-h-[80vh] object-contain rounded-lg mb-6 border border-gray-700 mx-auto">
+                <h2 id="modal-title" class="text-3xl font-bold text-white mb-2"></h2>
+                <p id="modal-description" class="text-gray-400 text-lg"></p>
+            </div>
         </div>
     </div>
 
     <script>
-        const steps = [
-            {
-                image: "WhatsApp Image 2025-11-20 at 20.12.04.jpeg",
-                title: "Preparación inicial del entorno",
-                description: "Comenzamos preparando el área de trabajo. Asegúrate de tener una superficie limpia y antiestática. Reúne todos los componentes necesarios: la Jetson Nano, la fuente de alimentación, el cable HDMI, el teclado, el ratón y la tarjeta microSD."
-            },
-            {
-                image: "WhatsApp Image 2025-11-20 at 20.12.05.jpeg",
-                title: "Conexión de cables y periféricos",
-                description: "Conecta el cable HDMI a tu monitor y a la Jetson Nano. Luego, conecta el teclado y el ratón a los puertos USB disponibles. Es importante realizar estas conexiones antes de encender el dispositivo."
-            },
-            {
-                image: "WhatsApp Image 2025-11-20 at 20.12.05 (1).jpeg",
-                title: "Instalación de la tarjeta microSD",
-                description: "Inserta la tarjeta microSD previamente flasheada con la imagen de JetPack en la ranura correspondiente ubicada debajo del módulo de la Jetson Nano. Asegúrate de que encaje correctamente con un clic suave."
-            },
-            {
-                image: "WhatsApp Image 2025-11-20 at 20.12.05 (2).jpeg",
-                title: "Conexión de alimentación",
-                description: "Conecta la fuente de alimentación al puerto micro-USB o al conector de barril (si estás usando el jumper J48). Al conectar la energía, el LED verde de encendido debería iluminarse."
-            },
-            {
-                image: "WhatsApp Image 2025-11-20 at 20.12.06.jpeg",
-                title: "Primer arranque del sistema",
-                description: "Observa el monitor. Deberías ver el logotipo de NVIDIA apareciendo en la pantalla, indicando que el sistema está iniciando correctamente el proceso de boot."
-            },
-            {
-                image: "WhatsApp Image 2025-11-20 at 20.12.06 (1).jpeg",
-                title: "Pantalla de inicio de Ubuntu",
-                description: "El sistema cargará el entorno de instalación de Ubuntu. Esta primera fase puede tardar unos minutos mientras se inicializan los componentes del sistema operativo."
-            },
-            {
-                image: "WhatsApp Image 2025-11-20 at 20.12.06 (2).jpeg",
-                title: "Configuración de región e idioma",
-                description: "Selecciona tu idioma preferido (Español) y tu ubicación geográfica. Esto configurará automáticamente los formatos de fecha, hora y moneda del sistema."
-            },
-            {
-                image: "WhatsApp Image 2025-11-20 at 21.26.25.jpeg",
-                title: "Selección de teclado",
-                description: "Elige la distribución de teclado que coincida con tu hardware (generalmente Español o Español Latinoamericano). Puedes probar las teclas en el cuadro de texto de prueba para verificar."
-            },
-            {
-                image: "WhatsApp Image 2025-11-20 at 21.26.25 (1).jpeg",
-                title: "Configuración de red WiFi",
-                description: "Si tienes un adaptador WiFi conectado, selecciona tu red de la lista e introduce la contraseña. Si usas Ethernet, la conexión debería detectarse automáticamente."
-            },
-            {
-                image: "WhatsApp Image 2025-11-27 at 22.27.20.jpeg",
-                title: "Creación de usuario y contraseña",
-                description: "Crea tu cuenta de usuario principal. Elige un nombre de usuario fácil de recordar y una contraseña segura. Esta cuenta tendrá privilegios de administrador (sudo)."
-            },
-            {
-                image: "WhatsApp Image 2025-11-27 at 22.27.21.jpeg",
-                title: "Configuración de zona horaria",
-                description: "Confirma tu zona horaria detectada automáticamente o selecciónala manualmente en el mapa. Esto es crucial para los registros del sistema y la sincronización de red."
-            },
-            {
-                image: "WhatsApp Image 2025-11-27 at 22.27.25.jpeg",
-                title: "Instalación de actualizaciones del sistema",
-                description: "El sistema buscará actualizaciones críticas. Es recomendable instalarlas ahora para asegurar la estabilidad y seguridad del sistema desde el primer momento."
-            },
-            {
-                image: "WhatsApp Image 2025-11-27 at 22.27.25 (1).jpeg",
-                title: "Descarga de paquetes necesarios",
-                description: "El instalador descargará paquetes adicionales de idioma y controladores necesarios para el hardware específico de la Jetson Nano."
-            },
-            {
-                image: "WhatsApp Image 2025-11-27 at 22.27.26.jpeg",
-                title: "Configuración de JetPack SDK",
-                description: "Iniciando la configuración de los componentes específicos de NVIDIA JetPack, que incluyen las bibliotecas de aceleración por GPU."
-            },
-            {
-                image: "WhatsApp Image 2025-11-27 at 22.27.28.jpeg",
-                title: "Instalación de CUDA Toolkit",
-                description: "Se está instalando el kit de herramientas CUDA, esencial para aprovechar la potencia de los 128 núcleos Maxwell de la GPU para computación paralela."
-            },
-            {
-                image: "WhatsApp Image 2025-11-27 at 22.27.28 (1).jpeg",
-                title: "Configuración de cuDNN",
-                description: "Configurando la biblioteca de redes neuronales profundas de CUDA (cuDNN), optimizada para el rendimiento en aprendizaje profundo."
-            },
-            {
-                image: "WhatsApp Image 2025-11-27 at 22.27.29.jpeg",
-                title: "Instalación de TensorRT",
-                description: "Instalando TensorRT, el optimizador de inferencia de aprendizaje profundo de NVIDIA, clave para ejecutar modelos de IA en tiempo real."
-            },
-            {
-                image: "WhatsApp Image 2025-11-27 at 22.27.29 (1).jpeg",
-                title: "Configuración de OpenCV",
-                description: "Compilando y configurando OpenCV con soporte para CUDA, permitiendo el procesamiento de imágenes acelerado por hardware."
-            },
-            {
-                image: "WhatsApp Image 2025-11-27 at 22.27.29 (2).jpeg",
-                title: "Instalación de Python y pip",
-                description: "Verificando la instalación de Python 3 y el gestor de paquetes pip. Instalando bibliotecas base esenciales como numpy y matplotlib."
-            },
-            {
-                image: "WhatsApp Image 2025-11-27 at 22.27.30.jpeg",
-                title: "Configuración de entorno virtual",
-                description: "Creando un entorno virtual (virtualenv) para aislar las dependencias de nuestros proyectos de IA y mantener el sistema limpio."
-            },
-            {
-                image: "WhatsApp Image 2025-11-27 at 22.27.30 (1).jpeg",
-                title: "Instalación de Jupyter Notebook",
-                description: "Instalando Jupyter Lab/Notebook para poder desarrollar y ejecutar código de manera interactiva desde el navegador web."
-            },
-            {
-                image: "WhatsApp Image 2025-11-27 at 22.27.31.jpeg",
-                title: "Configuración de bibliotecas de Deep Learning",
-                description: "Instalando bibliotecas de alto nivel como Keras o FastAI, dependiendo de la configuración deseada para el desarrollo de modelos."
-            },
-            {
-                image: "WhatsApp Image 2025-11-27 at 22.27.32.jpeg",
-                title: "Instalación de PyTorch",
-                description: "Descargando e instalando la versión de PyTorch optimizada para Jetson (aarch64), asegurando compatibilidad total con la GPU."
-            },
-            {
-                image: "WhatsApp Image 2025-11-27 at 22.27.33.jpeg",
-                title: "Instalación de TensorFlow",
-                description: "Instalando TensorFlow para Jetson. Este paso puede tomar tiempo ya que instala binarios grandes y optimizados."
-            },
-            {
-                image: "WhatsApp Image 2025-11-27 at 22.27.34.jpeg",
-                title: "Configuración de GPIO",
-                description: "Configurando los permisos de usuario para acceder a los pines GPIO (General Purpose Input/Output) sin necesidad de usar sudo."
-            },
-            {
-                image: "WhatsApp Image 2025-11-27 at 22.27.34 (1).jpeg",
-                title: "Prueba de puertos USB",
-                description: "Verificando que todos los puertos USB funcionan correctamente conectando diferentes periféricos y comprobando su detección con 'lsusb'."
-            },
-            {
-                image: "WhatsApp Image 2025-11-27 at 22.27.35.jpeg",
-                title: "Configuración de cámara CSI",
-                description: "Conectando y probando la cámara CSI (si está disponible) usando nvarguscamerasrc para verificar que el video fluye correctamente."
-            },
-            {
-                image: "WhatsApp Image 2025-11-27 at 22.27.36.jpeg",
-                title: "Prueba de conexión de red",
-                description: "Realizando un test de velocidad y ping para asegurar que la conexión a internet es estable y suficiente para descargar modelos y datasets."
-            },
-            {
-                image: "WhatsApp Image 2025-11-27 at 22.27.37.jpeg",
-                title: "Configuración de SSH",
-                description: "Habilitando y configurando el servidor SSH para permitir el acceso remoto a la Jetson Nano desde otro ordenador en la misma red."
-            },
-            {
-                image: "WhatsApp Image 2025-11-27 at 22.27.38.jpeg",
-                title: "Instalación de Visual Studio Code",
-                description: "Instalando VS Code (versión ARM64) o configurando la extensión Remote-SSH para desarrollar cómodamente desde tu PC principal."
-            },
-            {
-                image: "WhatsApp Image 2025-11-27 at 22.27.38 (1).jpeg",
-                title: "Configuración de permisos de usuario",
-                description: "Ajustando grupos de usuario (video, i2c, gpio) para asegurar que tu usuario tiene acceso a todo el hardware necesario sin restricciones."
-            },
-            {
-                image: "WhatsApp Image 2025-11-27 at 22.27.39.jpeg",
-                title: "Instalación de Docker",
-                description: "Instalando y configurando Docker y NVIDIA Container Runtime para poder ejecutar contenedores con aceleración GPU."
-            },
-            {
-                image: "WhatsApp Image 2025-11-27 at 22.27.40.jpeg",
-                title: "Configuración de contenedores",
-                description: "Descargando una imagen base de l4t-ml para verificar que el entorno de contenedores funciona correctamente."
-            },
-            {
-                image: "WhatsApp Image 2025-11-27 at 22.27.40 (1).jpeg",
-                title: "Prueba de rendimiento GPU",
-                description: "Ejecutando 'tegrastats' para monitorizar el uso de la GPU, CPU y memoria en tiempo real y verificar que el sistema no está en modo de bajo consumo."
-            },
-            {
-                image: "WhatsApp Image 2025-11-27 at 22.27.41.jpeg",
-                title: "Configuración de ventilador",
-                description: "Si tienes un ventilador instalado, configurando el perfil de refrigeración (jetson_clocks) para mantener la temperatura bajo control."
-            },
-            {
-                image: "WhatsApp Image 2025-11-27 at 22.27.42.jpeg",
-                title: "Monitorización de temperatura",
-                description: "Comprobando las temperaturas térmicas para asegurar que el disipador está haciendo buen contacto y no hay sobrecalentamiento."
-            },
-            {
-                image: "WhatsApp Image 2025-11-27 at 22.27.43.jpeg",
-                title: "Instalación de herramientas de desarrollo",
-                description: "Instalando herramientas adicionales como git, cmake, y build-essential necesarias para compilar proyectos desde el código fuente."
-            },
-            {
-                image: "WhatsApp Image 2025-11-27 at 22.27.43 (1).jpeg",
-                title: "Configuración de Git",
-                description: "Configurando tu nombre de usuario y correo electrónico en Git para el control de versiones de tus proyectos."
-            },
-            {
-                image: "WhatsApp Image 2025-11-27 at 22.27.44.jpeg",
-                title: "Clonación de repositorios de ejemplo",
-                description: "Clonando el repositorio 'jetson-inference' de NVIDIA para tener ejemplos listos para ejecutar y probar la capacidad de la placa."
-            },
-            {
-                image: "WhatsApp Image 2025-11-27 at 22.27.46.jpeg",
-                title: "Ejecución de primer modelo de IA",
-                description: "Ejecutando un ejemplo de clasificación de imágenes (como GoogleNet) para ver la Jetson Nano en acción clasificando objetos en tiempo real."
-            },
-            {
-                image: "WhatsApp Image 2025-11-27 at 22.27.46 (1).jpeg",
-                title: "Verificación de instalación completa",
-                description: "Revisando que todos los componentes de software y hardware están respondiendo como se espera tras las pruebas de estrés."
-            },
-            {
-                image: "WhatsApp Image 2025-11-27 at 22.27.46 (2).jpeg",
-                title: "Pruebas de rendimiento finales",
-                description: "Realizando un benchmark final para confirmar que obtenemos los FPS esperados en los modelos de prueba."
-            },
-            {
-                image: "WhatsApp Image 2025-11-27 at 22.27.47.jpeg",
-                title: "Configuración de inicio automático",
-                description: "Configurando scripts para que ciertos servicios o programas se inicien automáticamente al arrancar la Jetson Nano."
-            },
-            {
-                image: "WhatsApp Image 2025-11-27 at 22.27.47 (1).jpeg",
-                title: "Finalización y respaldo del sistema",
-                description: "¡Configuración completada! Es un buen momento para hacer una copia de seguridad de la tarjeta SD ahora que todo funciona perfectamente."
-            }
+        // DATOS DE LAS IMÁGENES
+        // Asegúrate de que los archivos en tu carpeta tengan EXACTAMENTE estos nombres.
+        const imageData = [
+            // --- Categoría 1: Hardware y Desempaquetado ---
+            { category: "1. Hardware y Desempaquetado", name: "WhatsApp Image 2025-11-20 at 20.12.06 (2).jpeg", title: "1. Desempaquetado del Kit", description: "Vista inicial del kit de desarrollo Jetson Orin Nano al abrir la caja." },
+            { category: "1. Hardware y Desempaquetado", name: "WhatsApp Image 2025-11-20 at 20.12.05.jpeg", title: "2. Componentes del Kit", description: "Todos los componentes incluidos: placa, adaptador y cable." },
+            { category: "1. Hardware y Desempaquetado", name: "WhatsApp Image 2025-11-20 at 20.12.06 (1).jpeg", title: "3. Placa Base de la Jetson", description: "Vista superior de la placa base con el módulo instalado." },
+            { category: "1. Hardware y Desempaquetado", name: "WhatsApp Image 2025-11-20 at 20.12.05 (2).jpeg", title: "4. Detalle de Conexión", description: "Vista lateral del módulo Jetson encajado en la placa portadora." },
+            { category: "1. Hardware y Desempaquetado", name: "WhatsApp Image 2025-11-20 at 20.12.05 (1).jpeg", title: "5. Ubicación Tarjeta SD", description: "Vista lateral indicando el conector para la tarjeta SD." },
+            { category: "1. Hardware y Desempaquetado", name: "WhatsApp Image 2025-11-20 at 20.12.06.jpeg", title: "6. Instalación SSD M.2", description: "Vista inferior con el SSD M.2 NVMe instalado." },
+            { category: "1. Hardware y Desempaquetado", name: "WhatsApp Image 2025-11-20 at 20.12.04.jpeg", title: "7. Conexiones Iniciales", description: "Placa con alimentación, video y USB conectados." },
+            
+            // --- Categoría 2: Configuración Inicial de Ubuntu ---
+            { category: "2. Configuración Inicial de Ubuntu", name: "WhatsApp Image 2025-11-27 at 22.27.20.jpeg", title: "8. Pantalla de Bienvenida", description: "Primer paso tras el arranque inicial de Ubuntu." },
+            { category: "2. Configuración Inicial de Ubuntu", name: "WhatsApp Image 2025-11-27 at 22.27.21.jpeg", title: "9. Selección de Idioma", description: "Elección del idioma para el sistema operativo." },
+            { category: "2. Configuración Inicial de Ubuntu", name: "WhatsApp Image 2025-11-27 at 22.27.25.jpeg", title: "10. Configuración Teclado", description: "Selección del layout o distribución del teclado." },
+            { category: "2. Configuración Inicial de Ubuntu", name: "WhatsApp Image 2025-11-27 at 22.27.25 (1).jpeg", title: "11. Configuración Ubicación", description: "Establecimiento de la zona horaria." },
+            { category: "2. Configuración Inicial de Ubuntu", name: "WhatsApp Image 2025-11-27 at 22.27.26.jpeg", title: "12. Creación del Usuario", description: "Creación de nombre de usuario y contraseña." },
+            { category: "2. Configuración Inicial de Ubuntu", name: "WhatsApp Image 2025-11-27 at 22.27.28.jpeg", title: "13. Privacidad", description: "Pantalla de configuración de privacidad y diagnóstico." },
+            { category: "2. Configuración Inicial de Ubuntu", name: "WhatsApp Image 2025-11-27 at 22.27.28 (1).jpeg", title: "14. Inicio de Sesión", description: "Pantalla de login tras completar la instalación." },
+            
+            // --- Categoría 3: Preparación del Almacenamiento ---
+            { category: "3. Preparación del Almacenamiento", name: "WhatsApp Image 2025-11-27 at 22.27.46 (2).jpeg", title: "15. Listado de Discos", description: "Comandos para listar particiones (lsblk)." },
+            { category: "3. Preparación del Almacenamiento", name: "WhatsApp Image 2025-11-27 at 22.27.46 (1).jpeg", title: "16. Formato del SSD", description: "Creación del sistema de archivos con mkfs.ext4." },
+            { category: "3. Preparación del Almacenamiento", name: "WhatsApp Image 2025-11-27 at 22.27.44.jpeg", title: "17. Montaje y Paquetes", description: "Instalación de paquetes y montaje del disco." },
+            { category: "3. Preparación del Almacenamiento", name: "WhatsApp Image 2025-11-27 at 22.27.29 (2).jpeg", title: "18. Chat Inicial", description: "Vista preliminar de la interfaz de chat." },
+            { category: "3. Preparación del Almacenamiento", name: "WhatsApp Image 2025-11-27 at 22.27.47.jpeg", title: "19. Guía NVIDIA AI Lab", description: "Tutoriales oficiales de NVIDIA para configuración de IA." },
+            { category: "3. Preparación del Almacenamiento", name: "WhatsApp Image 2025-11-27 at 22.27.47 (1).jpeg", title: "20. Descarga LM Studio", description: "Web oficial de LM Studio para Linux." },
+
+            // --- Categoría 4: Configuración de LLM Local ---
+            { category: "4. Configuración de LLM Local", name: "WhatsApp Image 2025-11-27 at 22.27.43 (1).jpeg", title: "21. Bienvenida LM Studio", description: "Pantalla de inicio de la aplicación LM Studio." },
+            { category: "4. Configuración de LLM Local", name: "WhatsApp Image 2025-11-27 at 22.27.43.jpeg", title: "22. Nivel de Usuario", description: "Selección de experiencia (User, Power User, Developer)." },
+            { category: "4. Configuración de LLM Local", name: "WhatsApp Image 2025-11-27 at 22.27.42.jpeg", title: "23. Descarga Primer Modelo", description: "Asistente para descargar el primer modelo de IA." },
+            { category: "4. Configuración de LLM Local", name: "WhatsApp Image 2025-11-27 at 22.27.40 (1).jpeg", title: "24. Búsqueda de Modelo", description: "Buscando 'qwen/qwen3-vl-4b' en el repositorio." },
+            { category: "4. Configuración de LLM Local", name: "WhatsApp Image 2025-11-27 at 22.27.35.jpeg", title: "25. Información Modelo", description: "Detalles técnicos del modelo Qwen3 VL 4B." },
+            { category: "4. Configuración de LLM Local", name: "WhatsApp Image 2025-11-27 at 22.27.34.jpeg", title: "26. Formatos Disponibles", description: "Formatos de descarga (GGUF, MLX) y tamaño." },
+            { category: "4. Configuración de LLM Local", name: "WhatsApp Image 2025-11-27 at 22.27.38.jpeg", title: "27. Opciones de Descarga", description: "Selección del archivo compatible (Likely Fit)." },
+            { category: "4. Configuración de LLM Local", name: "WhatsApp Image 2025-11-27 at 22.27.36.jpeg", title: "28. Descarga en Curso", description: "Barra de progreso de la descarga del modelo." },
+            { category: "4. Configuración de LLM Local", name: "WhatsApp Image 2025-11-27 at 22.27.31.jpeg", title: "29. Descarga Completada", description: "Notificación de descarga finalizada." },
+            { category: "4. Configuración de LLM Local", name: "WhatsApp Image 2025-11-27 at 22.27.29.jpeg", title: "30. Carga del Modelo", description: "Cargando el modelo en memoria para el chat." },
+            { category: "4. Configuración de LLM Local", name: "WhatsApp Image 2025-11-27 at 22.27.40.jpeg", title: "31. Chat Listo", description: "Interfaz lista para escribir el primer mensaje." },
+            { category: "4. Configuración de LLM Local", name: "WhatsApp Image 2025-11-27 at 22.27.28 (1).jpeg", title: "32. Primer Mensaje", description: "El modelo responde correctamente al saludo." }
         ];
 
-        const stepsGrid = document.getElementById('stepsGrid');
-        const progressFill = document.getElementById('progressFill');
-        const stepCounter = document.getElementById('stepCounter');
-        const modal = document.getElementById('imageModal');
-        const modalImage = document.getElementById('modalImage');
-        const closeModal = document.getElementById('closeModal');
+        const gallery = document.getElementById('image-gallery');
+        const modal = document.getElementById('image-modal');
+        const modalImage = document.getElementById('modal-image');
+        const modalTitle = document.getElementById('modal-title');
+        const modalDescription = document.getElementById('modal-description');
+        const closeModalBtn = document.getElementById('close-modal-btn');
 
-        // Generar tarjetas de pasos
-        steps.forEach((step, index) => {
-            const stepCard = document.createElement('div');
-            stepCard.className = 'step-card';
-            stepCard.innerHTML = `
-                <div class="step-content">
-                    <div class="step-header">
-                        <div class="step-number">${index + 1}</div>
-                        <h2 class="step-title">${step.title}</h2>
-                    </div>
-                    <p class="step-description">${step.description}</p>
-                </div>
-                <div class="image-container" onclick="openModal('${step.image}')">
-                    <img src="${step.image}" alt="${step.title}" class="step-image" loading="lazy">
-                </div>
-            `;
-            stepsGrid.appendChild(stepCard);
-        });
-
-        // Función para abrir modal
-        function openModal(imageSrc) {
-            modal.classList.add('active');
-            modalImage.src = imageSrc;
+        function openModal(src, title, description) {
+            modalImage.src = src;
+            modalTitle.textContent = title;
+            modalDescription.textContent = description;
+            
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            modal.querySelector('div').classList.remove('scale-95');
+            modal.querySelector('div').classList.add('scale-100');
             document.body.style.overflow = 'hidden';
         }
 
-        // Cerrar modal
-        closeModal.onclick = function () {
-            modal.classList.remove('active');
-            document.body.style.overflow = 'auto';
-        };
-
-        modal.onclick = function (e) {
-            if (e.target === modal) {
-                modal.classList.remove('active');
-                document.body.style.overflow = 'auto';
-            }
-        };
-
-        // Cerrar modal con tecla ESC
-        document.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape' && modal.classList.contains('active')) {
-                modal.classList.remove('active');
-                document.body.style.overflow = 'auto';
-            }
-        });
-
-        // Intersection Observer para animaciones y progreso
-        const observerOptions = {
-            threshold: 0.3,
-            rootMargin: '0px'
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('viewed');
-                    updateProgress();
-                }
-            });
-        }, observerOptions);
-
-        document.querySelectorAll('.step-card').forEach(card => {
-            observer.observe(card);
-        });
-
-        // Actualizar barra de progreso
-        function updateProgress() {
-            const viewedSteps = document.querySelectorAll('.step-card.viewed').length;
-            const totalSteps = steps.length;
-            const progress = (viewedSteps / totalSteps) * 100;
-            progressFill.style.width = progress + '%';
-            stepCounter.textContent = `Paso ${viewedSteps} de ${totalSteps}`;
+        function closeModal() {
+            modal.querySelector('div').classList.remove('scale-100');
+            modal.querySelector('div').classList.add('scale-95');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            document.body.style.overflow = '';
         }
 
-        // Scroll suave
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
+        function renderGallery() {
+            gallery.innerHTML = '';
+            
+            const groupedData = imageData.reduce((acc, item) => {
+                const category = item.category || 'Varios';
+                if (!acc[category]) {
+                    acc[category] = [];
                 }
-            });
-        });
-    </script>
-</body>
+                acc[category].push(item);
+                return acc;
+            }, {});
 
+            for (const category in groupedData) {
+                const categorySection = document.createElement('div');
+                categorySection.className = 'mb-8';
+                
+                const header = document.createElement('h2');
+                header.className = 'category-header text-2xl font-extrabold mb-8 pl-4 py-3 rounded-xl shadow-lg text-white';
+                header.textContent = category;
+                
+                categorySection.appendChild(header);
+
+                const gridContainer = document.createElement('div');
+                gridContainer.className = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6';
+
+                groupedData[category].forEach(item => {
+                    // AQUÍ ESTÁ EL CAMBIO CLAVE PARA LOCAL:
+                    // Usamos el nombre del archivo tal cual. El navegador resolverá los espacios.
+                    const imageUrl = item.name;
+
+                    const card = document.createElement('div');
+                    card.className = 'gallery-item bg-gray-800 rounded-xl shadow-xl overflow-hidden';
+                    
+                    card.onclick = () => openModal(imageUrl, item.title, item.description);
+
+                    const img = document.createElement('img');
+                    img.src = imageUrl;
+                    img.alt = item.title;
+                    img.className = 'w-full h-48 object-cover border-b border-gray-700';
+                    
+                    // Handler de error mejorado para depuración visual
+                    img.onerror = function() {
+                        this.src = 'https://placehold.co/400x300/374151/FFFFFF?text=Imagen+No+Encontrada';
+                        // Mensaje amigable en consola
+                        console.warn(`⚠️ No se pudo cargar: "${imageUrl}". Verifica que el archivo esté en la misma carpeta.`);
+                    };
+                    
+                    const cardBody = document.createElement('div');
+                    cardBody.className = 'p-5';
+                    
+                    const title = document.createElement('h3');
+                    title.className = 'text-lg font-semibold text-white mb-1';
+                    title.textContent = item.title;
+                    
+                    const description = document.createElement('p');
+                    description.className = 'text-sm text-gray-400 line-clamp-2';
+                    description.textContent = item.description;
+
+                    cardBody.appendChild(title);
+                    cardBody.appendChild(description);
+                    card.appendChild(img);
+                    card.appendChild(cardBody);
+                    
+                    gridContainer.appendChild(card);
+                });
+
+                categorySection.appendChild(gridContainer);
+                gallery.appendChild(categorySection);
+            }
+        }
+
+        renderGallery();
+
+        closeModalBtn.addEventListener('click', closeModal);
+        
+        modal.addEventListener('click', (e) => {
+            if (e.target.id === 'image-modal') {
+                closeModal();
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !modal.classList.contains('opacity-0')) {
+                closeModal();
+            }
+        });
+
+    </script>
+
+</body>
 </html>
