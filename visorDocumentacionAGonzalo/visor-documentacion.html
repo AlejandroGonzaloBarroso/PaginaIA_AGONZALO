@@ -31,30 +31,39 @@
         }
 
         :root {
-            --bg-primary: hsl(222, 22%, 10%);
-            --bg-secondary: hsl(222, 22%, 12%);
-            --bg-tertiary: hsl(222, 22%, 15%);
-            --bg-hover: hsl(222, 22%, 18%);
-            --bg-active: hsl(222, 22%, 20%);
-            --text-primary: hsl(0, 0%, 95%);
-            --text-secondary: hsl(0, 0%, 70%);
-            --text-tertiary: hsl(0, 0%, 50%);
-            --accent-primary: hsl(267, 84%, 65%);
-            --accent-secondary: hsl(197, 84%, 60%);
-            --accent-gradient: linear-gradient(135deg, hsl(267, 84%, 65%), hsl(197, 84%, 60%));
-            --border-color: hsl(222, 22%, 25%);
-            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
-            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
-            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
-            --radius-sm: 6px;
-            --radius-md: 10px;
-            --radius-lg: 16px;
+            /* Midnight Aurora Palette */
+            --bg-primary: #030712;
+            --bg-secondary: rgba(17, 24, 39, 0.7);
+            --bg-tertiary: rgba(31, 41, 55, 0.5);
+            --bg-hover: rgba(255, 255, 255, 0.08);
+            --bg-active: rgba(255, 255, 255, 0.15);
+
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-tertiary: #94a3b8;
+
+            --accent-primary: #8b5cf6;
+            --accent-secondary: #06b6d4;
+            --accent-glow: 0 0 20px rgba(139, 92, 246, 0.5);
+            --accent-gradient: linear-gradient(135deg, #06b6d4, #8b5cf6, #ec4899);
+
+            --border-color: rgba(255, 255, 255, 0.08);
+            --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
+
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 24px;
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg-primary);
+            background:
+                radial-gradient(circle at 0% 0%, rgba(6, 182, 212, 0.15), transparent 40%),
+                radial-gradient(circle at 100% 100%, rgba(236, 72, 153, 0.15), transparent 40%),
+                var(--bg-primary);
             color: var(--text-primary);
             height: 100vh;
             overflow: hidden;
@@ -62,15 +71,13 @@
 
         /* Header */
         .header {
-            background: var(--bg-secondary);
+            background: rgba(3, 7, 18, 0.6);
+            backdrop-filter: blur(20px);
             border-bottom: 1px solid var(--border-color);
-            padding: 1rem 1.5rem;
+            padding: 0.8rem 1.5rem;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            backdrop-filter: blur(10px);
-            box-shadow: var(--shadow-sm);
-            position: relative;
             z-index: 100;
         }
 
@@ -111,19 +118,20 @@
         .search-input {
             width: 100%;
             padding: 0.75rem 1rem 0.75rem 2.75rem;
-            background: var(--bg-tertiary);
+            background: rgba(0, 0, 0, 0.2);
             border: 1px solid var(--border-color);
             border-radius: var(--radius-md);
             color: var(--text-primary);
             font-size: 0.9rem;
             transition: var(--transition);
-            font-family: 'Inter', sans-serif;
+            font-family: inherit;
         }
 
         .search-input:focus {
             outline: none;
+            background: rgba(0, 0, 0, 0.4);
             border-color: var(--accent-primary);
-            box-shadow: 0 0 0 3px hsla(267, 84%, 65%, 0.1);
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
         }
 
         .search-icon {
@@ -142,38 +150,40 @@
         }
 
         .btn {
-            padding: 0.625rem 1.25rem;
+            padding: 0.6rem 1.25rem;
             border: none;
             border-radius: var(--radius-sm);
             font-size: 0.9rem;
-            font-weight: 500;
+            font-weight: 600;
             cursor: pointer;
             transition: var(--transition);
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            font-family: 'Inter', sans-serif;
+            gap: 0.6rem;
+            font-family: inherit;
         }
 
         .btn-primary {
             background: var(--accent-gradient);
             color: white;
-            box-shadow: var(--shadow-sm);
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
         }
 
         .btn-secondary {
-            background: var(--bg-tertiary);
+            background: rgba(255, 255, 255, 0.03);
             color: var(--text-primary);
             border: 1px solid var(--border-color);
         }
 
         .btn-secondary:hover {
-            background: var(--bg-hover);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
         }
 
         .btn-icon {
@@ -181,18 +191,20 @@
             border: none;
             color: var(--text-secondary);
             cursor: pointer;
-            padding: 0.5rem;
+            width: 36px;
+            height: 36px;
             border-radius: var(--radius-sm);
             transition: var(--transition);
-            font-size: 1.25rem;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 1.2rem;
         }
 
         .btn-icon:hover {
             background: var(--bg-hover);
-            color: var(--text-primary);
+            color: white;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
         }
 
         /* Main Layout */
@@ -204,7 +216,8 @@
         /* Sidebar */
         .sidebar {
             width: 280px;
-            background: var(--bg-secondary);
+            background: rgba(3, 7, 18, 0.4);
+            backdrop-filter: blur(10px);
             border-right: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
@@ -225,11 +238,11 @@
         }
 
         .sidebar-title {
-            font-size: 0.875rem;
-            font-weight: 600;
+            font-size: 0.8rem;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--text-secondary);
+            letter-spacing: 1px;
+            color: var(--text-tertiary);
         }
 
         .file-tree {
@@ -239,7 +252,7 @@
         }
 
         .file-tree::-webkit-scrollbar {
-            width: 8px;
+            width: 6px;
         }
 
         .file-tree::-webkit-scrollbar-track {
@@ -247,29 +260,35 @@
         }
 
         .file-tree::-webkit-scrollbar-thumb {
-            background: var(--bg-hover);
-            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
         }
 
         .tree-item {
-            padding: 0.5rem 0.75rem;
+            padding: 0.6rem 0.8rem;
+            margin: 2px 0.5rem;
             border-radius: var(--radius-sm);
+            color: var(--text-secondary);
+            font-weight: 500;
+            border: 1px solid transparent;
             cursor: pointer;
-            transition: var(--transition);
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            margin-bottom: 2px;
+            transition: var(--transition);
             user-select: none;
         }
 
         .tree-item:hover {
             background: var(--bg-hover);
+            color: var(--text-primary);
         }
 
         .tree-item.active {
-            background: var(--accent-gradient);
-            color: white;
+            background: rgba(139, 92, 246, 0.1);
+            color: var(--accent-primary);
+            border-color: rgba(139, 92, 246, 0.2);
+            box-shadow: 0 0 10px rgba(139, 92, 246, 0.1);
         }
 
         .tree-item-icon {
@@ -580,8 +599,8 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(135deg, hsla(267, 84%, 20%, 0.3), hsla(222, 22%, 10%, 0.95), hsla(197, 84%, 25%, 0.3));
-            backdrop-filter: blur(20px);
+            background: rgba(3, 7, 18, 0.8);
+            backdrop-filter: blur(8px);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -600,13 +619,14 @@
         }
 
         .auth-modal {
-            background: linear-gradient(135deg, hsla(222, 22%, 14%, 0.95), hsla(222, 22%, 12%, 0.98));
+            background: rgba(17, 24, 39, 0.6);
+            backdrop-filter: blur(24px);
             border-radius: 24px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px hsla(267, 84%, 65%, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
             width: 90%;
             max-width: 480px;
             padding: 3rem;
-            border: 1px solid hsla(267, 84%, 65%, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             animation: modalSlideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
             position: relative;
             overflow: hidden;
@@ -619,7 +639,7 @@
             left: 0;
             right: 0;
             height: 200px;
-            background: radial-gradient(ellipse at top, hsla(267, 84%, 65%, 0.15), transparent 70%);
+            background: radial-gradient(circle at top, rgba(139, 92, 246, 0.15), transparent 70%);
             pointer-events: none;
         }
 
@@ -645,7 +665,7 @@
         .auth-header h2 {
             font-size: 2rem;
             margin-bottom: 0.75rem;
-            background: linear-gradient(135deg, hsl(267, 84%, 75%), hsl(197, 84%, 70%));
+            background: var(--accent-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -661,10 +681,10 @@
             display: flex;
             gap: 0.75rem;
             margin-bottom: 2rem;
-            background: hsla(222, 22%, 8%, 0.6);
+            background: rgba(0, 0, 0, 0.3);
             border-radius: 12px;
             padding: 0.4rem;
-            border: 1px solid hsla(267, 84%, 65%, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .auth-tab {
@@ -676,20 +696,20 @@
             cursor: pointer;
             border-radius: 10px;
             transition: var(--transition);
-            font-family: 'Inter', sans-serif;
+            font-family: inherit;
             font-size: 0.95rem;
             font-weight: 600;
         }
 
         .auth-tab:hover:not(.active) {
-            background: hsla(267, 84%, 65%, 0.08);
+            background: rgba(255, 255, 255, 0.05);
             color: var(--text-primary);
         }
 
         .auth-tab.active {
-            background: linear-gradient(135deg, hsl(267, 84%, 60%), hsl(197, 84%, 55%));
+            background: var(--accent-gradient);
             color: white;
-            box-shadow: 0 4px 12px hsla(267, 84%, 65%, 0.3);
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
         }
 
         .auth-form {
@@ -712,23 +732,25 @@
 
         .form-input {
             padding: 0.875rem 1.125rem;
-            background: hsla(222, 22%, 8%, 0.6);
-            border: 1.5px solid hsla(267, 84%, 65%, 0.15);
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 10px;
             color: var(--text-primary);
             font-size: 0.95rem;
-            font-family: 'Inter', sans-serif;
+            font-family: inherit;
             transition: var(--transition);
         }
 
         .form-input:hover {
-            border-color: hsla(267, 84%, 65%, 0.3);
+            border-color: rgba(255, 255, 255, 0.2);
+            background: rgba(0, 0, 0, 0.3);
         }
 
         .form-input:focus {
             outline: none;
-            border-color: hsl(267, 84%, 65%);
-            box-shadow: 0 0 0 4px hsla(267, 84%, 65%, 0.12);
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.15);
+            background: rgba(0, 0, 0, 0.4);
         }
 
         .form-input::placeholder {
@@ -737,7 +759,7 @@
 
         .btn-auth {
             padding: 1rem 1.5rem;
-            background: linear-gradient(135deg, hsl(267, 84%, 62%), hsl(197, 84%, 58%));
+            background: var(--accent-gradient);
             color: white;
             border: none;
             border-radius: 12px;
@@ -745,14 +767,14 @@
             font-weight: 700;
             cursor: pointer;
             transition: var(--transition);
-            font-family: 'Inter', sans-serif;
+            font-family: inherit;
             margin-top: 0.75rem;
-            box-shadow: 0 4px 14px hsla(267, 84%, 65%, 0.35);
+            box-shadow: 0 4px 14px rgba(139, 92, 246, 0.35);
         }
 
         .btn-auth:hover {
             transform: translateY(-3px);
-            box-shadow: 0 8px 24px hsla(267, 84%, 65%, 0.5);
+            box-shadow: 0 8px 24px rgba(139, 92, 246, 0.5);
         }
 
         .error-message {
@@ -830,7 +852,7 @@
             content: '';
             flex: 1;
             height: 1px;
-            background: linear-gradient(90deg, transparent, hsla(267, 84%, 65%, 0.2), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
         }
 
         .auth-divider span {
@@ -841,11 +863,11 @@
         .btn-guest {
             width: 100%;
             padding: 0.875rem 1.25rem;
-            background: hsla(222, 22%, 10%, 0.4);
-            border: 1px solid hsla(267, 84%, 65%, 0.2);
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(139, 92, 246, 0.2);
             border-radius: 12px;
             color: var(--text-secondary);
-            font-family: 'Inter', sans-serif;
+            font-family: inherit;
             font-size: 0.95rem;
             font-weight: 500;
             cursor: pointer;
@@ -857,8 +879,8 @@
         }
 
         .btn-guest:hover {
-            background: hsla(267, 84%, 65%, 0.08);
-            border-color: hsla(267, 84%, 65%, 0.4);
+            background: rgba(139, 92, 246, 0.1);
+            border-color: rgba(139, 92, 246, 0.4);
             color: var(--text-primary);
             transform: translateY(-2px);
         }
@@ -868,12 +890,12 @@
         }
 
         .btn-guest-badge {
-            background: hsla(267, 84%, 65%, 0.1);
-            color: hsl(267, 84%, 75%);
+            background: rgba(139, 92, 246, 0.1);
+            color: var(--accent-primary);
             font-size: 0.75rem;
             padding: 0.2rem 0.6rem;
             border-radius: 20px;
-            border: 1px solid hsla(267, 84%, 65%, 0.2);
+            border: 1px solid rgba(139, 92, 246, 0.2);
             font-weight: 600;
             margin-left: auto;
         }
@@ -923,8 +945,39 @@
             z-index: 999;
         }
 
-        .sidebar-overlay.active {
-            display: block;
+        .mobile-only {
+            display: none;
+        }
+
+        /* Settings Styles */
+        .setting-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+        .setting-label {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .setting-label input[type="checkbox"] {
+            width: 1.25rem;
+            height: 1.25rem;
+            cursor: pointer;
+            accent-color: var(--accent-primary);
         }
     </style>
 </head>
@@ -1006,6 +1059,47 @@
         </div>
     </div>
 
+    <!-- Settings Overlay -->
+    <div class="auth-overlay" id="settingsOverlay" style="display: none; z-index: 10000;">
+        <div class="auth-modal" style="max-width: 400px;">
+            <div class="auth-header" style="margin-bottom: 1.5rem;">
+                <h2>⚙️ Configuración</h2>
+                <p>Personaliza tu experiencia de edición</p>
+            </div>
+
+            <div class="settings-form">
+                <div class="setting-item">
+                    <label class="setting-label">Tamaño de Fuente</label>
+                    <input type="number" id="fontSizeInput" class="form-input" value="14" min="10" max="30"
+                        style="width: 80px;">
+                </div>
+
+                <div class="setting-item">
+                    <label class="setting-label">
+                        <span>Minimapa</span>
+                        <input type="checkbox" id="minimapToggle" checked>
+                    </label>
+                </div>
+
+                <div class="setting-item">
+                    <label class="setting-label">
+                        <span>Ajuste de Línea (Word Wrap)</span>
+                        <input type="checkbox" id="wordWrapToggle" checked>
+                    </label>
+                </div>
+
+                <div class="setting-item">
+                    <label class="setting-label">
+                        <span>Números de Línea</span>
+                        <input type="checkbox" id="lineNumbersToggle" checked>
+                    </label>
+                </div>
+            </div>
+
+            <button class="btn-auth" id="closeSettingsBtn" style="margin-top: 1.5rem;">Guardar y Cerrar</button>
+        </div>
+    </div>
+
     <!-- Drop Zone -->
     <div class="drop-zone" id="dropZone">
         <div class="drop-zone-content">
@@ -1048,8 +1142,7 @@
     </header>
 
     <!-- Hidden file input -->
-    <input type="file" id="file-input" multiple
-        accept=".txt,.md,.js,.html,.css,.json,.xml,.yml,.yaml,.py,.java,.cpp,.c,.h,.cs,.php,.rb,.go,.rs,.swift,.kt">
+    <input type="file" id="file-input" multiple>
 
     <!-- Main Container -->
     <div class="main-container">
@@ -1057,7 +1150,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <span class="sidebar-title">Archivos</span>
-                <button class="btn-icon" id="addFileBtn" title="Agregar archivo">➕</button>
+
             </div>
             <div class="file-tree" id="fileTree">
                 <!-- Files will be populated here -->
@@ -1080,7 +1173,7 @@
                 <button class="btn-icon" id="undoBtn" title="Deshacer (Ctrl+Z)">↶</button>
                 <button class="btn-icon" id="redoBtn" title="Rehacer (Ctrl+Y)">↷</button>
                 <div class="toolbar-separator"></div>
-                <button class="btn-icon" id="formatBtn" title="Formatear documento">🎨</button>
+                <button class="btn-icon" id="toggleColorBtn" title="Alternar coloreado">🎨</button>
                 <button class="btn-icon" id="findBtn" title="Buscar (Ctrl+F)">🔍</button>
                 <div class="toolbar-separator"></div>
                 <button class="btn-icon" id="settingsBtn" title="Configuración">⚙️</button>
@@ -1125,10 +1218,49 @@
         require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' } });
 
         require(['vs/editor/editor.main'], function () {
+
+            // Define Vibrant Aurora Theme
+            monaco.editor.defineTheme('vibrant-aurora', {
+                base: 'vs-dark',
+                inherit: true,
+                rules: [
+                    { token: '', background: '110d1a' }, // Deep dark violet/blue background
+                    { token: 'comment', foreground: '64748b', fontStyle: 'italic' },
+                    { token: 'keyword', foreground: 'dd76e8', fontStyle: 'bold' },
+                    { token: 'string', foreground: '7dd3fc' },
+                    { token: 'number', foreground: 'f472b6' },
+                    { token: 'type', foreground: '8b5cf6' },
+                ],
+                colors: {
+                    'editor.background': '#0f172a', // Matches new dark theme or slightly lighter
+                    'editor.foreground': '#f8fafc',
+                    'editor.lineHighlightBackground': '#1e293b',
+                    'editorCursor.foreground': '#06b6d4',
+                    'editorWhitespace.foreground': '#334155',
+                    'editorIndentGuide.background': '#334155',
+                    'editor.selectionBackground': '#3b82f640',
+                }
+            });
+
+            // Enable Advanced JavaScript IntelliSense (Gemini-like behavior)
+            monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
+                target: monaco.languages.typescript.ScriptTarget.ES2020,
+                allowNonTsExtensions: true,
+                checkJs: true,
+                allowJs: true,
+                typeRoots: ["node_modules/@types"]
+            });
+
+            // Allow checking for diagnostics
+            monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
+                noSemanticValidation: false,
+                noSyntaxValidation: false
+            });
+
             editor = monaco.editor.create(document.getElementById('monaco-editor'), {
                 value: '',
                 language: 'markdown',
-                theme: 'vs-dark',
+                theme: 'vibrant-aurora',
                 automaticLayout: true,
                 fontSize: 14,
                 fontFamily: "'Fira Code', monospace",
@@ -1138,6 +1270,57 @@
                 wordWrap: 'on',
                 formatOnPaste: true,
                 formatOnType: true,
+                suggestOnTriggerCharacters: true,
+                quickSuggestions: { other: true, comments: true, strings: true },
+                wordBasedSuggestions: true, // Ensure words from document are suggested
+                acceptSuggestionOnEnter: 'on',
+                parameterHints: { enabled: true },
+                snippetSuggestions: 'top',
+            });
+
+            // Update Status Bar to show AI
+            document.getElementById('fileInfo').innerHTML = '✨ Gemini AI: Activo';
+
+            // Enhanced "Gemini" IntelliSense for other languages
+            // This provides common method suggestions to simulate intelligence without a backend LSP
+            const commonLanguages = ['java', 'python', 'cpp', 'csharp', 'php'];
+
+            commonLanguages.forEach(lang => {
+                monaco.languages.registerCompletionItemProvider(lang, {
+                    triggerCharacters: ['.'],
+                    provideCompletionItems: function (model, position) {
+                        const word = model.getWordUntilPosition(position);
+                        const range = {
+                            startLineNumber: position.lineNumber,
+                            endLineNumber: position.lineNumber,
+                            startColumn: word.startColumn,
+                            endColumn: word.endColumn
+                        };
+
+                        // Generic helpful methods that might apply to strings/objects in these languages
+                        // This simulates the "Gemini" helping out with methods
+                        const suggestions = [
+                            { label: 'toString', insertText: 'toString()', kind: monaco.languages.CompletionItemKind.Method, detail: 'Gemini Auto-Suggest' },
+                            { label: 'length', insertText: 'length()', kind: monaco.languages.CompletionItemKind.Method, detail: 'Gemini Auto-Suggest' },
+                            { label: 'substring', insertText: 'substring(${1:start}, ${2:end})', kind: monaco.languages.CompletionItemKind.Snippet, insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, detail: 'Gemini Auto-Suggest' },
+                            { label: 'indexOf', insertText: 'indexOf(${1:value})', kind: monaco.languages.CompletionItemKind.Method, insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, detail: 'Gemini Auto-Suggest' },
+                            { label: 'equals', insertText: 'equals(${1:obj})', kind: monaco.languages.CompletionItemKind.Method, insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, detail: 'Gemini Auto-Suggest' },
+                            { label: 'toLowerCase', insertText: 'toLowerCase()', kind: monaco.languages.CompletionItemKind.Method, detail: 'Gemini Auto-Suggest' },
+                            { label: 'toUpperCase', insertText: 'toUpperCase()', kind: monaco.languages.CompletionItemKind.Method, detail: 'Gemini Auto-Suggest' },
+                            { label: 'trim', insertText: 'trim()', kind: monaco.languages.CompletionItemKind.Method, detail: 'Gemini Auto-Suggest' },
+                            { label: 'split', insertText: 'split(${1:regex})', kind: monaco.languages.CompletionItemKind.Method, insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, detail: 'Gemini Auto-Suggest' },
+                            { label: 'replace', insertText: 'replace(${1:old}, ${2:new})', kind: monaco.languages.CompletionItemKind.Method, insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, detail: 'Gemini Auto-Suggest' },
+                            { label: 'print', insertText: 'print(${1:message})', kind: monaco.languages.CompletionItemKind.Function, insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, detail: 'Gemini Auto-Suggest' },
+                            // Add some specific Java/Python ones mixed in
+                            { label: 'append', insertText: 'append(${1:str})', kind: monaco.languages.CompletionItemKind.Method, insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, detail: 'Gemini Auto-Suggest' },
+                            { label: 'get', insertText: 'get(${1:index})', kind: monaco.languages.CompletionItemKind.Method, insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, detail: 'Gemini Auto-Suggest' },
+                            { label: 'set', insertText: 'set(${1:index}, ${2:element})', kind: monaco.languages.CompletionItemKind.Method, insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, detail: 'Gemini Auto-Suggest' },
+                            { label: 'size', insertText: 'size()', kind: monaco.languages.CompletionItemKind.Method, detail: 'Gemini Auto-Suggest' },
+                        ];
+
+                        return { suggestions: suggestions.map(s => ({ ...s, range })) };
+                    }
+                });
             });
 
             editor.onDidChangeCursorPosition((e) => {
@@ -1155,6 +1338,7 @@
             });
 
             addSampleFiles();
+            loadSettings(); // Apply saved settings
         });
 
         // Sample Files
@@ -1339,19 +1523,16 @@ body {
             currentFile = file;
             updateFileTree();
 
-            document.getElementById('emptyState').style.display = 'none';
-            document.getElementById('monaco-editor').style.display = 'block';
+            // Force switch to editor view
+            document.getElementById('editorTab').click();
 
+            // The click handler above handles display toggling, we just need to set content
             const language = getLanguage(file.name);
             monaco.editor.setModelLanguage(editor.getModel(), language);
             editor.setValue(file.content);
 
             document.getElementById('fileInfo').textContent = file.name;
             document.getElementById('statusText').textContent = 'Archivo cargado';
-
-            if (currentView === 'preview') {
-                updatePreview();
-            }
         }
 
         // View Switching
@@ -1362,6 +1543,10 @@ body {
             document.getElementById('monaco-editor').style.display = currentFile ? 'block' : 'none';
             document.getElementById('previewContainer').style.display = 'none';
             document.getElementById('emptyState').style.display = currentFile ? 'none' : 'flex';
+
+            // Show all toolbar buttons
+            document.querySelectorAll('.editor-toolbar > *').forEach(el => el.style.display = 'flex');
+            document.querySelectorAll('.toolbar-separator').forEach(el => el.style.display = 'block');
         };
 
         document.getElementById('previewTab').onclick = () => {
@@ -1371,6 +1556,15 @@ body {
             document.getElementById('monaco-editor').style.display = 'none';
             document.getElementById('previewContainer').style.display = 'block';
             document.getElementById('emptyState').style.display = 'none';
+
+            // Show Save and Color Toggle buttons in Preview
+            document.querySelectorAll('.editor-toolbar > *').forEach(el => {
+                if (el.id === 'saveBtn' || el.id === 'toggleColorBtn') {
+                    el.style.display = 'flex';
+                } else {
+                    el.style.display = 'none';
+                }
+            });
             updatePreview();
         };
 
@@ -1380,11 +1574,23 @@ body {
 
             if (currentFile && currentFile.name.endsWith('.md')) {
                 previewContent.innerHTML = marked.parse(content);
-                previewContent.querySelectorAll('pre code').forEach((block) => {
-                    hljs.highlightElement(block);
-                });
+                if (isHighlightingEnabled) {
+                    previewContent.querySelectorAll('pre code').forEach((block) => {
+                        hljs.highlightElement(block);
+                    });
+                }
             } else {
-                previewContent.innerHTML = `<pre><code>${escapeHtml(content)}</code></pre>`;
+                if (isHighlightingEnabled && currentFile) {
+                    // Try to highlight entire content if not markdown (e.g. JS file view)
+                    const langClass = currentFile.type === 'plaintext' ? '' : `language-${currentFile.type}`;
+                    previewContent.innerHTML = `<pre><code class="${langClass}">${escapeHtml(content)}</code></pre>`;
+                    if (langClass) {
+                        hljs.highlightElement(previewContent.querySelector('code'));
+                    }
+                } else {
+                    // Plain text view
+                    previewContent.innerHTML = `<pre><code>${escapeHtml(content)}</code></pre>`;
+                }
             }
         }
 
@@ -1468,6 +1674,96 @@ body {
         document.getElementById('undoBtn').onclick = () => editor?.trigger('keyboard', 'undo');
         document.getElementById('redoBtn').onclick = () => editor?.trigger('keyboard', 'redo');
         document.getElementById('findBtn').onclick = () => editor?.trigger('keyboard', 'actions.find');
+
+        // Global Highlighting State
+        let isHighlightingEnabled = true;
+
+        document.getElementById('toggleColorBtn').onclick = () => {
+            if (!editor || !currentFile) return;
+
+            isHighlightingEnabled = !isHighlightingEnabled;
+
+            if (currentView === 'editor') {
+                const model = editor.getModel();
+                const originalLang = currentFile.type;
+
+                if (isHighlightingEnabled) {
+                    monaco.editor.setModelLanguage(model, originalLang);
+                    showToast('Coloreado activado', 'success');
+                } else {
+                    monaco.editor.setModelLanguage(model, 'plaintext');
+                    showToast('Coloreado desactivado', 'info');
+                }
+            } else if (currentView === 'preview') {
+                updatePreview(); // Re-render preview with/without color
+                showToast(isHighlightingEnabled ? 'Coloreado activado' : 'Coloreado desactivado', isHighlightingEnabled ? 'success' : 'info');
+            }
+        };
+
+        // Settings Logic
+        const settingsOverlay = document.getElementById('settingsOverlay');
+        const settingsBtn = document.getElementById('settingsBtn');
+        const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+
+        // Load Settings
+        function loadSettings() {
+            const settings = JSON.parse(localStorage.getItem('docViewerSettings')) || {
+                fontSize: 14,
+                minimap: true,
+                wordWrap: 'on',
+                lineNumbers: 'on'
+            };
+
+            document.getElementById('fontSizeInput').value = settings.fontSize;
+            document.getElementById('minimapToggle').checked = settings.minimap;
+            document.getElementById('wordWrapToggle').checked = settings.wordWrap === 'on';
+            document.getElementById('lineNumbersToggle').checked = settings.lineNumbers === 'on';
+
+            applySettings(settings);
+        }
+
+        function applySettings(settings) {
+            if (editor) {
+                editor.updateOptions({
+                    fontSize: parseInt(settings.fontSize),
+                    minimap: { enabled: settings.minimap },
+                    wordWrap: settings.wordWrap,
+                    lineNumbers: settings.lineNumbers
+                });
+            }
+        }
+
+        function saveSettings() {
+            const settings = {
+                fontSize: document.getElementById('fontSizeInput').value,
+                minimap: document.getElementById('minimapToggle').checked,
+                wordWrap: document.getElementById('wordWrapToggle').checked ? 'on' : 'off',
+                lineNumbers: document.getElementById('lineNumbersToggle').checked ? 'on' : 'off'
+            };
+
+            localStorage.setItem('docViewerSettings', JSON.stringify(settings));
+            applySettings(settings);
+            showToast('Configuración guardada', 'success');
+        }
+
+        settingsBtn.onclick = () => {
+            settingsOverlay.style.display = 'flex';
+        };
+
+        closeSettingsBtn.onclick = () => {
+            saveSettings();
+            settingsOverlay.style.display = 'none';
+        };
+
+        // Close on click outside
+        settingsOverlay.onclick = (e) => {
+            if (e.target === settingsOverlay) {
+                settingsOverlay.style.display = 'none';
+            }
+        };
+
+
+
 
         // Toggle Sidebar
         document.getElementById('toggleSidebar').onclick = () => {

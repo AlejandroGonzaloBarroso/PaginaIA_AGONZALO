@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial de Versiones - DocViewer Pro</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #030712;
+            --bg-secondary: rgba(17, 24, 39, 0.7);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-gradient: linear-gradient(135deg, #06b6d4, #8b5cf6, #ec4899);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --radius-lg: 16px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            background-image:
+                radial-gradient(circle at 15% 50%, rgba(139, 92, 246, 0.1), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(6, 182, 212, 0.1), transparent 25%);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 6rem;
+            position: relative;
+        }
+
+        h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 0;
+            letter-spacing: -2px;
+        }
+
+        .subtitle {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-top: 1rem;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 2rem;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom,
+                    var(--border-color) 0%,
+                    #8b5cf6 50%,
+                    var(--border-color) 100%);
+        }
+
+        .version-block {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 3rem;
+            margin-bottom: 5rem;
+            position: relative;
+        }
+
+        .version-marker {
+            position: absolute;
+            left: -2.65rem;
+            top: 1.5rem;
+            width: 1.25rem;
+            height: 1.25rem;
+            background: var(--bg-primary);
+            border: 2px solid #8b5cf6;
+            border-radius: 50%;
+            z-index: 10;
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.5);
+        }
+
+        .version-info {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease;
+        }
+
+        .version-info:hover {
+            transform: translateY(-2px);
+            border-color: rgba(139, 92, 246, 0.3);
+        }
+
+        .version-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1rem;
+        }
+
+        .v-tag {
+            font-family: 'Fira Code', monospace;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .v-date {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .prompt-box {
+            background: rgba(6, 182, 212, 0.05);
+            border-left: 3px solid #06b6d4;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .prompt-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            color: #06b6d4;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .prompt-text {
+            font-style: italic;
+            color: #e2e8f0;
+            line-height: 1.6;
+            font-size: 1.05rem;
+        }
+
+        .changes-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .changes-list li {
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+            color: var(--text-secondary);
+        }
+
+        .changes-list li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: #8b5cf6;
+        }
+
+        /* MINI BROWSER PREVIEW */
+        .preview-container {
+            position: relative;
+        }
+
+        .mini-browser {
+            width: 100%;
+            height: 240px;
+            background: #1e293b;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+            cursor: zoom-in;
+        }
+
+        .mini-browser:hover {
+            transform: scale(1.03);
+            box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.6);
+            border-color: #8b5cf6;
+        }
+
+        .mb-bar {
+            height: 24px;
+            background: #0f172a;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            gap: 6px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .mb-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #334155;
+        }
+
+        .mb-dot.red {
+            background: #ef4444;
+        }
+
+        .mb-dot.yellow {
+            background: #f59e0b;
+        }
+
+        .mb-dot.green {
+            background: #10b981;
+        }
+
+        .mb-content {
+            flex: 1;
+            position: relative;
+            display: flex;
+            background: #fff;
+            overflow: hidden;
+        }
+
+        /* --- VISUAL MOCKS --- */
+
+        /* V0.5: Basic White Page */
+        .mock-page-basic {
+            padding: 20px;
+            width: 100%;
+            background: #fff;
+            color: #000;
+        }
+
+        .mp-h1 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+
+        .mp-text {
+            width: 100%;
+            height: 100px;
+            border: 1px solid #ccc;
+            background: #f9f9f9;
+        }
+
+        /* V1.0: IDE Light */
+        .mock-ide-light {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            background: #fff;
+        }
+
+        .mil-sidebar {
+            width: 25%;
+            background: #f1f5f9;
+            border-right: 1px solid #e2e8f0;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .mil-file {
+            height: 8px;
+            width: 80%;
+            background: #cbd5e1;
+            border-radius: 2px;
+        }
+
+        .mil-editor {
+            flex: 1;
+            padding: 10px;
+        }
+
+        .mil-code-line {
+            height: 6px;
+            background: #e2e8f0;
+            margin-bottom: 6px;
+            border-radius: 2px;
+            width: 60%;
+        }
+
+        /* V1.5: Drag Drop */
+        .mock-dropzone {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+        }
+
+        .md-box {
+            border: 2px dashed #94a3b8;
+            padding: 2rem;
+            border-radius: 8px;
+            color: #64748b;
+            font-weight: bold;
+            font-size: 0.8rem;
+            text-align: center;
+        }
+
+        /* V2.0: Auth Modal */
+        .mock-overlay {
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mock-login {
+            width: 60%;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .ml-input {
+            width: 100%;
+            height: 20px;
+            background: #f1f5f9;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .ml-btn {
+            width: 100%;
+            height: 25px;
+            background: #3b82f6;
+            border-radius: 4px;
+        }
+
+        /* V3.0: Dark Glass */
+        .mock-ide-dark {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            background: #030712;
+            color: #fff;
+        }
+
+        .mid-sidebar {
+            width: 25%;
+            background: rgba(17, 24, 39, 0.5);
+            backdrop-filter: blur(4px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 10px;
+        }
+
+        .mid-editor {
+            flex: 1;
+            padding: 10px;
+            position: relative;
+        }
+
+        .mid-toolbar {
+            height: 30px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .mid-tool {
+            width: 15px;
+            height: 15px;
+            background: linear-gradient(135deg, #06b6d4, #8b5cf6);
+            border-radius: 4px;
+        }
+
+        .mid-code-line {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            margin-bottom: 6px;
+            border-radius: 2px;
+        }
+
+        /* V3.5: IntelliSense */
+        .mock-popup {
+            position: absolute;
+            top: 60px;
+            left: 80px;
+            background: #1e293b;
+            border: 1px solid #334155;
+            padding: 5px;
+            border-radius: 4px;
+            width: 100px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .mp-item {
+            height: 8px;
+            width: 100%;
+            margin-bottom: 4px;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .mp-item.active {
+            background: #3b82f6;
+        }
+
+        .mp-icon {
+            width: 6px;
+            height: 6px;
+            background: #f472b6;
+            border-radius: 2px;
+        }
+
+        .mp-text-line {
+            height: 4px;
+            width: 60px;
+            background: #94a3b8;
+            border-radius: 2px;
+        }
+
+        /* FOOTER TECH */
+        footer {
+            margin-top: 5rem;
+            padding-top: 3rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .tech-stack {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+            text-align: left;
+        }
+
+        .tech-col h3 {
+            color: #06b6d4;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+        }
+
+        .tech-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .tag {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.3rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .credits-section {
+            text-align: center;
+            border-top: 1px solid var(--border-color);
+            padding-top: 2rem;
+        }
+
+        .credits {
+            display: inline-flex;
+            gap: 2rem;
+            padding: 1rem 2rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 50px;
+            border: 1px solid var(--border-color);
+        }
+
+        .ai-credit {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* LIGHTBOX */
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .lightbox.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .lightbox-content {
+            width: 80%;
+            height: 80%;
+            background: transparent;
+            position: relative;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .lightbox.active .lightbox-content {
+            transform: scale(1);
+        }
+
+        .close-lb {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            color: #fff;
+            font-size: 2rem;
+            cursor: pointer;
+        }
+
+        .expanded-browser {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background: #1e293b;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .expanded-browser .mb-content {
+            background: inherit;
+            /* Reset to let specific mocks render background */
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Historial de Evolución</h1>
+            <p class="subtitle">La historia de cómo construimos DocViewer Pro paso a paso</p>
+        </header>
+
+        <div class="timeline">
+
+            <!-- V0.5 -->
+            <div class="version-block">
+                <div class="version-marker"></div>
+                <div class="version-info">
+                    <div class="version-header">
+                        <span class="v-tag">v0.5</span>
+                        <span class="v-date">Prototipo Inicial</span>
+                    </div>
+                    <div class="prompt-box">
+                        <div class="prompt-meta">👤 Usuario</div>
+                        <div class="prompt-text">"Hola, quiero hacer una página web simple para editar texto. ¿Podrías
+                            crearme una estructura básica en HTML para empezar?"</div>
+                    </div>
+                    <ul class="changes-list">
+                        <li>Estructura HTML5 básica</li>
+                        <li>Estilos CSS iniciales</li>
+                        <li>Contenedor principal</li>
+                    </ul>
+                </div>
+                <div class="preview-container" onclick="openLightbox('v0.5')">
+                    <div class="mini-browser" id="preview-v0.5">
+                        <div class="mb-bar">
+                            <div class="mb-dot red"></div>
+                        </div>
+                        <div class="mb-content">
+                            <div class="mock-page-basic">
+                                <div class="mp-h1">Mi Editor Simple</div>
+                                <div class="mp-text"></div>
+                                <div style="margin-top:10px; width: 60px; height: 25px; background: #ddd;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- V1.0 -->
+            <div class="version-block">
+                <div class="version-marker"></div>
+                <div class="version-info">
+                    <div class="version-header">
+                        <span class="v-tag">v1.0</span>
+                        <span class="v-date">Editor Funcional</span>
+                    </div>
+                    <div class="prompt-box">
+                        <div class="prompt-meta">👤 Usuario</div>
+                        <div class="prompt-text">"Necesito que esto sea un editor de código de verdad. Implementa Monaco
+                            Editor y un panel lateral para ver mis archivos."</div>
+                    </div>
+                    <ul class="changes-list">
+                        <li>Integración de Monaco Editor</li>
+                        <li>Árbol de archivos lateral</li>
+                        <li>Gestión de documentos en JS</li>
+                    </ul>
+                </div>
+                <div class="preview-container" onclick="openLightbox('v1.0')">
+                    <div class="mini-browser" id="preview-v1.0">
+                        <div class="mb-bar">
+                            <div class="mb-dot red"></div>
+                            <div class="mb-dot yellow"></div>
+                            <div class="mb-dot green"></div>
+                        </div>
+                        <div class="mb-content">
+                            <div class="mock-ide-light">
+                                <div class="mil-sidebar">
+                                    <div style="font-size:8px; font-weight:bold; color:#64748b; margin-bottom:5px;">
+                                        EXPLORER</div>
+                                    <div class="mil-file"></div>
+                                    <div class="mil-file"></div>
+                                </div>
+                                <div class="mil-editor">
+                                    <div class="mil-code-line" style="width:40%"></div>
+                                    <div class="mil-code-line" style="width:70%"></div>
+                                    <div class="mil-code-line" style="width:50%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- V1.5 -->
+            <div class="version-block">
+                <div class="version-marker"></div>
+                <div class="version-info">
+                    <div class="version-header">
+                        <span class="v-tag">v1.5</span>
+                        <span class="v-date">Sistema de Archivos</span>
+                    </div>
+                    <div class="prompt-box">
+                        <div class="prompt-meta">👤 Usuario</div>
+                        <div class="prompt-text">"Me gustaría poder arrastrar archivos desde mi escritorio para abrirlos
+                            directamente. Añade funcionalidad Drag & Drop."</div>
+                    </div>
+                    <ul class="changes-list">
+                        <li>Zona de Drag & Drop</li>
+                        <li>Lectura de archivos locales (FileReader)</li>
+                        <li>Iconos por tipo de archivo</li>
+                    </ul>
+                </div>
+                <div class="preview-container" onclick="openLightbox('v1.5')">
+                    <div class="mini-browser" id="preview-v1.5">
+                        <div class="mb-bar">
+                            <div class="mb-dot green"></div>
+                        </div>
+                        <div class="mb-content">
+                            <div class="mock-dropzone">
+                                <div class="md-box">📂 Arrastra Archivos Aquí</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- V2.0 -->
+            <div class="version-block">
+                <div class="version-marker"></div>
+                <div class="version-info">
+                    <div class="version-header">
+                        <span class="v-tag">v2.0</span>
+                        <span class="v-date">Seguridad</span>
+                    </div>
+                    <div class="prompt-box">
+                        <div class="prompt-meta">👤 Usuario</div>
+                        <div class="prompt-text">"La aplicación necesita seguridad. ¿Podrías integrar un sistema de
+                            Login y Registro usando Supabase?"</div>
+                    </div>
+                    <ul class="changes-list">
+                        <li>Autenticación con Supabase</li>
+                        <li>Modales de acceso</li>
+                        <li>Protección de interfaz</li>
+                    </ul>
+                </div>
+                <div class="preview-container" onclick="openLightbox('v2.0')">
+                    <div class="mini-browser" id="preview-v2.0">
+                        <div class="mb-bar">
+                            <div class="mb-dot red"></div>
+                        </div>
+                        <div class="mb-content">
+                            <div class="mock-overlay">
+                                <div class="mock-login">
+                                    <div style="text-align:center; font-weight:bold; margin-bottom:10px; color:#333;">
+                                        Iniciar Sesión</div>
+                                    <div class="ml-input"></div>
+                                    <div class="ml-input"></div>
+                                    <div class="ml-btn"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- V3.0 -->
+            <div class="version-block">
+                <div class="version-marker"></div>
+                <div class="version-info">
+                    <div class="version-header">
+                        <span class="v-tag">v3.0</span>
+                        <span class="v-date">Rediseño Total</span>
+                    </div>
+                    <div class="prompt-box">
+                        <div class="prompt-meta">👤 Usuario</div>
+                        <div class="prompt-text">"El diseño se ve muy básico. Haz un cambio radical: usa un tema oscuro
+                            futurista, efectos de cristal (Glassmorphism) y colores neón vibrantes."</div>
+                    </div>
+                    <ul class="changes-list">
+                        <li>Tema <strong>Midnight Aurora</strong></li>
+                        <li>Estética Glassmorphism</li>
+                        <li>Gradientes de acento</li>
+                        <li>Rediseño de componentes UI</li>
+                    </ul>
+                </div>
+                <div class="preview-container" onclick="openLightbox('v3.0')">
+                    <div class="mini-browser" id="preview-v3.0">
+                        <div class="mb-bar">
+                            <div class="mb-dot green"></div>
+                        </div>
+                        <div class="mb-content">
+                            <div class="mock-ide-dark">
+                                <div class="mid-sidebar">
+                                    <div style="color:#fff; font-size:10px; margin-bottom:10px;">FILES</div>
+                                    <div
+                                        style="height:4px; width:60%; background:rgba(255,255,255,0.2); border-radius:2px;">
+                                    </div>
+                                </div>
+                                <div class="mid-editor">
+                                    <div class="mid-toolbar">
+                                        <div class="mid-tool"></div>
+                                        <div class="mid-tool" style="opacity:0.5"></div>
+                                    </div>
+                                    <div class="mid-code-line" style="width: 30%"></div>
+                                    <div class="mid-code-line" style="width: 60%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- V3.5 -->
+            <div class="version-block">
+                <div class="version-marker"></div>
+                <div class="version-info">
+                    <div class="version-header">
+                        <span class="v-tag">v3.5</span>
+                        <span class="v-date">Inteligencia Artificial</span>
+                    </div>
+                    <div class="prompt-box">
+                        <div class="prompt-meta">👤 Usuario</div>
+                        <div class="prompt-text">"Vamos a darle inteligencia. Añade una funcionalidad que sugiera código
+                            y métodos automáticamente mientras escribo, similar a Gemini."</div>
+                    </div>
+                    <ul class="changes-list">
+                        <li>Integración Mock IntelliSense</li>
+                        <li>Autocompletado inteligente</li>
+                        <li>Tema de editor "Vibrant Aurora"</li>
+                    </ul>
+                </div>
+                <div class="preview-container" onclick="openLightbox('v3.5')">
+                    <div class="mini-browser" id="preview-v3.5">
+                        <div class="mb-bar">
+                            <div class="mb-dot green"></div>
+                        </div>
+                        <div class="mb-content">
+                            <div class="mock-ide-dark" style="background: #0f172a;">
+                                <div class="mid-editor" style="padding: 20px;">
+                                    <div class="mid-code-line" style="width: 40%; background: #dd76e8"></div>
+                                    <div class="mid-code-line" style="width: 20%; background: #fff; margin-top:5px;">
+                                    </div>
+
+                                    <div class="mock-popup">
+                                        <div class="mp-item active">
+                                            <div class="mp-icon"></div>
+                                            <div class="mp-text-line"></div>
+                                        </div>
+                                        <div class="mp-item">
+                                            <div class="mp-icon"></div>
+                                            <div class="mp-text-line"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- V4.0 -->
+            <div class="version-block">
+                <div class="version-marker"></div>
+                <div class="version-info">
+                    <div class="version-header">
+                        <span class="v-tag">v4.0</span>
+                        <span class="v-date">UX Final</span>
+                    </div>
+                    <div class="prompt-box">
+                        <div class="prompt-meta">👤 Usuario</div>
+                        <div class="prompt-text">"Para terminar, pule la experiencia de usuario. Limpia la barra de
+                            herramientas en la vista previa y mejora la navegación entre pestañas."</div>
+                    </div>
+                    <ul class="changes-list">
+                        <li>Navegación fluida Editor/Preview</li>
+                        <li>Toolbar contextual inteligente</li>
+                        <li>Toggle Color Global</li>
+                    </ul>
+                </div>
+                <div class="preview-container" onclick="openLightbox('v4.0')">
+                    <div class="mini-browser" id="preview-v4.0">
+                        <div class="mb-bar">
+                            <div class="mb-dot green"></div>
+                        </div>
+                        <div class="mb-content">
+                            <div class="mock-ide-dark"
+                                style="align-items: center; justify-content: center; flex-direction: column;">
+                                <div style="font-size: 3rem;">✨</div>
+                                <div
+                                    style="font-family: 'Fira Code'; font-size: 0.8rem; color: #94a3b8; margin-top:10px;">
+                                    System Optimized</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <footer>
+            <div class="tech-stack">
+                <div class="tech-col">
+                    <h3>Lenguajes</h3>
+                    <div class="tech-tags">
+                        <span class="tag">HTML5</span>
+                        <span class="tag">CSS3 (Variables, Flexbox, Grid)</span>
+                        <span class="tag">JavaScript (ES6+)</span>
+                    </div>
+                </div>
+                <div class="tech-col">
+                    <h3>APIs y Librerías</h3>
+                    <div class="tech-tags">
+                        <span class="tag">Monaco Editor API</span>
+                        <span class="tag">Supabase Auth</span>
+                        <span class="tag">LocalStorage API</span>
+                        <span class="tag">Marked.js</span>
+                        <span class="tag">Highlight.js</span>
+                        <span class="tag">FileReader API</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="credits-section">
+                <div class="credits">
+                    <div class="ai-credit">
+                        <span class="ai-icon">🧠</span> Gemini 3
+                    </div>
+                    <div style="width: 1px; background: var(--border-color);"></div>
+                    <div class="ai-credit">
+                        <span class="ai-icon">🤖</span> Claude Sonnet 4.5
+                    </div>
+                </div>
+                <p style="margin-top: 1.5rem; color: #475569; font-size: 0.8rem;">Generado automáticamente el 10 de
+                    Diciembre de 2025</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- LIGHTBOX OVERLAY -->
+    <div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+        <span class="close-lb">&times;</span>
+        <div class="lightbox-content">
+            <div class="expanded-browser">
+                <div class="mb-bar">
+                    <div class="mb-dot red"></div>
+                    <div class="mb-dot yellow"></div>
+                    <div class="mb-dot green"></div>
+                </div>
+                <div class="mb-content" id="lb-content-area">
+                    <!-- Content Injected via JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openLightbox(versionId) {
+            const lb = document.getElementById('lightbox');
+            const targetContent = document.querySelector(`#preview-${versionId} .mb-content`).innerHTML;
+            const lbArea = document.getElementById('lb-content-area');
+
+            lbArea.innerHTML = targetContent;
+            lb.classList.add('active');
+        }
+
+        function closeLightbox(e) {
+            if (e.target !== document.querySelector('.expanded-browser') && !document.querySelector('.expanded-browser').contains(e.target) || e.target.classList.contains('close-lb')) {
+                document.getElementById('lightbox').classList.remove('active');
+            }
+        }
+    </script>
+</body>
+
+</html>

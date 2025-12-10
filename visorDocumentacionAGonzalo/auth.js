@@ -141,6 +141,8 @@ function updateUserProfile() {
     // Disable editing features in guest mode
     if (isGuestMode) {
         disableEditingFeatures();
+    } else {
+        enableEditingFeatures();
     }
 }
 
@@ -181,6 +183,37 @@ function disableEditingFeatures() {
     if (typeof editor !== 'undefined' && editor) {
         editor.updateOptions({ readOnly: true });
     }
+}
+
+function enableEditingFeatures() {
+    // Show editor toolbar
+    const toolbar = document.querySelector('.editor-toolbar');
+    if (toolbar) toolbar.style.display = 'flex';
+
+    // Show editor tab
+    const editorTab = document.getElementById('editorTab');
+    if (editorTab) editorTab.style.display = 'flex';
+
+    // Restore preview tab interaction
+    const previewTab = document.getElementById('previewTab');
+    if (previewTab) {
+        previewTab.style.pointerEvents = 'auto';
+    }
+
+    // Show save and download buttons
+    const saveBtn = document.getElementById('saveBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+
+    if (saveBtn) saveBtn.style.display = 'flex';
+    if (downloadBtn) downloadBtn.style.display = 'flex';
+
+    // Make editor editable
+    if (typeof editor !== 'undefined' && editor) {
+        editor.updateOptions({ readOnly: false });
+    }
+
+    // Switch back to editor view by default if desired, or just let user choose
+    if (editorTab) editorTab.click();
 }
 
 function showAuthError(message) {
