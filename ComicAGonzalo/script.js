@@ -12,18 +12,17 @@ const ENDING_2 = "final 2.png";
 const SU = "https://cdqjwrfboxsdayzdqnqz.supabase.co";
 const SK = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNkcWp3cmZib3hzZGF5emRxbnF6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MTQ1NjAsImV4cCI6MjA4MTM5MDU2MH0.cnu1mr6MwlEiKcufwRzzoFzSSYmsHfa_X6FyxZbtsAU";
 
+// Cambiamos nombre de variable para evitar conflictos con residuos de caché
 let dbClient = null;
 let users = [];
 let currentUser = null;
 let isOffline = false;
 
 // ---------------------------------------------------------
-// UTILIDAD DE DEPURACIÓN EN PANTALLA (Para ver errores en GitHub)
+// UTILIDAD DE DEPURACIÓN EN PANTALLA
 // ---------------------------------------------------------
 function logDebug(msg, type = 'info') {
     console.log(`[${type.toUpperCase()}] ${msg}`);
-    
-    // Solo mostrar en pantalla si es error o advertencia crítica
     if (type === 'error' || msg.includes('OFFLINE')) {
         let debugBox = document.getElementById('debug-console');
         if (!debugBox) {
@@ -63,7 +62,7 @@ async function initApp() {
 
         logDebug("Librería cargada. Conectando cliente...");
 
-        // 2. Conectar (Sin persistencia para evitar bloqueos de navegador)
+        // 2. Conectar (Sin persistencia para evitar bloqueos)
         dbClient = window.supabase.createClient(SU, SK, {
             auth: {
                 persistSession: false,
@@ -101,7 +100,7 @@ function waitForLib() {
                 clearInterval(interval);
                 resolve();
             }
-            if (attempts > 30) { // 3 segundos
+            if (attempts > 30) {
                 clearInterval(interval);
                 reject(new Error("No se pudo cargar el script de Supabase (CDN)."));
             }
@@ -114,12 +113,11 @@ function activateOfflineMode(reason) {
     const sel = document.getElementById('user-select');
     if(sel) sel.innerHTML = `<option value="">⚠️ MODO OFFLINE</option>`;
     
-    // Mostrar botón de creación local
     const btnCreate = document.querySelector("#login-form button.secondary");
     if(btnCreate) {
         btnCreate.innerText = "Jugar Sin Conexión";
         btnCreate.style.border = "1px solid red";
-        btnCreate.onclick = () => showCreateUser(); // Asegurar que el evento existe
+        btnCreate.onclick = () => showCreateUser();
     }
 }
 
@@ -209,7 +207,6 @@ window.createUser = async () => {
 
     } catch (e) {
         logDebug("Fallo al crear usuario online: " + e.message, "error");
-        // Fallback a offline
         isOffline = true;
         window.createUser(); 
     }
@@ -237,7 +234,6 @@ function startReading() {
 
 function setPageImage(el, src) {
     if(!el) return;
-    // IMPORTANTE: encodeURI ayuda si los nombres tienen espacios
     el.style.backgroundImage = src ? `url('${encodeURI(src)}')` : 'none';
     el.dataset.src = src || "";
 }
@@ -256,7 +252,6 @@ function loadPage(pageIndex, direction = 'none') {
     
     const pageFront = document.getElementById('page-front');
 
-    // Gestión de Finales
     if (pageIndex > PAGES.length) {
         if (pageIndex > PAGES.length + 1) {
             if (currentUser.currentPath === 'ending2') showPostEndingScreen(CHAPTER_2_TEXT);
@@ -271,9 +266,6 @@ function loadPage(pageIndex, direction = 'none') {
 
     const nextSrc = PAGES[pageIndex - 1];
     if(!nextSrc) return;
-
-    // Verificar si la imagen existe (Pre-check básico)
-    // No podemos verificar existencia real por CORS fácilmente, pero confiamos en el nombre.
 
     if (direction === 'next' || direction === 'prev') {
         isAnimating = true;
