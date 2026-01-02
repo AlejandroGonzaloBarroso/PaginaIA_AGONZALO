@@ -1,3 +1,6 @@
+// VERSIÓN: 2.1 (LIMPIEZA TOTAL)
+console.log("Iniciando Script v2.1 - Si ves esto, el código nuevo ha cargado correctamente.");
+
 // CONFIGURACIÓN DE PÁGINAS E IMÁGENES
 // IMPORTANTE: En GitHub, "1.png" no es lo mismo que "1.PNG". Revisa los nombres reales.
 const PAGES = [
