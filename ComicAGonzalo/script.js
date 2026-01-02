@@ -1,4 +1,5 @@
 // CONFIGURACIÓN DE PÁGINAS E IMÁGENES
+// IMPORTANTE: En GitHub, "1.png" no es lo mismo que "1.PNG". Revisa los nombres reales.
 const PAGES = [
     "1.png", "2.png", "3.png", "4.png", "5.png",
     "6.png", "7.png", "8.png", "9.png", "10.png",
@@ -7,49 +8,71 @@ const PAGES = [
 const ENDING_1 = "final 1.png";
 const ENDING_2 = "final 2.png";
 
-// TUS CREDENCIALES
+// CREDENCIALES
 const SU = "https://cdqjwrfboxsdayzdqnqz.supabase.co";
 const SK = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNkcWp3cmZib3hzZGF5emRxbnF6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MTQ1NjAsImV4cCI6MjA4MTM5MDU2MH0.cnu1mr6MwlEiKcufwRzzoFzSSYmsHfa_X6FyxZbtsAU";
 
-// ESTADO (Renombrado para evitar conflictos)
-let dbClient = null; 
+let dbClient = null;
 let users = [];
 let currentUser = null;
 let isOffline = false;
 
 // ---------------------------------------------------------
-// 1. SISTEMA DE ARRANQUE "A PRUEBA DE FALLOS"
+// UTILIDAD DE DEPURACIÓN EN PANTALLA (Para ver errores en GitHub)
+// ---------------------------------------------------------
+function logDebug(msg, type = 'info') {
+    console.log(`[${type.toUpperCase()}] ${msg}`);
+    
+    // Solo mostrar en pantalla si es error o advertencia crítica
+    if (type === 'error' || msg.includes('OFFLINE')) {
+        let debugBox = document.getElementById('debug-console');
+        if (!debugBox) {
+            debugBox = document.createElement('div');
+            debugBox.id = 'debug-console';
+            debugBox.style.cssText = "position:fixed; top:0; left:0; width:100%; background:rgba(0,0,0,0.9); color:#0f0; font-family:monospace; font-size:12px; padding:10px; z-index:9999; border-bottom:2px solid red; max-height: 150px; overflow-y:auto;";
+            document.body.appendChild(debugBox);
+        }
+        const time = new Date().toLocaleTimeString();
+        debugBox.innerHTML += `<div><span style="color:${type === 'error' ? 'red' : 'yellow'}">[${time}]</span> ${msg}</div>`;
+    }
+}
+
+// ---------------------------------------------------------
+// 1. SISTEMA DE ARRANQUE
 // ---------------------------------------------------------
 
 async function initApp() {
-    console.log("Iniciando S-ØMBRA...");
+    logDebug("Iniciando aplicación...");
     const sel = document.getElementById('user-select');
     if(sel) sel.innerHTML = '<option>Conectando...</option>';
 
-    // TEMPORIZADOR DE EMERGENCIA (El "Martillo")
+    // Timer de seguridad
     const safetyTimer = setTimeout(() => {
         if (!dbClient || users.length === 0) {
-            console.warn("Tiempo de espera agotado. Forzando modo Offline.");
-            activateOfflineMode("Tiempo de espera agotado");
+            logDebug("Tiempo de espera agotado. Forzando OFFLINE.", "warn");
+            activateOfflineMode("Timeout conexión");
         }
-    }, 4000);
+    }, 5000);
 
     try {
-        // 1. Intentar cargar librería
+        // 1. Cargar librería
         if (!window.supabase) {
+            logDebug("Esperando librería Supabase...");
             await waitForLib();
         }
 
-        // 2. Conectar cliente (FIX: Sin persistencia para evitar bloqueo de Tracking)
+        logDebug("Librería cargada. Conectando cliente...");
+
+        // 2. Conectar (Sin persistencia para evitar bloqueos de navegador)
         dbClient = window.supabase.createClient(SU, SK, {
             auth: {
-                persistSession: false, // IMPORTANTE: Evita errores de localStorage/cookies
+                persistSession: false,
                 autoRefreshToken: false,
                 detectSessionInUrl: false
             }
         });
 
-        // 3. Descargar usuarios
+        // 3. Descargar datos
         const { data, error } = await dbClient
             .from('users')
             .select('*')
@@ -57,15 +80,15 @@ async function initApp() {
 
         if (error) throw error;
 
-        // Si llegamos aquí, todo ha ido bien
         clearTimeout(safetyTimer);
         users = data || [];
+        logDebug(`Usuarios cargados: ${users.length}`);
         renderUserList();
 
     } catch (err) {
-        console.error("Fallo en conexión:", err);
         clearTimeout(safetyTimer);
-        activateOfflineMode(err.message || "Error de red");
+        logDebug("Error crítico: " + (err.message || err), "error");
+        activateOfflineMode(err.message || "Error desconocido");
     }
 }
 
@@ -78,9 +101,9 @@ function waitForLib() {
                 clearInterval(interval);
                 resolve();
             }
-            if (attempts > 20) { 
+            if (attempts > 30) { // 3 segundos
                 clearInterval(interval);
-                reject(new Error("Librería bloqueada o no cargada"));
+                reject(new Error("No se pudo cargar el script de Supabase (CDN)."));
             }
         }, 100);
     });
@@ -89,20 +112,20 @@ function waitForLib() {
 function activateOfflineMode(reason) {
     isOffline = true;
     const sel = document.getElementById('user-select');
-    sel.innerHTML = `<option value="">⚠️ OFFLINE: ${reason}</option>`;
+    if(sel) sel.innerHTML = `<option value="">⚠️ MODO OFFLINE</option>`;
     
+    // Mostrar botón de creación local
     const btnCreate = document.querySelector("#login-form button.secondary");
     if(btnCreate) {
-        btnCreate.innerText = "Crear Usuario Local";
+        btnCreate.innerText = "Jugar Sin Conexión";
         btnCreate.style.border = "1px solid red";
+        btnCreate.onclick = () => showCreateUser(); // Asegurar que el evento existe
     }
-    
-    // No bloqueamos con alert, solo mostramos en UI
-    console.warn("Modo offline activo: " + reason);
 }
 
 function renderUserList() {
     const sel = document.getElementById('user-select');
+    if(!sel) return;
     sel.innerHTML = '<option value="">-- Selecciona Usuario --</option>';
 
     if (users.length === 0) {
@@ -121,7 +144,7 @@ function renderUserList() {
 }
 
 // ---------------------------------------------------------
-// 2. FUNCIONES DE USUARIO (UI)
+// 2. UI Y EVENTOS
 // ---------------------------------------------------------
 
 window.showCreateUser = () => {
@@ -139,7 +162,10 @@ window.handleLogin = () => {
     const userId = sel.value;
 
     if (!userId || userId.startsWith("⚠️")) {
-        if (isOffline) return alert("En modo offline debes crear un usuario nuevo.");
+        if (isOffline) {
+            alert("Estás en modo Offline. Por favor, crea un 'Nuevo Usuario' para jugar localmente.");
+            return;
+        }
         if (users.length === 0) return alert("No hay usuarios. Crea uno nuevo.");
         return alert("Selecciona un usuario válido.");
     }
@@ -153,7 +179,7 @@ window.createUser = async () => {
     const name = nameInput.value.trim();
     if (!name) return alert("Pon un nombre.");
 
-    // MODO OFFLINE / LOCAL
+    // OFFLINE
     if (isOffline || !dbClient) {
         const tempUser = { 
             id: 'local-' + Date.now(), 
@@ -167,7 +193,7 @@ window.createUser = async () => {
         return;
     }
 
-    // MODO ONLINE
+    // ONLINE
     try {
         const { data, error } = await dbClient
             .from('users')
@@ -182,9 +208,8 @@ window.createUser = async () => {
         startReadingAfterAuth();
 
     } catch (e) {
-        alert("Error creando usuario online: " + e.message + "\nSe creará en modo local.");
-        activateOfflineMode("Error al guardar");
-        // Reintentamos en local recursivamente pero forzando offline
+        logDebug("Fallo al crear usuario online: " + e.message, "error");
+        // Fallback a offline
         isOffline = true;
         window.createUser(); 
     }
@@ -201,7 +226,7 @@ window.startAfterPlot = () => {
 };
 
 // ---------------------------------------------------------
-// 3. LÓGICA DE LECTURA (CORE)
+// 3. CORE DE LECTURA
 // ---------------------------------------------------------
 
 function startReading() {
@@ -211,6 +236,8 @@ function startReading() {
 }
 
 function setPageImage(el, src) {
+    if(!el) return;
+    // IMPORTANTE: encodeURI ayuda si los nombres tienen espacios
     el.style.backgroundImage = src ? `url('${encodeURI(src)}')` : 'none';
     el.dataset.src = src || "";
 }
@@ -232,13 +259,11 @@ function loadPage(pageIndex, direction = 'none') {
     // Gestión de Finales
     if (pageIndex > PAGES.length) {
         if (pageIndex > PAGES.length + 1) {
-            // Post-Final
             if (currentUser.currentPath === 'ending2') showPostEndingScreen(CHAPTER_2_TEXT);
             else if (currentUser.currentPath === 'ending1') showPostEndingScreen(BAD_ENDING_TEXT);
             else { currentUser.lastPage = PAGES.length + 1; loadPage(PAGES.length + 1); }
             return;
         }
-        // Pantalla de Final
         if (currentUser.currentPath === 'ending1') displayEnding(ENDING_1);
         else if (currentUser.currentPath === 'ending2') displayEnding(ENDING_2);
         else pageIndex = PAGES.length;
@@ -246,6 +271,9 @@ function loadPage(pageIndex, direction = 'none') {
 
     const nextSrc = PAGES[pageIndex - 1];
     if(!nextSrc) return;
+
+    // Verificar si la imagen existe (Pre-check básico)
+    // No podemos verificar existencia real por CORS fácilmente, pero confiamos en el nombre.
 
     if (direction === 'next' || direction === 'prev') {
         isAnimating = true;
@@ -270,9 +298,13 @@ function updateState(idx, isDecision) {
     
     const decTrigger = document.getElementById('decision-trigger');
     if (!isDecision && decTrigger && !decTrigger.classList.contains('active-phase')) {
-        document.getElementById('decision-overlay').classList.remove('active');
-        document.getElementById('page-front').classList.remove('blurred-context');
-        document.getElementById('reader-container').classList.remove('decision-mode');
+        const overlay = document.getElementById('decision-overlay');
+        const pFront = document.getElementById('page-front');
+        const rCont = document.getElementById('reader-container');
+        
+        if(overlay) overlay.classList.remove('active');
+        if(pFront) pFront.classList.remove('blurred-context');
+        if(rCont) rCont.classList.remove('decision-mode');
     }
 }
 
@@ -285,11 +317,11 @@ async function saveProgress() {
             lastPage: currentUser.lastPage, 
             currentPath: currentUser.currentPath 
         }).eq('id', currentUser.id);
-    } catch (e) { console.warn("No se pudo guardar progreso en nube"); }
+    } catch (e) { console.warn("Error guardando progreso"); }
 }
 
 // ---------------------------------------------------------
-// 4. CONTROLADORES (CLICK / TECLADO)
+// 4. CONTROLES
 // ---------------------------------------------------------
 
 window.nextPage = () => {
