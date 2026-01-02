@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S-ØMBRA READER</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+
+    <!-- Dynamic Background -->
+    <div id="starfield"></div>
+    <div class="grid-overlay"></div>
+    <canvas id="matrix-rain"></canvas>
+
+    <!-- Auth / Plot Overlay -->
+    <div id="overlay-screen">
+
+        <!-- Login Form -->
+        <div id="auth-box" class="auth-box">
+            <h1 class="title">S-ØMBRA</h1>
+            <div id="login-form">
+                <select id="user-select">
+                    <option>Cargando usuarios...</option>
+                </select>
+                <button onclick="handleLogin()">Continuar Lectura</button>
+                <button class="secondary" onclick="showCreateUser()">Nuevo Usuario</button>
+            </div>
+
+            <div id="create-form" style="display:none;">
+                <input type="text" id="new-user-name" placeholder="Ingresa tu nombre">
+                <button onclick="createUser()">Comenzar</button>
+                <button class="secondary" onclick="cancelCreate()">Cancelar</button>
+            </div>
+        </div>
+
+        <!-- Plot Summary (Initially Hidden) -->
+        <div id="plot-box" class="auth-box hidden">
+            <h1 class="title">Sincronizando...</h1>
+            <div id="plot-text">
+                <p><strong>REPORTE DE INCIDENTE: PROYECTO S-ØMBRA</strong></p>
+                <br>
+                <p>Año 2147. En las ruinas de la Antigua Metrópolis, el chatarrero Kael ha encontrado algo que no
+                    debería existir. Un artefacto de la era pre-colapso.</p>
+                <br>
+                <p>Al tocarlo, ha activado una simbiosis prohibida. Una IA de combate nanotecnológica, "S-Ømbra", se ha
+                    fusionado con su sistema nervioso.</p>
+                <br>
+                <p>Ahora, las corporaciones lo cazan. Los "Purificadores" descienden del cielo. Kael debe huir, luchar
+                    y, finalmente, decidir el destino de su propia humanidad.</p>
+                <br>
+                <p><em>¿Dominarás a la máquina, o te convertirás en ella?</em></p>
+            </div>
+            <button onclick="startAfterPlot()">INICIAR SECUENCIA</button>
+        </div>
+
+        <!-- Chapter 2 Teaser (Initially Hidden) -->
+        <div id="chapter2-box" class="auth-box hidden">
+            <h1 class="title">CAPÍTULO 2</h1>
+            <div id="chapter2-text" style="text-align: justify; margin-bottom: 20px;">
+                Cargando datos del servidor...
+            </div>
+            <button onclick="logout()">CERRAR SESIÓN</button>
+        </div>
+
+    </div>
+
+    <!-- Main Reader -->
+    <div id="reader-container">
+
+        <!-- Book Stage for Realistic turns -->
+        <div id="book-stage">
+            <div id="page-back" class="book-page"></div> <!-- The page underneath -->
+            <div id="page-front" class="book-page"></div> <!-- The current page on top -->
+        </div>
+
+        <!-- Decision Overlay -->
+        <!-- Decision Overlay -->
+        <div id="decision-overlay">
+            <h2>DECISIÓN CRÍTICA</h2>
+
+            <button id="decision-trigger" onclick="revealDecision()">TOMAR DECISIÓN</button>
+
+            <div id="decision-choices" class="hidden-choices" style="display: none;">
+                <p>Elegir destino de la simbiosis:</p>
+                <div class="decision-buttons">
+                    <button class="btn-accept" onclick="choosePath(1)">ACEPTAR (Simbiosis)</button>
+                    <button class="btn-reject" onclick="choosePath(2)">RECHAZAR (Humanidad)</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Zones (RTL) -->
+        <!-- Left click = Go to NEXT page -->
+        <div class="nav-zone nav-zone-left" onclick="nextPage()" title="Siguiente Página">
+            <div class="nav-arrow">❮</div>
+        </div>
+        <!-- Right click = Go to PREV page -->
+        <div class="nav-zone nav-zone-right" onclick="prevPage()" title="Página Anterior">
+            <div class="nav-arrow">❯</div>
+        </div>
+
+        <!-- Page Indicator -->
+        <div id="page-indicator">Página: 1</div>
+
+        <!-- UI Controls -->
+        <div id="ui-controls">
+            <button class="control-btn" onclick="resetProgress()">Reiniciar Cap.</button>
+            <button class="control-btn" onclick="logout()">Salir</button>
+        </div>
+
+    </div>
+
+    <!-- Supabase Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>

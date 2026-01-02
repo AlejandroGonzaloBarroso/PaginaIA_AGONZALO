@@ -1,0 +1,176 @@
+NOMBRE DEL PROYECTO: PROTOCOL S-ØMBRA - SECUENCIA DE PROMPTS COMPLETA
+
+--- INICIO DEL ARCO ---
+
+PÁGINA 1 (El Hallazgo - Reconstrucción de contexto)
+Prompt: Página de cómic estilo cyberpunk. Un laboratorio abandonado y oscuro con cables colgando. En el centro, una caja negra o artefacto tecnológico brilla con luz tenue. Un hombre joven, Kael, se acerca con curiosidad y toca el objeto. Primer plano de su dedo haciendo contacto y una chispa digital saltando a su piel. Texto: "Todo comenzó con un toque".
+
+PÁGINA 2 (La Infección)
+Prompt: Página de cómic. Kael retrocede asustado. Una sustancia negra y tecnológica (nanobots) empieza a trepar por su brazo rápidamente, formando una armadura parcial. Su ojo derecho brilla con un tono rojo. Cuadros de texto de sistema iniciándose: "S-Ømbra OS: Online. Sincronización neuronal: 10%". Kael grita de dolor.
+
+PÁGINA 3 (La Detección)
+Prompt: Página de cómic. Exterior del edificio. Naves de vigilancia y robots "Purificadores" descienden del cielo lluvioso con luces rojas de búsqueda. Kael mira por una ventana rota, viendo el ejército que viene por él. El traje (S-Ømbra) le habla mentalmente: "Nos han encontrado. Corre".
+
+--- SESIÓN ACTUAL ---
+
+PÁGINA 4 (La Huida)
+Prompt: Página de cómic. Kael, con el traje blindado táctico aún formándose, corre desesperado por un callejón futurista sucio bajo una lluvia intensa. Luces de neón reflejadas en charcos. En el fondo, sombras con ojos rojos lo persiguen. Panel de detalle: Kael mirando su mano donde venas negras brillan. Atmósfera de terror y urgencia.
+
+PÁGINA 5 (El Despertar del Traje / Combate)
+Prompt: Página de cómic de acción. Panel 1: Tres robots ágiles y hostiles saltan al ataque. Panel 2: Primer plano del casco de Kael; el visor cambia de apagado a un rojo intenso con efectos de glitch. Texto: "Protocolo de Combate". Panel 3: El brazo de Kael, moviéndose mecánicamente por voluntad propia, dispara una ráfaga de energía roja que destroza al robot más cercano. Panel 4: Kael mirando su propia mano con horror.
+
+PÁGINA 6 (Conflicto Interno)
+Prompt: Página de cómic narrativa. Kael corriendo por callejones estrechos. Se sujeta el brazo derecho como si le doliera o no fuera suyo, luchando contra la IA. Cuadros de texto de S-Ømbra: "Amenazas neutralizadas. Asumiendo control motor". Globo de diálogo de Kael: "¡¿Qué está pasando?! ¡Mi cuerpo se mueve solo!". Estilo dinámico.
+
+PÁGINA 7 (Amenaza Aérea)
+Prompt: Página de cómic vertical. Panel 1: Un dron policial futurista ilumina una azotea con un foco potente buscando al objetivo. Panel 2: Kael, controlado por el traje, realiza un salto sobrehumano entre dos edificios para evadir la luz. Panel 3: Aterrizaje pesado en una escalera de incendios oxidada, rompiendo parte de la estructura. Texto IA: "Integridad del huésped aceptable".
+
+PÁGINA 8 (Acceso al Subsuelo)
+Prompt: Página de cómic oscura y opresiva. Panel 1: Kael usa su fuerza aumentada para levantar una pesada tapa de alcantarilla en un callejón oscuro. Panel 2: Vista desde abajo (dentro de la alcantarilla) viendo a Kael descender por una escalera de mano. Panel 3: Kael caminando por el túnel, el agua es verde y sucia. Texto IA: "Este camino es indetectable".
+
+PÁGINA 9 (La Oscuridad)
+Prompt: Página de cómic en el alcantarillado. Kael camina con dificultad por un túnel largo y cilíndrico lleno de tuberías y vapor. La única luz proviene de su visor rojo y algunos hongos bioluminiscentes en las paredes. Se nota el agotamiento físico de Kael, pero el traje lo mantiene erguido forzosamente. Ambiente claustrofóbico.
+
+PÁGINA 10 (El Punto de Decisión)
+Prompt: Página de cómic. Kael llega a una gran cámara subterránea donde convergen varios túneles. Hay maquinaria antigua y olvidada. Se detiene. El traje deja de empujarlo y la luz roja del visor parpadea suavemente, esperando una orden. Silencio tenso. Es el momento de decidir: aceptar al simbionte o rechazarlo.
+
+--- FINALES ---
+
+FINAL 1 (Aceptación / Simbiosis)
+Prompt: Página de cómic final. Plano épico. Kael está de pie, tranquilo, mirando hacia la salida del túnel. Su postura es perfecta y letal. El visor del casco ya no tiene glitch, es un rojo sólido y estable. La armadura se ha completado y se ve elegante. Texto narrativo: "El miedo es ineficiente. Ahora, somos uno".
+
+FINAL 2 (Rechazo / Humanidad)
+Prompt: Página de cómic final dramática. Kael está de rodillas en el barro, gritando de agonía, arrancándose el casco y partes del blindaje a la fuerza, rompiendo los conectores neuronales con sangre y chispas. El traje intenta resistirse pero Kael logra liberarse, cayendo al suelo agotado, humano pero libre, mientras el traje vacío queda frente a él como una cáscara inerte.
+
+--- USER REQUESTS ---
+
+TIMESTAMP: 2025-12-15T19:18:36+01:00
+REQUEST: Con las imagenes en orden debes de crear un manga que se leera de derecha a izquierda y deberas hacerlo en html para que se pueda usar en github mete tambien nombres de usuario que se guarden en un json a los que tiene acceso el html para que haga de marcapaginas y cuando cargues la primera vez la pagina (Como un nuevo usuario) debe decir la trama con un boton de continuar
+
+TIMESTAMP: 2025-12-15T19:19:46+01:00
+REQUEST: guarda cada prompt que te pida incluyendo el anterior en el txt de la carpeta y procede con el plan de implementacion
+
+TIMESTAMP: 2025-12-15T19:23:30+01:00
+REQUEST: Puedes mejorar el estilo y poner animaciones al pasado de paginas
+
+TIMESTAMP: 2025-12-15T19:27:10+01:00
+REQUEST: Al logueo añadele mas estilo y centralo con la pantalla y la pagina donde se ve la sinopsis hazla mas grande
+
+
+TIMESTAMP: 2025-12-15T19:54:22+01:00
+REQUEST: ponlo mejor cuando pases de pagina el boton de tomar decision recuerda que no deben visualizarse los finales solo se visualizara cada final para cada decision tomada
+
+TIMESTAMP: 2025-12-15T19:56:09+01:00
+REQUEST: no me refiero a que cuando leas la pagina 11 y le des a siguiente ahi aparecera la toma de decision
+
+TIMESTAMP: 2025-12-15T19:58:05+01:00
+REQUEST: Metele mas diseño
+
+TIMESTAMP: 2025-12-15T20:04:54+01:00
+REQUEST: me parece bien, pero no puedo pulsar nada ahora
+
+TIMESTAMP: 2025-12-15T20:06:29+01:00
+REQUEST: quiero que las animaciones de pasar paginas simulen lo mejor posible a las de un libro
+
+TIMESTAMP: 2025-12-15T20:08:42+01:00
+REQUEST: mas como un libro que la imagen se vaya doblando como un libro, como pasar una pagina
+
+TIMESTAMP: 2025-12-15T20:10:57+01:00
+REQUEST: no se ve el comic ahora
+
+TIMESTAMP: 2025-12-15T20:12:14+01:00
+REQUEST: tengo una pantalla negra
+
+TIMESTAMP: 2025-12-15T20:13:07+01:00
+REQUEST: ok hazlo
+
+TIMESTAMP: 2025-12-15T20:13:50+01:00
+REQUEST: guarda los prompts que no los estas guardando
+
+TIMESTAMP: 2025-12-15T20:16:11+01:00
+REQUEST: se doblaria a la mitad la imagen haciendo la ilusion de pasar una pagina
+
+TIMESTAMP: 2025-12-15T20:18:38+01:00
+REQUEST: me refiero que el giro empiece en la mitad de la foto como si pasaras la pagina de un libro real y actualiza le archivo de prompts
+
+TIMESTAMP: 2025-12-15T20:22:36+01:00
+REQUEST: Dale al logeo un fondo como negro y rojo como si fuera codigo pasando por detras, debe estar animado
+
+TIMESTAMP: 2025-12-15T20:23:16+01:00
+REQUEST: hazlo
+
+TIMESTAMP: 2025-12-15T20:35:54+01:00
+REQUEST: Quiero que a la pagina en el login le metas un fondo como de codigo rojo y negro que sea animado
+
+TIMESTAMP: 2025-12-15T20:36:46+01:00
+REQUEST: hazlo
+
+TIMESTAMP: 2025-12-15T20:39:20+01:00
+REQUEST: Quiero que metas el fondo matrix aqui tambien
+
+TIMESTAMP: 2025-12-15T20:40:40+01:00
+REQUEST: Mete todos los prompts al archivo de prompts
+
+TIMESTAMP: 2025-12-15T20:43:06+01:00
+REQUEST: haz que lo que has metido se vea algo mas
+
+
+TIMESTAMP: 2025-12-15T20:46:03+01:00
+REQUEST: dale algo mas de brillo
+
+
+TIMESTAMP: 2025-12-15T20:47:14+01:00
+REQUEST: el fondo de numeros dentro del libro me gustaba
+
+
+TIMESTAMP: 2025-12-15T20:48:40+01:00
+REQUEST: dale mejor a la animacion de pasar pagina como si una pantalla fallara en vez de un libro
+
+
+TIMESTAMP: 2025-12-15T20:51:26+01:00
+REQUEST: no se ven las imagenes ahora
+
+
+TIMESTAMP: 2025-12-15T20:55:17+01:00
+REQUEST: Cuando termines de leer si pasas la pagina crea una sinopsis de lo que seria un capitulo 2 y metelo ahi y metelo em premisa.docx
+
+
+TIMESTAMP: 2025-12-15T21:02:00+01:00
+REQUEST: Cuando termines de leer si pasas la pagina crea una sinopsis de lo que seria un capitulo 2 y metelo ahi y metelo en un nuevo txt y arregla el js
+
+
+TIMESTAMP: 2025-12-15T21:04:37+01:00
+REQUEST: esto solo aparecera si se elige humanidad
+
+
+TIMESTAMP: 2025-12-16T20:18:25+01:00
+REQUEST: haz lo de el capitulo 2 que te dije
+
+
+TIMESTAMP: 2025-12-16T20:19:51+01:00
+REQUEST: [User uploaded image showing connection error]
+
+
+TIMESTAMP: 2025-12-16T20:21:30+01:00
+REQUEST: [User uploaded image showing page indicator overlap issue]
+
+
+TIMESTAMP: 2025-12-16T20:23:35+01:00
+REQUEST: ahora se ve mal [User uploaded image showing stretched indicator]
+
+
+TIMESTAMP: 2025-12-16T20:25:11+01:00
+REQUEST: Para el final malo tambien pon algo cuando pases a la siguiente pagina
+
+
+TIMESTAMP: 2025-12-16T20:28:03+01:00
+REQUEST: Vale crealo
+
+
+TIMESTAMP: 2025-12-16T20:33:04+01:00
+REQUEST: Dale mas estilo al login
+
+
+TIMESTAMP: 2025-12-16T20:36:43+01:00
+REQUEST: ahora hazlo
+
