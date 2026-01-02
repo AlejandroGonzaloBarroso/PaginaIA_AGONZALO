@@ -1,4 +1,4 @@
-// Data Configuration
+// CONFIGURACIÓN DE PÁGINAS E IMÁGENES
 const PAGES = [
     "1.png", "2.png", "3.png", "4.png", "5.png",
     "6.png", "7.png", "8.png", "9.png", "10.png",
@@ -7,96 +7,122 @@ const PAGES = [
 const ENDING_1 = "final 1.png";
 const ENDING_2 = "final 2.png";
 
-// SUPABASE CONFIGURATION
+// TUS CREDENCIALES
 const SU = "https://cdqjwrfboxsdayzdqnqz.supabase.co";
 const SK = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNkcWp3cmZib3hzZGF5emRxbnF6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MTQ1NjAsImV4cCI6MjA4MTM5MDU2MH0.cnu1mr6MwlEiKcufwRzzoFzSSYmsHfa_X6FyxZbtsAU";
 
-let supabase;
-try {
-    if (!window.supabase) throw new Error("Librería Supabase no cargada");
-    supabase = window.supabase.createClient(SU, SK);
-    console.log("Supabase Client Initialized");
-} catch (e) {
-    console.error(e);
-    alert("Error Crítico: No se pudo cargar la librería de Supabase. Revisa tu conexión.");
-}
-
-// State
+// ESTADO (Renombrado para evitar conflictos)
+let dbClient = null; 
 let users = [];
 let currentUser = null;
+let isOffline = false;
 
-// DOM Elements
-const overlayScreen = document.getElementById('overlay-screen');
-const authBox = document.getElementById('auth-box');
-const plotBox = document.getElementById('plot-box');
-const userSelect = document.getElementById('user-select');
-const newUserInput = document.getElementById('new-user-name');
-// const mangaImg = document.getElementById('manga-page'); // Replaced
-const pageFront = document.getElementById('page-front');
-const pageBack = document.getElementById('page-back');
-const bookStage = document.getElementById('book-stage');
+// ---------------------------------------------------------
+// 1. SISTEMA DE ARRANQUE "A PRUEBA DE FALLOS"
+// ---------------------------------------------------------
 
-const decisionOverlay = document.getElementById('decision-overlay');
-const pageIndicator = document.getElementById('page-indicator');
+async function initApp() {
+    console.log("Iniciando S-ØMBRA...");
+    const sel = document.getElementById('user-select');
+    if(sel) sel.innerHTML = '<option>Conectando...</option>';
 
-// Initialization
-async function init() {
-    await loadUsers();
-    renderUserSelect();
-}
+    // TEMPORIZADOR DE EMERGENCIA (El "Martillo")
+    const safetyTimer = setTimeout(() => {
+        if (!dbClient || users.length === 0) {
+            console.warn("Tiempo de espera agotado. Forzando modo Offline.");
+            activateOfflineMode("Tiempo de espera agotado");
+        }
+    }, 4000);
 
-async function loadUsers() {
-    userSelect.innerHTML = '<option>Cargando de la nube...</option>';
+    try {
+        // 1. Intentar cargar librería
+        if (!window.supabase) {
+            await waitForLib();
+        }
 
-    // Fetch from Supabase
-    const { data, error } = await supabase
-        .from('users')
-        .select('*')
-        .order('lastPage', { ascending: false });
+        // 2. Conectar cliente (FIX: Sin persistencia para evitar bloqueo de Tracking)
+        dbClient = window.supabase.createClient(SU, SK, {
+            auth: {
+                persistSession: false, // IMPORTANTE: Evita errores de localStorage/cookies
+                autoRefreshToken: false,
+                detectSessionInUrl: false
+            }
+        });
 
-    if (error) {
-        console.error("Error loading users:", error);
-        alert("Error de conexión con la base de datos.");
-        users = [];
-    } else {
+        // 3. Descargar usuarios
+        const { data, error } = await dbClient
+            .from('users')
+            .select('*')
+            .order('lastPage', { ascending: false });
+
+        if (error) throw error;
+
+        // Si llegamos aquí, todo ha ido bien
+        clearTimeout(safetyTimer);
         users = data || [];
+        renderUserList();
+
+    } catch (err) {
+        console.error("Fallo en conexión:", err);
+        clearTimeout(safetyTimer);
+        activateOfflineMode(err.message || "Error de red");
     }
 }
 
-// Deprecated: Local Save. Now we use Upsert/Update on events.
-async function saveProgress() {
-    if (!currentUser) return;
-
-    // Update DB
-    const { error } = await supabase
-        .from('users')
-        .update({
-            lastPage: currentUser.lastPage,
-            currentPath: currentUser.currentPath
-        })
-        .eq('id', currentUser.id);
-
-    if (error) console.error("Error saving progress:", error);
-}
-
-function renderUserSelect() {
-    userSelect.innerHTML = '<option value="">-- Seleccionar Usuario --</option>';
-    users.forEach(u => {
-        const opt = document.createElement('option');
-        opt.value = u.id;
-        opt.textContent = `${u.name} (Pág. ${u.lastPage})`;
-        userSelect.appendChild(opt);
+function waitForLib() {
+    return new Promise((resolve, reject) => {
+        let attempts = 0;
+        const interval = setInterval(() => {
+            attempts++;
+            if (window.supabase) {
+                clearInterval(interval);
+                resolve();
+            }
+            if (attempts > 20) { 
+                clearInterval(interval);
+                reject(new Error("Librería bloqueada o no cargada"));
+            }
+        }, 100);
     });
 }
 
-// UI Handlers
-window.handleLogin = () => {
-    const userId = userSelect.value; // ID is text/uuid from DB now
-    if (!userId) return alert("Por favor selecciona un usuario");
+function activateOfflineMode(reason) {
+    isOffline = true;
+    const sel = document.getElementById('user-select');
+    sel.innerHTML = `<option value="">⚠️ OFFLINE: ${reason}</option>`;
+    
+    const btnCreate = document.querySelector("#login-form button.secondary");
+    if(btnCreate) {
+        btnCreate.innerText = "Crear Usuario Local";
+        btnCreate.style.border = "1px solid red";
+    }
+    
+    // No bloqueamos con alert, solo mostramos en UI
+    console.warn("Modo offline activo: " + reason);
+}
 
-    currentUser = users.find(u => u.id == userId); // Weak check for string/int mismatch safety
-    startReading();
-};
+function renderUserList() {
+    const sel = document.getElementById('user-select');
+    sel.innerHTML = '<option value="">-- Selecciona Usuario --</option>';
+
+    if (users.length === 0) {
+        const opt = document.createElement('option');
+        opt.text = "Sin usuarios (Crea uno nuevo)";
+        opt.disabled = true;
+        sel.appendChild(opt);
+    } else {
+        users.forEach(u => {
+            const opt = document.createElement('option');
+            opt.value = u.id;
+            opt.textContent = `${u.name} (Pág. ${u.lastPage})`;
+            sel.appendChild(opt);
+        });
+    }
+}
+
+// ---------------------------------------------------------
+// 2. FUNCIONES DE USUARIO (UI)
+// ---------------------------------------------------------
 
 window.showCreateUser = () => {
     document.getElementById('login-form').style.display = 'none';
@@ -108,355 +134,248 @@ window.cancelCreate = () => {
     document.getElementById('login-form').style.display = 'block';
 };
 
+window.handleLogin = () => {
+    const sel = document.getElementById('user-select');
+    const userId = sel.value;
+
+    if (!userId || userId.startsWith("⚠️")) {
+        if (isOffline) return alert("En modo offline debes crear un usuario nuevo.");
+        if (users.length === 0) return alert("No hay usuarios. Crea uno nuevo.");
+        return alert("Selecciona un usuario válido.");
+    }
+
+    currentUser = users.find(u => u.id == userId);
+    if (currentUser) startReading();
+};
+
 window.createUser = async () => {
-    const name = newUserInput.value.trim();
-    if (!name) return alert("El nombre no puede estar vacío");
+    const nameInput = document.getElementById('new-user-name');
+    const name = nameInput.value.trim();
+    if (!name) return alert("Pon un nombre.");
 
-    // Insert into DB
-    const newUserPayload = {
-        name: name,
-        lastPage: 1,
-        currentPath: 'neutral'
-    };
-
-    const { data, error } = await supabase
-        .from('users')
-        .insert([newUserPayload])
-        .select();
-
-    if (error) {
-        console.error("Error creating user:", error);
-        alert("Error al crear usuario. Intenta otro nombre.");
+    // MODO OFFLINE / LOCAL
+    if (isOffline || !dbClient) {
+        const tempUser = { 
+            id: 'local-' + Date.now(), 
+            name: name + " (Local)", 
+            lastPage: 1, 
+            currentPath: 'neutral' 
+        };
+        users.push(tempUser);
+        currentUser = tempUser;
+        startReadingAfterAuth();
         return;
     }
 
-    const newUser = data[0];
-    users.push(newUser);
+    // MODO ONLINE
+    try {
+        const { data, error } = await dbClient
+            .from('users')
+            .insert([{ name: name, lastPage: 1, currentPath: 'neutral' }])
+            .select();
 
-    // Switch to Plot View for new user
-    currentUser = newUser;
-    authBox.classList.add('hidden');
-    plotBox.classList.remove('hidden');
+        if (error) throw error;
+
+        const newUser = data[0];
+        users.push(newUser);
+        currentUser = newUser;
+        startReadingAfterAuth();
+
+    } catch (e) {
+        alert("Error creando usuario online: " + e.message + "\nSe creará en modo local.");
+        activateOfflineMode("Error al guardar");
+        // Reintentamos en local recursivamente pero forzando offline
+        isOffline = true;
+        window.createUser(); 
+    }
 };
+
+function startReadingAfterAuth() {
+    document.getElementById('auth-box').classList.add('hidden');
+    document.getElementById('plot-box').classList.remove('hidden');
+}
 
 window.startAfterPlot = () => {
-    overlayScreen.classList.add('hidden');
-    loadPage(1); // New users always start at 1
+    document.getElementById('overlay-screen').classList.add('hidden');
+    loadPage(1); 
 };
 
-// Helper to set image
-function setPageImage(el, src) {
-    if (!src) {
-        el.style.backgroundImage = 'none';
-        return;
-    }
-    // Encode the filename to handle spaces in URL
-    el.style.backgroundImage = `url('${encodeURI(src)}')`;
-    // Store raw src for logic checks
-    el.dataset.src = src;
-}
-
-function getPageSrc(el) {
-    return el.dataset.src || "";
-}
+// ---------------------------------------------------------
+// 3. LÓGICA DE LECTURA (CORE)
+// ---------------------------------------------------------
 
 function startReading() {
-    overlayScreen.classList.add('hidden');
-    setPageImage(pageBack, ''); // Clear back page on start
+    document.getElementById('overlay-screen').classList.add('hidden');
+    setPageImage(document.getElementById('page-back'), ''); 
     loadPage(currentUser.lastPage);
 }
 
-// Navigation Logic
+function setPageImage(el, src) {
+    el.style.backgroundImage = src ? `url('${encodeURI(src)}')` : 'none';
+    el.dataset.src = src || "";
+}
+
+function getPageSrc(el) { return el.dataset.src || ""; }
+
 let isAnimating = false;
+
+// Textos Finales
+const CHAPTER_2_TEXT = `S-ØMBRA: CAPÍTULO 2 - CONSECUENCIAS<br><br>Próximamente.`;
+const BAD_ENDING_TEXT = `S-ØMBRA: ASIMILACIÓN COMPLETADA<br><br>FIN DE LA TRANSMISIÓN.`;
 
 function loadPage(pageIndex, direction = 'none') {
     if (isAnimating) return;
-
     if (pageIndex < 1) pageIndex = 1;
+    
+    const pageFront = document.getElementById('page-front');
 
-    // ... Ending checks similar ...
+    // Gestión de Finales
     if (pageIndex > PAGES.length) {
-        // If we really are past the ending (user clicked Next ON the ending)
         if (pageIndex > PAGES.length + 1) {
-            if (currentUser.currentPath === 'ending2') {
-                showPostEndingScreen(CHAPTER_2_TEXT);
-            } else if (currentUser.currentPath === 'ending1') {
-                showPostEndingScreen(BAD_ENDING_TEXT);
-            } else {
-                // Stay on ending for other paths (fallback)
-                currentUser.lastPage = PAGES.length + 1;
-                loadPage(PAGES.length + 1);
-            }
+            // Post-Final
+            if (currentUser.currentPath === 'ending2') showPostEndingScreen(CHAPTER_2_TEXT);
+            else if (currentUser.currentPath === 'ending1') showPostEndingScreen(BAD_ENDING_TEXT);
+            else { currentUser.lastPage = PAGES.length + 1; loadPage(PAGES.length + 1); }
             return;
         }
-
-        if (currentUser.currentPath === 'ending1') {
-            displayEnding(ENDING_1);
-            return;
-        } else if (currentUser.currentPath === 'ending2') {
-            displayEnding(ENDING_2);
-            return;
-        } else {
-            pageIndex = PAGES.length;
-        }
+        // Pantalla de Final
+        if (currentUser.currentPath === 'ending1') displayEnding(ENDING_1);
+        else if (currentUser.currentPath === 'ending2') displayEnding(ENDING_2);
+        else pageIndex = PAGES.length;
     }
 
     const nextSrc = PAGES[pageIndex - 1];
-    if (!nextSrc) return; // safety
+    if(!nextSrc) return;
 
     if (direction === 'next' || direction === 'prev') {
-        // GLITCH TRANSITION
         isAnimating = true;
-
-        // 1. Play Glitch Sound? (Optional future)
-        // 2. Add Glitch Class to Front Page
         pageFront.classList.add('glitch-active');
-
-        // 3. Wait for "fail" peak (approx 200ms)
-        setTimeout(() => {
-            // 4. Swap Source while glitched
-            setPageImage(pageFront, nextSrc);
-        }, 200);
-
-        // 5. End Glitch and Cleanup
+        setTimeout(() => setPageImage(pageFront, nextSrc), 200);
         setTimeout(() => {
             pageFront.classList.remove('glitch-active');
             isAnimating = false;
-            postLoadCheck(nextSrc, pageIndex);
-        }, 500); // 0.5s total duration
-
+            updateState(pageIndex, nextSrc.includes("decision"));
+        }, 500); 
     } else {
-        // No animation (initial)
         setPageImage(pageFront, nextSrc);
-        postLoadCheck(nextSrc, pageIndex);
+        updateState(pageIndex, nextSrc.includes("decision"));
     }
 }
 
-function postLoadCheck(src, idx) {
-    updateState(idx, src.includes("decision"));
-}
-
-
-window.updateState = function (pageIndex, isDecision) {
-    currentUser.lastPage = pageIndex;
-    updateIndicator(pageIndex);
+function updateState(idx, isDecision) {
+    currentUser.lastPage = idx;
+    const ind = document.getElementById('page-indicator');
+    if(ind) ind.innerText = `Página: ${idx}`;
     saveProgress();
-
-    if (!document.getElementById('decision-trigger').classList.contains('active-phase')) {
-        decisionOverlay.classList.remove('active');
-        pageFront.classList.remove('blurred-context'); // Apply blur to front page
+    
+    const decTrigger = document.getElementById('decision-trigger');
+    if (!isDecision && decTrigger && !decTrigger.classList.contains('active-phase')) {
+        document.getElementById('decision-overlay').classList.remove('active');
+        document.getElementById('page-front').classList.remove('blurred-context');
         document.getElementById('reader-container').classList.remove('decision-mode');
     }
+}
+
+async function saveProgress() {
+    if (!currentUser || !dbClient || isOffline) return;
+    if (typeof currentUser.id === 'string' && currentUser.id.startsWith('local')) return;
+
+    try {
+        await dbClient.from('users').update({ 
+            lastPage: currentUser.lastPage, 
+            currentPath: currentUser.currentPath 
+        }).eq('id', currentUser.id);
+    } catch (e) { console.warn("No se pudo guardar progreso en nube"); }
+}
+
+// ---------------------------------------------------------
+// 4. CONTROLADORES (CLICK / TECLADO)
+// ---------------------------------------------------------
+
+window.nextPage = () => {
+    const src = getPageSrc(document.getElementById('page-front'));
+    if (src.includes("decision") && currentUser.currentPath === 'neutral') {
+        triggerDecisionPhase();
+        return;
+    }
+    loadPage(currentUser.lastPage + 1, 'next');
 };
 
-window.triggerDecisionPhase = () => {
-    // Visual focus
-    pageFront.classList.add('blurred-context');
-    document.getElementById('reader-container').classList.add('decision-mode');
+window.prevPage = () => { 
+    if (currentUser.lastPage > 1) loadPage(currentUser.lastPage - 1, 'prev'); 
+};
 
-    // Show Overlay
-    decisionOverlay.classList.add('active');
+function triggerDecisionPhase() {
+    document.getElementById('page-front').classList.add('blurred-context');
+    document.getElementById('reader-container').classList.add('decision-mode');
+    document.getElementById('decision-overlay').classList.add('active');
     document.getElementById('decision-trigger').style.display = 'block';
     document.getElementById('decision-choices').style.display = 'none';
-
     document.getElementById('decision-trigger').classList.add('active-phase');
-};
+}
 
 window.revealDecision = () => {
     document.getElementById('decision-trigger').style.display = 'none';
     document.getElementById('decision-choices').style.display = 'block';
 };
 
-window.displayEnding = function (imgSrc) {
-    setPageImage(pageFront, imgSrc);
-    decisionOverlay.classList.remove('active');
-    pageFront.classList.remove('blurred-context');
+window.choosePath = (path) => {
+    currentUser.currentPath = path === 1 ? 'ending1' : 'ending2';
+    const finalImg = path === 1 ? ENDING_1 : ENDING_2;
+    displayEnding(finalImg);
+    currentUser.lastPage = PAGES.length + 1;
+    saveProgress();
+};
+
+function displayEnding(img) {
+    setPageImage(document.getElementById('page-front'), img);
+    document.getElementById('decision-overlay').classList.remove('active');
+    document.getElementById('page-front').classList.remove('blurred-context');
     document.getElementById('reader-container').classList.remove('decision-mode');
     document.getElementById('decision-trigger').classList.remove('active-phase');
-
-    updateIndicator("FIN");
-};
-
-function updateIndicator(text) {
-    pageIndicator.innerText = `Página: ${text}`;
+    document.getElementById('page-indicator').innerText = "FIN";
 }
 
-function updateIndicator(text) {
-    pageIndicator.innerText = `Página: ${text}`;
-}
-
-// Embedded to avoid CORS/Fetch errors on local file:// protocol
-const CHAPTER_2_TEXT = `
-S-ØMBRA: CAPÍTULO 2 - CONSECUENCIAS<br><br>
-Tras los eventos en el subsuelo, Kael ya no es el mismo. La decisión ha sido tomada, pero el precio a pagar apenas comienza a revelarse.<br><br>
-Los "Purificadores" han marcado su firma biológica. No hay refugio en la Antigua Metrópolis.<br>
-La única salida es cruzar el Mar de Óxido, una tierra de nadie donde las leyes de la corporación no alcanzan... y donde horrores peores que la muerte aguardan.<br><br>
-"La libertad es un desierto. La sintonía es una jaula."<br><br>
-PRÓXIMAMENTE.
-`;
-
-const BAD_ENDING_TEXT = `
-S-ØMBRA: ASIMILACIÓN COMPLETADA<br><br>
-Sujeto integrado exitosamente en la Red Neural Central.<br>
-Individualidad: <span style="color:red">ELIMINADA</span><br>
-Conciencia: <span style="color:red">ARCHIVADA</span><br>
-Voluntad: <span style="color:red">NULL</span><br><br>
-"No hay dolor en la unidad. No hay duda en el código."<br><br>
-FIN DE LA TRANSMISIÓN.
-`;
-
-window.showPostEndingScreen = (contentHtml) => {
-    overlayScreen.classList.remove('hidden');
+window.showPostEndingScreen = (html) => {
+    document.getElementById('overlay-screen').classList.remove('hidden');
     document.getElementById('auth-box').classList.add('hidden');
     document.getElementById('plot-box').classList.add('hidden');
-
-    // Using the generic "chapter2-box" container for all endings now (could rename ID in HTML but keeping for simplicity)
-    const container = document.getElementById('chapter2-box');
-    const contentArea = document.getElementById('chapter2-text');
-    const title = container.querySelector('h1');
-
-    container.classList.remove('hidden');
-    startMatrix(); // Bring back the cool background
-
-    // Update Title based on content? Or just keep generic.
-    // Let's deduce title from context if needed, but for now generic box style works.
-    if (contentHtml === BAD_ENDING_TEXT) {
-        title.innerText = "SISTEMA";
-        title.style.color = "red";
-    } else {
-        title.innerText = "CAPÍTULO 2";
-        title.style.color = "var(--accent-color)";
-    }
-
-    // Use embedded text
-    contentArea.innerHTML = contentHtml;
-};
-
-// Reader Actions
-// RTL: Left Click/Arrow = NEXT Page. Right Click/Arrow = PREV Page.
-window.nextPage = () => {
-    const currentSrc = getPageSrc(pageFront);
-    if (currentSrc.includes("decision") && currentUser.currentPath === 'neutral') {
-        window.triggerDecisionPhase();
-        return;
-    }
-
-    // if (currentUser.currentPath !== 'neutral') return; // Allow navigation to trigger Chapter 2 logic // Removed to allow post-ending navigation (Chapter 2)
-
-    let next = currentUser.lastPage + 1;
-    loadPage(next, 'next');
-};
-
-window.prevPage = () => {
-    if (currentUser.currentPath !== 'neutral') {
-        currentUser.currentPath = 'neutral';
-        currentUser.lastPage = PAGES.length;
-        loadPage(currentUser.lastPage); // No specific animation for reset
-        return;
-    }
-
-    let prev = currentUser.lastPage - 1;
-    if (prev < 1) prev = 1;
-
-    if (prev !== currentUser.lastPage) {
-        loadPage(prev, 'prev'); // Direction 'prev'
-    }
-};
-
-
-// Branching
-window.choosePath = (path) => {
-    if (path === 1) {
-        currentUser.currentPath = 'ending1';
-        displayEnding(ENDING_1);
-    } else {
-        currentUser.currentPath = 'ending2';
-        displayEnding(ENDING_2);
-    }
-    currentUser.lastPage = PAGES.length + 1; // Mark as completed essentially
-    saveProgress();
+    document.getElementById('chapter2-box').classList.remove('hidden');
+    document.getElementById('chapter2-text').innerHTML = html;
+    startMatrix();
 };
 
 window.resetProgress = () => {
-    if (!confirm("¿Borrar progreso de este usuario?")) return;
-    currentUser.lastPage = 1;
-    currentUser.currentPath = 'neutral';
-    saveProgress();
-    loadPage(1);
-};
-
-window.logout = () => {
-    currentUser = null;
-    location.reload();
-};
-
-// Event Listeners
-document.addEventListener('keydown', (e) => {
-    if (!overlayScreen.classList.contains('hidden')) return;
-
-    if (e.key === 'ArrowLeft') {
-        window.nextPage(); // RTL
-    } else if (e.key === 'ArrowRight') {
-        window.prevPage(); // RTL
+    if (confirm("¿Reiniciar capítulo?")) {
+        currentUser.lastPage = 1; 
+        currentUser.currentPath = 'neutral';
+        saveProgress();
+        loadPage(1);
     }
-});
+};
 
-// Run Init
-init();
+window.logout = () => location.reload();
 
-// --- MATRIX RAIN EFFECT ---
-const canvas = document.getElementById('matrix-rain');
-const ctx = canvas.getContext('2d');
+// Matrix Effect
+const cvs = document.getElementById('matrix-rain');
+if (cvs) {
+    const ctx = cvs.getContext('2d');
+    let w = cvs.width = window.innerWidth, h = cvs.height = window.innerHeight;
+    const cols = Math.floor(w/20)+1, ypos = Array(cols).fill(0);
+    window.startMatrix = () => setInterval(() => {
+        ctx.fillStyle='#0001'; ctx.fillRect(0,0,w,h);
+        ctx.fillStyle='#f00'; ctx.font='18pt monospace';
+        ypos.forEach((y,i)=>{
+            ctx.fillText(String.fromCharCode(Math.random()*128), i*20, y);
+            ypos[i] = y>100+Math.random()*1e4 ? 0 : y+20;
+        });
+    }, 50);
+    window.startMatrix();
+} else { window.startMatrix = () => {}; }
 
-let width = canvas.width = window.innerWidth;
-let height = canvas.height = window.innerHeight;
-
-// Re-size canvas on window resize
-window.addEventListener('resize', () => {
-    width = canvas.width = window.innerWidth;
-    height = canvas.height = window.innerHeight;
-});
-
-const cols = Math.floor(width / 20) + 1;
-const ypos = Array(cols).fill(0);
-
-let matrixInterval;
-
-function matrix() {
-    // Semi-transparent black to create trailing effect
-    ctx.fillStyle = '#0001';
-    ctx.fillRect(0, 0, width, height);
-
-    // Set text color and font
-    ctx.fillStyle = '#ff0000'; // Brighter Red
-    ctx.shadowBlur = 8; // Glow effect
-    ctx.shadowColor = 'red';
-    ctx.font = '18pt monospace'; // Larger font
-
-    ypos.forEach((y, ind) => {
-        // Generate random character
-        const text = String.fromCharCode(Math.random() * 128);
-        const x = ind * 20;
-
-        ctx.fillText(text, x, y);
-
-        // Reset drop randomly if it passes height
-        if (y > 100 + Math.random() * 10000) ypos[ind] = 0;
-        else ypos[ind] = y + 20;
-    });
+// INICIAR AL CARGAR
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initApp);
+} else {
+    initApp();
 }
-
-function startMatrix() {
-    if (matrixInterval) return;
-    canvas.style.display = 'block';
-    matrixInterval = setInterval(matrix, 50);
-}
-
-function stopMatrix() {
-    clearInterval(matrixInterval);
-    matrixInterval = null;
-    canvas.style.display = 'none';
-}
-
-// Run matrix animation initially
-startMatrix();
