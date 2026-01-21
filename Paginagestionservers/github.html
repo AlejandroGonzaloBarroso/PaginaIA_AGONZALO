@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VBox Cloud Controller</title>
+    <title>VBox Cloud Controller (Secure)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
@@ -45,35 +45,45 @@
     <!-- CABECERA -->
     <nav class="bg-slate-900 border-b border-slate-700 h-16 flex items-center justify-between px-6 shrink-0 z-50 shadow-md">
         <div class="flex items-center gap-3">
-            <div class="bg-indigo-600 p-2 rounded-lg shadow-lg shadow-indigo-500/20">
-                <i data-lucide="cloud" class="text-white"></i>
+            <div class="bg-emerald-600 p-2 rounded-lg shadow-lg shadow-emerald-500/20">
+                <i data-lucide="lock" class="text-white"></i>
             </div>
             <div>
                 <h1 class="font-bold text-lg text-white leading-tight">VBox Cloud Controller</h1>
-                <div class="text-[10px] text-slate-400 font-mono flex items-center gap-2">
+                <div class="text-[10px] text-emerald-400 font-mono flex items-center gap-2">
                     <span id="global-status" class="text-rose-500 font-bold">● DESCONECTADO</span>
                     <span class="text-slate-600">|</span>
-                    <span id="host-mode">Detectando entorno...</span>
+                    <span id="host-mode">Modo Full HTTPS</span>
                 </div>
             </div>
         </div>
         
         <div class="flex items-center gap-3">
-            <!-- Aviso HTTPS -->
-            <div id="https-warning" class="hidden bg-amber-500/10 border border-amber-500/50 text-amber-500 px-3 py-1 rounded text-xs flex items-center gap-2">
-                <i data-lucide="lock" width="12"></i> Modo Seguro (GitHub) detectado
-            </div>
-
             <button onclick="toggleModal()" class="flex items-center gap-2 bg-amber-600 hover:bg-amber-500 text-white px-3 py-1.5 rounded text-xs font-bold transition shadow-lg animate-pulse border border-amber-600">
-                <i data-lucide="wrench" width="14"></i> ⚠️ REPARAR ERRORES
+                <i data-lucide="wrench" width="14"></i> ⚠️ PASOS PARA HTTPS
             </button>
             <div class="h-6 w-px bg-slate-700 mx-1"></div>
+            
+            <div class="flex flex-col text-[9px] text-slate-500 text-right mr-2 leading-tight">
+                <span>APROBAR CERTIFICADOS</span>
+                <span>(Si sale gris)</span>
+            </div>
+
             <div class="flex gap-2">
-                <a href="https://127.0.0.1:9001" target="_blank" class="text-[10px] bg-slate-800 border border-slate-600 hover:bg-slate-700 px-3 py-1.5 rounded text-slate-300 transition flex items-center gap-2 group">
-                    <span class="status-dot" id="dot-s1"></span> S1
+                <!-- Botones para Monitor (900x) -->
+                <a href="https://127.0.0.1:9001" target="_blank" class="text-[10px] bg-slate-800 border border-slate-600 hover:bg-slate-700 px-2 py-1.5 rounded text-slate-300 transition group" title="Monitor S1">
+                    <i data-lucide="activity" width="12"></i>
                 </a>
-                <a href="https://127.0.0.1:9002" target="_blank" class="text-[10px] bg-slate-800 border border-slate-600 hover:bg-slate-700 px-3 py-1.5 rounded text-slate-300 transition flex items-center gap-2 group">
-                    <span class="status-dot" id="dot-s2"></span> S2
+                <a href="https://127.0.0.1:9002" target="_blank" class="text-[10px] bg-slate-800 border border-slate-600 hover:bg-slate-700 px-2 py-1.5 rounded text-slate-300 transition group" title="Monitor S2">
+                    <i data-lucide="activity" width="12"></i>
+                </a>
+                <div class="w-px bg-slate-700"></div>
+                <!-- Botones para Web Apps (800x) - AHORA HTTPS -->
+                <a href="https://127.0.0.1:8001" target="_blank" class="text-[10px] bg-blue-900/30 border border-blue-800 hover:bg-blue-800 px-2 py-1.5 rounded text-blue-300 transition group" title="Web Archivos">
+                    <i data-lucide="folder" width="12"></i>
+                </a>
+                <a href="https://127.0.0.1:8002" target="_blank" class="text-[10px] bg-purple-900/30 border border-purple-800 hover:bg-purple-800 px-2 py-1.5 rounded text-purple-300 transition group" title="Web SQL">
+                    <i data-lucide="database" width="12"></i>
                 </a>
             </div>
         </div>
@@ -94,7 +104,8 @@
                     <button onclick="loadFrame('https://127.0.0.1:9001', this, 'Monitor S1', 'secure')" class="sidebar-btn active">
                         <i data-lucide="activity" width="16"></i> Monitor Sistema
                     </button>
-                    <button onclick="loadFrame('http://127.0.0.1:8001', this, 'Archivos Web', 'insecure')" class="sidebar-btn">
+                    <!-- CAMBIO A HTTPS -->
+                    <button onclick="loadFrame('https://127.0.0.1:8001', this, 'Archivos Web', 'secure')" class="sidebar-btn">
                         <i data-lucide="folder-open" width="16"></i> Gestor Archivos
                     </button>
                     
@@ -105,10 +116,6 @@
                         <div class="grid grid-cols-[auto_1fr] gap-x-2 gap-y-1">
                             <span class="data-label">User:</span> <span class="data-value text-yellow-400" onclick="copy(this)">admin</span>
                             <span class="data-label">Pass:</span> <span class="data-value text-yellow-400" onclick="copy(this)">admin@123</span>
-                        </div>
-                        <div class="mt-2 border-t border-slate-800 pt-1">
-                            <span class="data-label block mb-0.5">Ruta Windows (SMB):</span>
-                            <code class="data-value text-emerald-400 block bg-slate-800 p-1 rounded" onclick="copy(this)">\\127.0.0.1</code>
                         </div>
                     </div>
                 </div>
@@ -123,7 +130,8 @@
                     <button onclick="loadFrame('https://127.0.0.1:9002', this, 'Monitor S2', 'secure')" class="sidebar-btn">
                         <i data-lucide="activity" width="16"></i> Monitor Sistema
                     </button>
-                    <button onclick="loadFrame('http://127.0.0.1:8002', this, 'SQL Admin', 'insecure')" class="sidebar-btn">
+                    <!-- CAMBIO A HTTPS -->
+                    <button onclick="loadFrame('https://127.0.0.1:8002', this, 'SQL Admin', 'secure')" class="sidebar-btn">
                         <i data-lucide="database" width="16"></i> Gestor SQL
                     </button>
 
@@ -166,17 +174,17 @@
                         <div id="overlay-icon" class="w-16 h-16 bg-amber-500/10 rounded-full flex items-center justify-center mx-auto mb-4 text-amber-500">
                             <i data-lucide="lock" width="32"></i>
                         </div>
-                        <h3 id="overlay-title" class="text-white font-bold text-xl mb-2">Conexión Bloqueada</h3>
+                        <h3 id="overlay-title" class="text-white font-bold text-xl mb-2">Certificado HTTPS Requerido</h3>
                         <p id="overlay-msg" class="text-slate-400 text-sm mb-6 leading-relaxed">
-                            Si ves esto, el servidor está rechazando mostrarse aquí. Usa el botón <b>REPARAR ERRORES</b> arriba.
+                            Para ver el servidor seguro, debes aprobar su certificado una vez.
                         </p>
                         <a id="overlay-btn" href="#" target="_blank" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg font-bold transition">
-                            ABRIR EN PESTAÑA NUEVA
+                            APROBAR CERTIFICADO
                         </a>
+                        <p class="text-[10px] text-slate-500 mt-2">Luego cierra la pestaña y vuelve aquí.</p>
                     </div>
                 </div>
 
-                <!-- IMPORTANTE: He quitado el atributo 'sandbox' y el 'onload' inline que causaba el error -->
                 <iframe id="main-frame" src="about:blank" class="relative z-10 w-full h-full"></iframe>
             </div>
         </div>
@@ -189,31 +197,44 @@
             <div class="flex justify-between items-center p-5 border-b border-slate-800 bg-slate-800 rounded-t-xl">
                 <div>
                     <h3 class="text-white font-bold flex items-center gap-2 text-lg">
-                        <i data-lucide="wrench" class="text-amber-500"></i> Solución "Conexión Rechazada"
+                        <i data-lucide="lock" class="text-emerald-500"></i> Activar HTTPS en Servidores
                     </h3>
-                    <p class="text-xs text-slate-400 mt-1">Si los monitores o el SQL dicen "Rechazó la conexión", ejecuta esto EN LAS MÁQUINAS VIRTUALES.</p>
+                    <p class="text-xs text-slate-400 mt-1">Sigue estos 3 pasos para que todo funcione con candado verde (HTTPS).</p>
                 </div>
                 <button onclick="toggleModal()" class="text-slate-400 hover:text-white bg-slate-700 p-1 rounded-full"><i data-lucide="x" width="20"></i></button>
             </div>
             
             <div class="p-6 overflow-y-auto space-y-8 text-sm text-slate-300">
                 
-                <!-- FIX 1: MONITORES -->
-                <div class="border-l-4 border-blue-500 pl-4">
-                    <h4 class="text-white font-bold mb-2 text-base">PASO 1: Desbloquear Cockpit (Monitores)</h4>
-                    <p class="mb-2 text-slate-400">Ejecuta esto en la terminal de <b>AMBOS</b> servidores:</p>
+                <!-- PASO 1: APACHE SSL -->
+                <div class="border-l-4 border-emerald-500 pl-4">
+                    <h4 class="text-white font-bold mb-2 text-base">PASO 1: Activar SSL en Lubuntu</h4>
+                    <p class="mb-2 text-slate-400">Ejecuta esto en la terminal de <b>AMBOS</b> servidores para encender el HTTPS de Apache:</p>
                     <div class="bg-black p-4 rounded border border-slate-700 font-mono text-xs text-emerald-400 relative group break-all">
-                        echo -e "[WebService]\nAllowUnencrypted=true\nOrigins = https://127.0.0.1:9001 https://127.0.0.1:9002 http://127.0.0.1:8001 http://127.0.0.1:8002 file://" | sudo tee /etc/cockpit/cockpit.conf && sudo systemctl restart cockpit
+                        sudo a2enmod ssl && sudo a2ensite default-ssl && sudo systemctl restart apache2
                         <button onclick="copyText(this)" class="absolute top-2 right-2 bg-slate-800 text-white px-3 py-1 rounded text-[10px] opacity-0 group-hover:opacity-100 transition font-sans font-bold">COPIAR</button>
                     </div>
                 </div>
 
-                <!-- FIX 2: SQL -->
+                <!-- PASO 2: VIRTUALBOX -->
+                <div class="border-l-4 border-blue-500 pl-4">
+                    <h4 class="text-white font-bold mb-2 text-base">PASO 2: Cambiar Puertos en VirtualBox</h4>
+                    <p class="mb-2 text-slate-400">Ve a <b>Configuración > Red > Reenvío de Puertos</b> y cambia el "Puerto Invitado" de las webs:</p>
+                    <table class="w-full text-xs text-left mb-2 bg-black/40 rounded overflow-hidden">
+                        <thead class="bg-slate-800 text-slate-400"><tr><th class="p-2">Regla</th><th class="p-2">IP Anfitrión</th><th class="p-2">Puerto Anfitrión</th><th class="p-2 text-amber-400">Puerto Invitado</th></tr></thead>
+                        <tbody class="divide-y divide-slate-800">
+                            <tr><td class="p-2">Web S1</td><td class="p-2">127.0.0.1</td><td class="p-2">8001</td><td class="p-2 font-bold text-white">443 <span class="text-slate-500 font-normal">(Antes 80)</span></td></tr>
+                            <tr><td class="p-2">Web S2</td><td class="p-2">127.0.0.1</td><td class="p-2">8002</td><td class="p-2 font-bold text-white">443 <span class="text-slate-500 font-normal">(Antes 80)</span></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- PASO 3: PERMISOS DE VISUALIZACIÓN -->
                 <div class="border-l-4 border-purple-500 pl-4">
-                    <h4 class="text-white font-bold mb-2 text-base">PASO 2: Desbloquear SQL (Adminer)</h4>
-                    <p class="mb-2 text-slate-400">Ejecuta esto solo en el <b>SERVER 2</b> para permitir que se vea en el marco:</p>
+                    <h4 class="text-white font-bold mb-2 text-base">PASO 3: Permitir Incrustación (Cockpit y Adminer)</h4>
+                    <p class="mb-2 text-slate-400">Ejecuta esto para que permitan ser vistos dentro de esta web:</p>
                     <div class="bg-black p-4 rounded border border-slate-700 font-mono text-xs text-purple-400 relative group">
-                        sudo sed -i "s/header('X-Frame-Options/ \/\/ header('X-Frame-Options/g" /var/www/html/index.php && sudo systemctl restart apache2
+                        echo -e "[WebService]\nAllowUnencrypted=true\nOrigins = https://127.0.0.1:9001 https://127.0.0.1:9002 https://127.0.0.1:8001 https://127.0.0.1:8002 file://" | sudo tee /etc/cockpit/cockpit.conf && sudo systemctl restart cockpit
                         <button onclick="copyText(this)" class="absolute top-2 right-2 bg-slate-800 text-white px-3 py-1 rounded text-[10px] opacity-0 group-hover:opacity-100 transition font-sans font-bold">COPIAR</button>
                     </div>
                 </div>
@@ -229,17 +250,12 @@
 
     <script>
         lucide.createIcons();
-        const isSecureContext = window.location.protocol === 'https:';
         
-        // Detectar entorno
-        const hostMode = document.getElementById('host-mode');
+        // Detección de entorno simple
+        const isSecureContext = window.location.protocol === 'https:';
         if (isSecureContext) {
-            hostMode.innerHTML = "Web Pública (HTTPS)";
-            hostMode.className = "text-amber-500 font-bold";
+            document.getElementById('host-mode').innerText = "GitHub/Web Pública";
             document.getElementById('https-warning').classList.remove('hidden');
-        } else {
-            hostMode.innerHTML = "Archivo Local";
-            hostMode.className = "text-emerald-500 font-bold";
         }
 
         function loadFrame(url, btn, title, type) {
@@ -254,29 +270,21 @@
             document.getElementById('frame-title').innerHTML = `${btn.innerHTML}`;
             document.getElementById('ext-link').href = url;
 
-            // Lógica inteligente para GitHub Pages
-            if (isSecureContext && type === 'insecure') {
-                frame.style.display = 'none'; // Ocultar iframe
-                document.getElementById('help-overlay').style.zIndex = "20";
-                overlayTitle.innerText = "Bloqueo de Contenido Mixto";
-                overlayMsg.innerText = "GitHub usa HTTPS (Seguro) pero tu servidor local usa HTTP. El navegador impide mostrarlo aquí.";
-                overlayBtn.innerText = "ABRIR EN VENTANA NUEVA";
-                overlayBtn.href = url;
-            } else {
-                // Intento normal
-                frame.style.display = 'block';
-                frame.src = 'about:blank';
-                setTimeout(() => { frame.src = url; }, 50);
-                
-                // Configurar overlay de fondo por si falla
-                document.getElementById('help-overlay').style.zIndex = "5";
-                overlayTitle.innerText = "Conexión Rechazada";
-                overlayMsg.innerText = "Ejecuta los comandos del botón 'REPARAR ERRORES' en tus VMs.";
-                overlayBtn.href = url;
-            }
+            // Al ser todo HTTPS, ya no necesitamos bloquear por mixed content
+            // Pero sí necesitamos manejar el error de certificado autofirmado
+            frame.style.display = 'block';
+            frame.src = 'about:blank';
+            setTimeout(() => { frame.src = url; }, 50);
+            
+            // Configurar overlay de fondo por si falla (Certificado no aceptado)
+            document.getElementById('help-overlay').style.zIndex = "5";
+            overlayTitle.innerText = "Certificado Pendiente";
+            overlayMsg.innerText = "Si ves esto, necesitas aprobar el certificado de seguridad de " + url;
+            overlayBtn.innerText = "APROBAR CERTIFICADO";
+            overlayBtn.href = url;
         }
 
-        function hideOverlay() { /* Browser logic handles visibility via z-index */ }
+        function hideOverlay() { /* Logic handled by browser z-index stacking */ }
         function toggleModal() {
             const m = document.getElementById('fix-modal');
             m.classList.toggle('hidden'); m.classList.toggle('visible');
