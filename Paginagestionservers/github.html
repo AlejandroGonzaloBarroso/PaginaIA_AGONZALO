@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VBox Cloud Controller</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { background-color: #0f172a; color: #e2e8f0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        iframe { border: none; width: 100%; height: 100%; background: #ffffff; }
+        
+        .sidebar-btn { 
+            display: flex; align-items: center; gap: 0.75rem; 
+            padding: 0.75rem 1rem; width: 100%; 
+            text-align: left; border-radius: 0.5rem; 
+            transition: all 0.2s; color: #94a3b8; font-size: 0.875rem;
+            margin-bottom: 0.25rem; border: 1px solid transparent;
+        }
+        .sidebar-btn:hover { background-color: #1e293b; color: #f1f5f9; border-color: #334155; }
+        .sidebar-btn.active { background-color: #2563eb; color: white; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.4); border-color: #3b82f6; }
+
+        .data-card {
+            background-color: #020617; border: 1px solid #1e293b; border-radius: 0.5rem;
+            padding: 0.75rem; font-size: 0.75rem; margin-top: 0.5rem; position: relative; overflow: hidden;
+        }
+        .data-card::before { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; }
+        .card-blue::before { background-color: #3b82f6; }
+        .card-purple::before { background-color: #a855f7; }
+
+        .data-label { color: #64748b; font-weight: bold; text-transform: uppercase; font-size: 0.65rem; }
+        .data-value { color: #e2e8f0; font-family: 'Courier New', monospace; user-select: all; cursor: pointer; }
+        .data-value:hover { color: #fff; text-decoration: underline; }
+
+        /* Modal & Status */
+        #fix-modal { transition: opacity 0.2s ease; }
+        #fix-modal.hidden { opacity: 0; pointer-events: none; }
+        #fix-modal.visible { opacity: 1; pointer-events: auto; }
+        .status-dot { height: 8px; width: 8px; border-radius: 50%; background-color: #ef4444; display: inline-block; margin-right: 6px; box-shadow: 0 0 5px rgba(239,68,68,0.5); }
+        .status-dot.online { background-color: #10b981; box-shadow: 0 0 5px rgba(16,185,129,0.5); }
+    </style>
+</head>
+<body>
+
+    <!-- CABECERA -->
+    <nav class="bg-slate-900 border-b border-slate-700 h-16 flex items-center justify-between px-6 shrink-0 z-50 shadow-md">
+        <div class="flex items-center gap-3">
+            <div class="bg-indigo-600 p-2 rounded-lg shadow-lg shadow-indigo-500/20">
+                <i data-lucide="cloud" class="text-white"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-lg text-white leading-tight">VBox Cloud Controller</h1>
+                <div class="text-[10px] text-slate-400 font-mono flex items-center gap-2">
+                    <span id="global-status" class="text-rose-500 font-bold">● DESCONECTADO</span>
+                    <span class="text-slate-600">|</span>
+                    <span id="host-mode">Detectando entorno...</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="flex items-center gap-3">
+            <!-- Aviso HTTPS -->
+            <div id="https-warning" class="hidden bg-amber-500/10 border border-amber-500/50 text-amber-500 px-3 py-1 rounded text-xs flex items-center gap-2">
+                <i data-lucide="lock" width="12"></i> Modo Seguro (GitHub) detectado
+            </div>
+
+            <button onclick="toggleModal()" class="flex items-center gap-2 bg-amber-600 hover:bg-amber-500 text-white px-3 py-1.5 rounded text-xs font-bold transition shadow-lg animate-pulse border border-amber-600">
+                <i data-lucide="wrench" width="14"></i> ⚠️ REPARAR ERRORES
+            </button>
+            <div class="h-6 w-px bg-slate-700 mx-1"></div>
+            <div class="flex gap-2">
+                <a href="https://127.0.0.1:9001" target="_blank" class="text-[10px] bg-slate-800 border border-slate-600 hover:bg-slate-700 px-3 py-1.5 rounded text-slate-300 transition flex items-center gap-2 group">
+                    <span class="status-dot" id="dot-s1"></span> S1
+                </a>
+                <a href="https://127.0.0.1:9002" target="_blank" class="text-[10px] bg-slate-800 border border-slate-600 hover:bg-slate-700 px-3 py-1.5 rounded text-slate-300 transition flex items-center gap-2 group">
+                    <span class="status-dot" id="dot-s2"></span> S2
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- CUERPO PRINCIPAL -->
+    <div class="flex flex-1 overflow-hidden relative">
+        
+        <!-- BARRA LATERAL -->
+        <div class="w-72 bg-slate-900 border-r border-slate-800 p-4 flex flex-col gap-6 shrink-0 overflow-y-auto">
+            
+            <!-- SERVER 1 -->
+            <div>
+                <h2 class="text-xs font-bold text-blue-400 uppercase tracking-wider mb-3 px-2 flex items-center gap-2">
+                    <i data-lucide="server" width="14"></i> Server 1 (Archivos)
+                </h2>
+                <div class="space-y-1">
+                    <button onclick="loadFrame('https://127.0.0.1:9001', this, 'Monitor S1', 'secure')" class="sidebar-btn active">
+                        <i data-lucide="activity" width="16"></i> Monitor Sistema
+                    </button>
+                    <button onclick="loadFrame('http://127.0.0.1:8001', this, 'Archivos Web', 'insecure')" class="sidebar-btn">
+                        <i data-lucide="folder-open" width="16"></i> Gestor Archivos
+                    </button>
+                    
+                    <div class="data-card card-blue">
+                        <div class="mb-2 border-b border-slate-800 pb-1 text-slate-400 font-bold flex justify-between">
+                            <span>WEB LOGIN</span> <i data-lucide="lock" width="10"></i>
+                        </div>
+                        <div class="grid grid-cols-[auto_1fr] gap-x-2 gap-y-1">
+                            <span class="data-label">User:</span> <span class="data-value text-yellow-400" onclick="copy(this)">admin</span>
+                            <span class="data-label">Pass:</span> <span class="data-value text-yellow-400" onclick="copy(this)">admin@123</span>
+                        </div>
+                        <div class="mt-2 border-t border-slate-800 pt-1">
+                            <span class="data-label block mb-0.5">Ruta Windows (SMB):</span>
+                            <code class="data-value text-emerald-400 block bg-slate-800 p-1 rounded" onclick="copy(this)">\\127.0.0.1</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SERVER 2 -->
+            <div>
+                <h2 class="text-xs font-bold text-purple-400 uppercase tracking-wider mb-3 px-2 flex items-center gap-2">
+                    <i data-lucide="database" width="14"></i> Server 2 (Datos)
+                </h2>
+                <div class="space-y-1">
+                    <button onclick="loadFrame('https://127.0.0.1:9002', this, 'Monitor S2', 'secure')" class="sidebar-btn">
+                        <i data-lucide="activity" width="16"></i> Monitor Sistema
+                    </button>
+                    <button onclick="loadFrame('http://127.0.0.1:8002', this, 'SQL Admin', 'insecure')" class="sidebar-btn">
+                        <i data-lucide="database" width="16"></i> Gestor SQL
+                    </button>
+
+                    <div class="data-card card-purple">
+                        <div class="mb-2 border-b border-slate-800 pb-1 text-slate-400 font-bold flex justify-between">
+                            <span>SQL LOGIN</span> <i data-lucide="key" width="10"></i>
+                        </div>
+                        <div class="grid grid-cols-[auto_1fr] gap-x-2 gap-y-1">
+                            <span class="data-label">Host:</span> <span class="data-value">127.0.0.1</span>
+                            <span class="data-label">User:</span> <span class="data-value text-yellow-400" onclick="copy(this)">user</span>
+                            <span class="data-label">Pass:</span> <span class="data-value text-yellow-400" onclick="copy(this)">user</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VISUALIZADOR -->
+        <div class="flex-1 flex flex-col bg-slate-800 relative">
+            <div class="h-10 bg-slate-800 border-b border-slate-700 flex justify-between items-center px-4 shrink-0">
+                <div class="flex items-center gap-2 text-sm text-white font-medium" id="frame-title">
+                    <i data-lucide="activity" width="16" class="text-blue-400"></i> Monitor S1
+                </div>
+                <div class="flex gap-2">
+                    <a id="ext-link" href="#" target="_blank" class="text-xs text-blue-400 hover:text-white flex items-center gap-1 hover:underline">
+                        <i data-lucide="external-link" width="12"></i> Abrir pestaña
+                    </a>
+                    <button onclick="document.getElementById('main-frame').contentWindow.location.reload();" class="text-slate-400 hover:text-white">
+                        <i data-lucide="refresh-cw" width="14"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- IFRAME -->
+            <div class="flex-1 relative w-full h-full bg-slate-100">
+                
+                <!-- Capa de Error/Ayuda -->
+                <div id="help-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-900 z-0 text-center px-4">
+                    <div class="bg-slate-800 p-8 rounded-xl border border-slate-700 shadow-2xl max-w-lg">
+                        <div id="overlay-icon" class="w-16 h-16 bg-amber-500/10 rounded-full flex items-center justify-center mx-auto mb-4 text-amber-500">
+                            <i data-lucide="lock" width="32"></i>
+                        </div>
+                        <h3 id="overlay-title" class="text-white font-bold text-xl mb-2">Conexión Bloqueada</h3>
+                        <p id="overlay-msg" class="text-slate-400 text-sm mb-6 leading-relaxed">
+                            Si ves esto, el servidor está rechazando mostrarse aquí. Usa el botón <b>REPARAR ERRORES</b> arriba.
+                        </p>
+                        <a id="overlay-btn" href="#" target="_blank" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg font-bold transition">
+                            ABRIR EN PESTAÑA NUEVA
+                        </a>
+                    </div>
+                </div>
+
+                <!-- IMPORTANTE: He quitado el atributo 'sandbox' y el 'onload' inline que causaba el error -->
+                <iframe id="main-frame" src="about:blank" class="relative z-10 w-full h-full"></iframe>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- MODAL AYUDA / REPARAR -->
+    <div id="fix-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-sm p-4">
+        <div class="bg-slate-900 border border-slate-700 w-full max-w-3xl rounded-xl shadow-2xl flex flex-col max-h-[90vh]">
+            <div class="flex justify-between items-center p-5 border-b border-slate-800 bg-slate-800 rounded-t-xl">
+                <div>
+                    <h3 class="text-white font-bold flex items-center gap-2 text-lg">
+                        <i data-lucide="wrench" class="text-amber-500"></i> Solución "Conexión Rechazada"
+                    </h3>
+                    <p class="text-xs text-slate-400 mt-1">Si los monitores o el SQL dicen "Rechazó la conexión", ejecuta esto EN LAS MÁQUINAS VIRTUALES.</p>
+                </div>
+                <button onclick="toggleModal()" class="text-slate-400 hover:text-white bg-slate-700 p-1 rounded-full"><i data-lucide="x" width="20"></i></button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto space-y-8 text-sm text-slate-300">
+                
+                <!-- FIX 1: MONITORES -->
+                <div class="border-l-4 border-blue-500 pl-4">
+                    <h4 class="text-white font-bold mb-2 text-base">PASO 1: Desbloquear Cockpit (Monitores)</h4>
+                    <p class="mb-2 text-slate-400">Ejecuta esto en la terminal de <b>AMBOS</b> servidores:</p>
+                    <div class="bg-black p-4 rounded border border-slate-700 font-mono text-xs text-emerald-400 relative group break-all">
+                        echo -e "[WebService]\nAllowUnencrypted=true\nOrigins = https://127.0.0.1:9001 https://127.0.0.1:9002 http://127.0.0.1:8001 http://127.0.0.1:8002 file://" | sudo tee /etc/cockpit/cockpit.conf && sudo systemctl restart cockpit
+                        <button onclick="copyText(this)" class="absolute top-2 right-2 bg-slate-800 text-white px-3 py-1 rounded text-[10px] opacity-0 group-hover:opacity-100 transition font-sans font-bold">COPIAR</button>
+                    </div>
+                </div>
+
+                <!-- FIX 2: SQL -->
+                <div class="border-l-4 border-purple-500 pl-4">
+                    <h4 class="text-white font-bold mb-2 text-base">PASO 2: Desbloquear SQL (Adminer)</h4>
+                    <p class="mb-2 text-slate-400">Ejecuta esto solo en el <b>SERVER 2</b> para permitir que se vea en el marco:</p>
+                    <div class="bg-black p-4 rounded border border-slate-700 font-mono text-xs text-purple-400 relative group">
+                        sudo sed -i "s/header('X-Frame-Options/ \/\/ header('X-Frame-Options/g" /var/www/html/index.php && sudo systemctl restart apache2
+                        <button onclick="copyText(this)" class="absolute top-2 right-2 bg-slate-800 text-white px-3 py-1 rounded text-[10px] opacity-0 group-hover:opacity-100 transition font-sans font-bold">COPIAR</button>
+                    </div>
+                </div>
+
+                <div class="text-center pt-2">
+                    <button onclick="location.reload()" class="bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-lg font-bold transition shadow-lg shadow-blue-900/50">
+                        Hecho esto, RECARGAR PÁGINA
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+        const isSecureContext = window.location.protocol === 'https:';
+        
+        // Detectar entorno
+        const hostMode = document.getElementById('host-mode');
+        if (isSecureContext) {
+            hostMode.innerHTML = "Web Pública (HTTPS)";
+            hostMode.className = "text-amber-500 font-bold";
+            document.getElementById('https-warning').classList.remove('hidden');
+        } else {
+            hostMode.innerHTML = "Archivo Local";
+            hostMode.className = "text-emerald-500 font-bold";
+        }
+
+        function loadFrame(url, btn, title, type) {
+            document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            const frame = document.getElementById('main-frame');
+            const overlayTitle = document.getElementById('overlay-title');
+            const overlayMsg = document.getElementById('overlay-msg');
+            const overlayBtn = document.getElementById('overlay-btn');
+
+            document.getElementById('frame-title').innerHTML = `${btn.innerHTML}`;
+            document.getElementById('ext-link').href = url;
+
+            // Lógica inteligente para GitHub Pages
+            if (isSecureContext && type === 'insecure') {
+                frame.style.display = 'none'; // Ocultar iframe
+                document.getElementById('help-overlay').style.zIndex = "20";
+                overlayTitle.innerText = "Bloqueo de Contenido Mixto";
+                overlayMsg.innerText = "GitHub usa HTTPS (Seguro) pero tu servidor local usa HTTP. El navegador impide mostrarlo aquí.";
+                overlayBtn.innerText = "ABRIR EN VENTANA NUEVA";
+                overlayBtn.href = url;
+            } else {
+                // Intento normal
+                frame.style.display = 'block';
+                frame.src = 'about:blank';
+                setTimeout(() => { frame.src = url; }, 50);
+                
+                // Configurar overlay de fondo por si falla
+                document.getElementById('help-overlay').style.zIndex = "5";
+                overlayTitle.innerText = "Conexión Rechazada";
+                overlayMsg.innerText = "Ejecuta los comandos del botón 'REPARAR ERRORES' en tus VMs.";
+                overlayBtn.href = url;
+            }
+        }
+
+        function hideOverlay() { /* Browser logic handles visibility via z-index */ }
+        function toggleModal() {
+            const m = document.getElementById('fix-modal');
+            m.classList.toggle('hidden'); m.classList.toggle('visible');
+        }
+        function copy(el) {
+            navigator.clipboard.writeText(el.innerText);
+            const prev = el.style.color; el.style.color = '#34d399';
+            setTimeout(()=>el.style.color = prev, 200);
+        }
+        function copyText(btn) {
+            const text = btn.parentElement.innerText.replace('COPIAR', '').trim();
+            navigator.clipboard.writeText(text);
+            btn.innerText = "¡COPIADO!";
+            setTimeout(() => btn.innerText = "COPIAR", 2000);
+        }
+
+        // Check Status (Ping image)
+        setInterval(() => {
+            const img = new Image();
+            img.onload = () => {
+                document.getElementById('global-status').innerHTML = '● ONLINE';
+                document.getElementById('global-status').className = 'text-emerald-500 font-bold';
+                document.getElementById('dot-s1').classList.add('online');
+            };
+            img.src = "https://127.0.0.1:9001/favicon.ico?" + Date.now();
+        }, 5000);
+        
+        // Cargar por defecto
+        loadFrame('https://127.0.0.1:9001', document.querySelector('.sidebar-btn'), 'Monitor S1', 'secure');
+        
+        // Listener seguro
+        document.getElementById('main-frame').addEventListener('load', hideOverlay);
+    </script>
+</body>
+</html>
