@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PocketManager - Cloud Support</title>
+    
+    <!-- LIBRERÍAS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: ['class', '.mode-dark'],
+            theme: {
+                extend: {
+                    colors: {
+                        primary: 'var(--primary)',
+                        surface: 'var(--bg-card)',
+                        base: 'var(--bg-body)'
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- ESTILOS -->
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --bg-body: #f1f5f9;
+            --bg-card: #ffffff;
+            --bg-input: #f8fafc;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --space-p: 1.25rem;
+            --text-sz: 1rem;
+        }
+
+        body.mode-dark {
+            --bg-body: #020617;
+            --bg-card: #1e293b;
+            --bg-input: #0f172a;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+        }
+
+        body.density-compact { --space-p: 0.75rem; --text-sz: 0.875rem; }
+
+        body.theme-indigo  { --primary: #4f46e5; }
+        body.theme-emerald { --primary: #059669; }
+        body.theme-rose    { --primary: #be123c; }
+        body.theme-amber   { --primary: #d97706; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            -webkit-tap-highlight-color: transparent;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .bg-primary { background-color: var(--primary) !important; }
+        .text-primary { color: var(--primary) !important; }
+
+        .glass-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 1.25rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            padding: var(--space-p);
+        }
+
+        .input-std {
+            width: 100%; padding: 14px;
+            border-radius: 10px; border: 2px solid var(--border);
+            background-color: var(--bg-input); color: var(--text-main);
+            outline: none; transition: 0.2s; font-size: var(--text-sz); font-weight: 600;
+        }
+        .input-std:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(var(--primary), 0.1); }
+
+        .btn-primary {
+            background-color: var(--primary); color: white;
+            padding: 14px; border-radius: 10px; font-weight: 700; width: 100%;
+            text-align: center; transition: transform 0.1s; font-size: var(--text-sz);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .btn-primary:active { transform: scale(0.98); }
+
+        section.view-section {
+            display: none !important; min-height: 100vh; padding-bottom: 120px;
+            background-color: var(--bg-body); animation: fadeIn 0.2s ease-out;
+        }
+        section.view-section.active { display: block !important; }
+        section.view-section.view-auth.active { display: flex !important; flex-direction: column; justify-content: center; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        .nav-bar {
+            position: fixed; bottom: 20px; left: 16px; right: 16px;
+            background-color: var(--bg-card); padding: 12px;
+            border: 1px solid var(--border); border-radius: 20px;
+            display: none; justify-content: space-around; align-items: center;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); z-index: 50;
+        }
+        .nav-bar.active { display: flex; }
+        .nav-item { color: var(--text-muted); font-size: 1.3rem; transition: 0.2s; padding: 10px; }
+        .nav-item.active { color: var(--primary); transform: scale(1.1); }
+
+        .text-main { color: var(--text-main); }
+        .text-muted { color: var(--text-muted); }
+        
+        .spinner {
+            width: 20px; height: 20px; border: 3px solid #fff; 
+            border-bottom-color: transparent; border-radius: 50%; 
+            display: inline-block; animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="theme-indigo mode-light density-normal">
+
+    <!-- Toast -->
+    <div id="toast" class="fixed top-6 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-6 py-3 rounded-full shadow-2xl z-[100] transition-all duration-300 opacity-0 -translate-y-10 pointer-events-none text-sm font-bold flex items-center gap-3">
+        <i id="toast-icon" class="fa-solid fa-info-circle"></i>
+        <span id="toast-msg">Notificación</span>
+    </div>
+
+    <!-- LOGIN -->
+    <section id="view-login" class="view-section view-auth active">
+        <div class="w-full max-w-sm mx-auto px-6">
+            <div class="text-center mb-10">
+                <div class="w-20 h-20 bg-primary rounded-3xl mx-auto flex items-center justify-center mb-6 shadow-xl shadow-indigo-500/20 text-white">
+                    <i class="fa-solid fa-wallet text-3xl"></i>
+                </div>
+                <h1 class="text-4xl font-extrabold text-main mb-2">PocketManager</h1>
+                <p class="text-muted font-medium" data-i18n="app_slogan">Tu dinero, bajo control</p>
+            </div>
+
+            <div class="glass-card">
+                <div class="flex bg-slate-100 dark:bg-slate-900 p-1.5 rounded-xl mb-6">
+                    <button onclick="AuthController.setMode('login')" id="tab-login" class="flex-1 py-3 rounded-lg text-sm font-bold bg-white dark:bg-slate-700 shadow-sm text-primary transition-all">Entrar</button>
+                    <button onclick="AuthController.setMode('signup')" id="tab-signup" class="flex-1 py-3 rounded-lg text-sm font-bold text-slate-400 transition-all">Crear</button>
+                </div>
+
+                <form onsubmit="AuthController.submit(event)" class="space-y-5">
+                    <div>
+                        <label class="text-xs font-bold text-muted uppercase ml-1 mb-1 block" data-i18n="username">Usuario</label>
+                        <input type="text" id="username" class="input-std" placeholder="juan123" required oninput="this.value = this.value.replace(/[^a-zA-Z0-9]/g, '').toLowerCase()">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-muted uppercase ml-1 mb-1 block" data-i18n="password">Contraseña</label>
+                        <input type="password" id="password" class="input-std" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit" id="btn-auth" class="btn-primary mt-6" data-i18n="login_btn">Iniciar Sesión</button>
+                </form>
+            </div>
+            <div class="mt-8 text-center">
+                <button onclick="App.reset()" class="text-xs text-muted font-bold underline opacity-60 hover:opacity-100">Resetear App</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- DASHBOARD -->
+    <section id="view-dashboard" class="view-section pt-8 px-5">
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <p class="text-xs font-bold text-muted uppercase" data-i18n="welcome">Bienvenido</p>
+                <h2 class="text-2xl font-bold text-main truncate max-w-[200px]" id="user-display">Usuario</h2>
+            </div>
+            <select id="time-filter" onchange="FinanceController.setFilter(this.value)" class="bg-white dark:bg-slate-800 text-xs font-bold text-muted border border-std rounded-lg px-3 py-2 outline-none shadow-sm">
+                <option value="all" data-i18n="filter_all">Todo</option>
+                <option value="month" data-i18n="filter_month">Mes</option>
+            </select>
+        </div>
+
+        <div class="bg-primary rounded-3xl p-6 text-white shadow-lg mb-6 relative overflow-hidden transition-colors duration-300">
+            <div class="relative z-10">
+                <p class="text-white/80 text-xs font-bold uppercase mb-1" data-i18n="balance">Balance Total</p>
+                <h3 class="text-4xl font-black mb-6" id="total-balance">$0.00</h3>
+                <div class="flex gap-4">
+                    <div class="bg-white/20 backdrop-blur rounded-xl p-3 flex-1 border border-white/10">
+                        <div class="flex items-center gap-2 mb-1">
+                            <div class="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-[10px]"><i class="fa-solid fa-arrow-down"></i></div>
+                            <span class="text-xs font-bold text-white/90" data-i18n="income">Ingresos</span>
+                        </div>
+                        <p class="font-bold text-lg" id="total-income">$0.00</p>
+                    </div>
+                    <div class="bg-white/20 backdrop-blur rounded-xl p-3 flex-1 border border-white/10">
+                        <div class="flex items-center gap-2 mb-1">
+                            <div class="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-[10px]"><i class="fa-solid fa-arrow-up"></i></div>
+                            <span class="text-xs font-bold text-white/90" data-i18n="expense">Gastos</span>
+                        </div>
+                        <p class="font-bold text-lg" id="total-expense">$0.00</p>
+                    </div>
+                </div>
+            </div>
+            <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
+            <div class="absolute bottom-0 left-0 w-24 h-24 bg-black/10 rounded-full blur-xl -ml-6 -mb-6"></div>
+        </div>
+
+        <div class="glass-card mb-6 p-4">
+            <div class="h-40 relative"><canvas id="chart-canvas"></canvas></div>
+        </div>
+
+        <h4 class="text-sm font-bold text-muted mb-3 ml-1 uppercase tracking-wide" data-i18n="recent">Movimientos</h4>
+        <div id="list-container" class="space-y-3 pb-24"></div>
+    </section>
+
+    <!-- AGREGAR -->
+    <section id="view-add" class="view-section pt-10 px-5">
+        <h2 class="text-2xl font-bold text-main mb-6 text-center" data-i18n="new_op">Nueva Operación</h2>
+        <form onsubmit="FinanceController.add(event)" class="glass-card space-y-5">
+            <div class="grid grid-cols-2 gap-3 p-1.5 rounded-xl bg-slate-100 dark:bg-slate-900">
+                <label class="cursor-pointer relative">
+                    <input type="radio" name="type" value="expense" class="peer sr-only" checked>
+                    <div class="py-3 rounded-lg text-sm font-bold text-slate-500 text-center transition-all duration-200 hover:bg-white/50" data-i18n="expense">Gasto</div>
+                    <div class="absolute inset-0 py-3 rounded-lg text-sm font-bold text-white bg-primary text-center opacity-0 scale-95 peer-checked:opacity-100 peer-checked:scale-100 transition-all duration-200 shadow-md" data-i18n="expense">Gasto</div>
+                </label>
+                <label class="cursor-pointer relative">
+                    <input type="radio" name="type" value="income" class="peer sr-only">
+                    <div class="py-3 rounded-lg text-sm font-bold text-slate-500 text-center transition-all duration-200 hover:bg-white/50" data-i18n="income">Ingreso</div>
+                    <div class="absolute inset-0 py-3 rounded-lg text-sm font-bold text-white bg-primary text-center opacity-0 scale-95 peer-checked:opacity-100 peer-checked:scale-100 transition-all duration-200 shadow-md" data-i18n="income">Ingreso</div>
+                </label>
+            </div>
+            
+            <div>
+                <label class="text-xs font-bold text-muted uppercase ml-1 mb-1 block" data-i18n="date">Fecha</label>
+                <input type="date" name="date" class="input-std" required id="date-input">
+            </div>
+
+            <div>
+                <label class="text-xs font-bold text-muted uppercase ml-1 mb-1 block" data-i18n="amount">Monto</label>
+                <div class="relative">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-muted font-bold text-lg currency-symbol">$</span>
+                    <input type="number" name="amount" step="0.01" class="input-std pl-10 text-2xl font-bold" placeholder="0.00" required>
+                </div>
+            </div>
+            
+            <div>
+                <label class="text-xs font-bold text-muted uppercase ml-1 mb-1 block" data-i18n="category">Categoría</label>
+                <select name="category" class="input-std bg-transparent">
+                    <option value="food">🍽️ Comida</option>
+                    <option value="transport">🚗 Transporte</option>
+                    <option value="home">🏠 Casa</option>
+                    <option value="entertainment">🎬 Ocio</option>
+                    <option value="shopping">🛍️ Compras</option>
+                    <option value="health">💊 Salud</option>
+                    <option value="education">🎓 Educación</option>
+                    <option value="travel">✈️ Viajes</option>
+                    <option value="gifts">🎁 Regalos</option>
+                    <option value="savings">🐷 Ahorro</option>
+                    <option value="investment">📈 Inversión</option>
+                    <option value="salary">💰 Salario</option>
+                    <option value="other">📦 Otro</option>
+                </select>
+            </div>
+            
+            <div>
+                <label class="text-xs font-bold text-muted uppercase ml-1 mb-1 block" data-i18n="note">Nota</label>
+                <input type="text" name="description" class="input-std" placeholder="...">
+            </div>
+            
+            <div onclick="document.getElementById('file-input').click()" class="border-2 border-dashed border-std rounded-xl p-4 text-center cursor-pointer transition hover:bg-slate-50 dark:hover:bg-slate-800" style="border-color: var(--border);">
+                <input type="file" id="file-input" accept="image/*" class="hidden" onchange="FinanceController.handleFile(event)">
+                <div id="file-label" class="text-sm text-muted font-medium flex flex-col items-center gap-2">
+                    <i class="fa-solid fa-camera text-2xl text-primary"></i>
+                    <span data-i18n="photo">Adjuntar Foto</span>
+                </div>
+                <img id="file-preview" class="hidden w-full h-32 object-cover rounded-lg shadow-sm">
+            </div>
+            <button type="submit" id="btn-save" class="btn-primary flex justify-center items-center gap-2" data-i18n="save">Guardar Operación</button>
+        </form>
+        <button onclick="App.nav('dashboard')" class="w-full mt-6 py-3 text-muted font-bold opacity-60 hover:opacity-100" data-i18n="cancel">Cancelar</button>
+    </section>
+
+    <!-- AJUSTES -->
+    <section id="view-settings" class="view-section pt-10 px-5">
+        <h2 class="text-2xl font-bold text-main mb-6" data-i18n="settings">Ajustes</h2>
+        
+        <div class="glass-card mb-6 overflow-hidden space-y-6">
+            
+            <!-- APARIENCIA -->
+            <div class="border-b border-std pb-5" style="border-color: var(--border);">
+                <p class="text-xs font-bold text-muted uppercase mb-3" data-i18n="theme">Apariencia</p>
+                <div class="flex gap-2 bg-slate-100 dark:bg-slate-900 p-1 rounded-xl">
+                    <button onclick="Config.setMode('light')" class="flex-1 py-2 rounded-lg font-bold text-xs transition-all hover:bg-white/50" id="btn-mode-light" data-i18n="light">☀️ Claro</button>
+                    <button onclick="Config.setMode('dark')" class="flex-1 py-2 rounded-lg font-bold text-xs transition-all hover:bg-white/50" id="btn-mode-dark" data-i18n="dark">🌙 Oscuro</button>
+                </div>
+            </div>
+
+            <!-- COLOR -->
+            <div class="border-b border-std pb-5" style="border-color: var(--border);">
+                <p class="text-xs font-bold text-muted uppercase mb-3" data-i18n="color">Color Principal</p>
+                <div class="flex gap-4 justify-between px-2">
+                    <button onclick="Config.setTheme('indigo')" class="w-12 h-12 rounded-full bg-indigo-600 ring-2 ring-offset-2 ring-transparent hover:ring-indigo-300 transition shadow-sm"></button>
+                    <button onclick="Config.setTheme('emerald')" class="w-12 h-12 rounded-full bg-emerald-600 ring-2 ring-offset-2 ring-transparent hover:ring-emerald-300 transition shadow-sm"></button>
+                    <button onclick="Config.setTheme('rose')" class="w-12 h-12 rounded-full bg-rose-600 ring-2 ring-offset-2 ring-transparent hover:ring-rose-300 transition shadow-sm"></button>
+                    <button onclick="Config.setTheme('amber')" class="w-12 h-12 rounded-full bg-amber-600 ring-2 ring-offset-2 ring-transparent hover:ring-amber-300 transition shadow-sm"></button>
+                </div>
+            </div>
+
+            <!-- IDIOMA & MONEDA -->
+            <div class="flex gap-4 border-b border-std pb-5" style="border-color: var(--border);">
+                <div class="flex-1">
+                    <p class="text-xs font-bold text-muted uppercase mb-2" data-i18n="currency">Moneda</p>
+                    <div class="flex flex-col gap-2">
+                        <button onclick="Config.setCurr('$')" class="py-2 border border-std rounded-lg text-muted text-sm font-bold hover:bg-primary hover:text-white transition">$</button>
+                        <button onclick="Config.setCurr('€')" class="py-2 border border-std rounded-lg text-muted text-sm font-bold hover:bg-primary hover:text-white transition">€</button>
+                    </div>
+                </div>
+                <div class="flex-1">
+                    <p class="text-xs font-bold text-muted uppercase mb-2" data-i18n="language">Idioma</p>
+                    <div class="flex flex-col gap-2">
+                        <button onclick="Config.setLang('es')" class="py-2 border border-std rounded-lg text-muted text-sm font-bold hover:bg-primary hover:text-white transition">Español</button>
+                        <button onclick="Config.setLang('en')" class="py-2 border border-std rounded-lg text-muted text-sm font-bold hover:bg-primary hover:text-white transition">English</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EXPORTAR -->
+            <div class="border-b border-std pb-5 cursor-pointer opacity-70 hover:opacity-100 transition" onclick="FinanceController.export()" style="border-color: var(--border);">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-primary text-lg"><i class="fa-solid fa-file-csv"></i></div>
+                    <div>
+                        <p class="text-sm font-bold text-main" data-i18n="export">Exportar CSV</p>
+                        <p class="text-xs text-muted">Guardar copia local</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SOPORTE (DB INSERT) -->
+            <div class="border-b border-std pb-5" style="border-color: var(--border);">
+                <p class="text-xs font-bold text-muted uppercase mb-3" data-i18n="support">Soporte</p>
+                <form onsubmit="App.sendSupport(event)" class="space-y-3">
+                    <input type="text" id="contact-subject" class="input-std text-sm" placeholder="Asunto" required>
+                    <textarea id="contact-message" class="input-std text-sm" rows="3" placeholder="Describe tu duda..." required></textarea>
+                    <button type="submit" class="w-full py-3 bg-slate-800 text-white rounded-xl font-bold hover:bg-slate-700 transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-paper-plane"></i> <span data-i18n="send_msg">Enviar Mensaje</span>
+                    </button>
+                </form>
+                <div class="text-center mt-3">
+                    <p class="text-xs text-muted" data-i18n="contact_hint">O escribe a:</p>
+                    <a href="mailto:gonzaloalejandro667@gmail.com" class="text-primary font-bold text-sm hover:underline">gonzaloalejandro667@gmail.com</a>
+                </div>
+            </div>
+
+            <!-- ZONA DE PELIGRO -->
+            <div class="pt-2">
+                <p class="text-xs font-bold text-red-400 uppercase mb-3" data-i18n="danger_zone">Zona de Peligro</p>
+                <div class="space-y-3">
+                    <button onclick="FinanceController.deleteAll()" class="w-full py-3 border-2 border-red-100 text-red-500 rounded-xl font-bold hover:bg-red-50 transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-eraser"></i> <span data-i18n="delete_data">Borrar Historial</span>
+                    </button>
+                    <!-- BOTÓN ELIMINAR CUENTA -->
+                    <button onclick="AuthController.deleteAccount()" class="w-full py-3 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 transition flex items-center justify-center gap-2 shadow-lg shadow-red-200">
+                        <i class="fa-solid fa-skull"></i> <span data-i18n="delete_account">Eliminar Cuenta Definitivamente</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <button onclick="AuthController.logout()" class="w-full py-4 text-red-500 font-bold bg-red-50 dark:bg-red-900/20 rounded-xl hover:bg-red-100 transition mb-8" data-i18n="logout">Cerrar Sesión</button>
+    </section>
+
+    <!-- NAV -->
+    <nav id="nav-bar" class="nav-bar">
+        <button onclick="App.nav('dashboard')" class="nav-item active" id="nav-dashboard"><i class="fa-solid fa-house"></i></button>
+        <button onclick="App.nav('add')" class="w-14 h-14 rounded-full bg-primary text-white flex items-center justify-center -mt-10 shadow-lg shadow-indigo-500/30 transition transform active:scale-95">
+            <i class="fa-solid fa-plus text-xl"></i>
+        </button>
+        <button onclick="App.nav('settings')" class="nav-item" id="nav-settings"><i class="fa-solid fa-sliders"></i></button>
+    </nav>
+
+    <!-- LÓGICA -->
+    <script>
+        const I18N = {
+            es: {
+                app_slogan: "Tu dinero, bajo control", username: "Usuario", password: "Contraseña", login_btn: "Iniciar Sesión",
+                welcome: "Bienvenido", balance: "Balance Total", income: "Ingresos", expense: "Gastos", recent: "Movimientos",
+                new_op: "Nueva Operación", amount: "Monto", category: "Categoría", note: "Nota", photo: "Adjuntar Foto", save: "Guardar Operación",
+                cancel: "Cancelar", settings: "Ajustes", theme: "Apariencia", color: "Color Principal", currency: "Moneda", language: "Idioma",
+                export: "Exportar CSV", logout: "Cerrar Sesión", date: "Fecha", danger_zone: "Zona de Peligro", delete_data: "Borrar Historial",
+                delete_account: "Eliminar Cuenta", light: "☀️ Claro", dark: "🌙 Oscuro",
+                filter_all: "Todo", filter_month: "Mes Actual", support: "Soporte", send_msg: "Enviar Mensaje", contact_hint: "O escribe a:",
+                // Toasts & Mensajes
+                lang_changed: "Idioma cambiado", theme_updated: "Tema actualizado", mode_updated: "Modo actualizado",
+                curr_updated: "Moneda: ", saved: "Guardado", error: "Error", welcome_msg: "¡Bienvenido!", created: "¡Cuenta creada!",
+                data_deleted: "Historial borrado", acct_deleted: "Cuenta eliminada para siempre",
+                confirm_delete_title: "⚠️ ¿ELIMINAR CUENTA?",
+                confirm_delete_msg: "Esta acción es irreversible. Se borrará tu usuario y todos tus datos para siempre. ¿Estás seguro?",
+                confirm_delete_msg_2: "Última advertencia: Perderás el acceso y los datos inmediatamente.",
+                msg_sent: "Mensaje enviado al soporte", msg_error: "Error al enviar mensaje"
+            },
+            en: {
+                app_slogan: "Your money, under control", username: "Username", password: "Password", login_btn: "Login",
+                welcome: "Welcome", balance: "Total Balance", income: "Income", expense: "Expenses", recent: "Transactions",
+                new_op: "New Transaction", amount: "Amount", category: "Category", note: "Note", photo: "Attach Photo", save: "Save Transaction",
+                cancel: "Cancel", settings: "Settings", theme: "Appearance", color: "Main Color", currency: "Currency", language: "Language",
+                export: "Export CSV", logout: "Log Out", date: "Date", danger_zone: "Danger Zone", delete_data: "Clear History",
+                delete_account: "Delete Account", light: "☀️ Light", dark: "🌙 Dark",
+                filter_all: "All Time", filter_month: "Current Month", support: "Support", send_msg: "Send Message", contact_hint: "Or write to:",
+                // Toasts & Messages
+                lang_changed: "Language changed", theme_updated: "Theme updated", mode_updated: "Mode updated",
+                curr_updated: "Currency: ", saved: "Saved", error: "Error", welcome_msg: "Welcome!", created: "Account created!",
+                data_deleted: "History cleared", acct_deleted: "Account deleted forever",
+                confirm_delete_title: "⚠️ DELETE ACCOUNT?",
+                confirm_delete_msg: "This action is irreversible. Your user and all data will be deleted forever. Are you sure?",
+                confirm_delete_msg_2: "Final warning: You will lose access and data immediately.",
+                msg_sent: "Message sent to support", msg_error: "Error sending message"
+            }
+        };
+
+        const CONFIG = {
+            url: 'https://swbhdvvmbzqaktcimyuk.supabase.co',
+            key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3YmhkdnZtYnpxYWt0Y2lteXVrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwNDQzODAsImV4cCI6MjA4NTYyMDM4MH0.4savimhIfR3LDP5rGzWTrnaP87r685tYrh5zg_URJ6w',
+            currency: '$', theme: 'indigo', lang: 'es', mode: 'light', density: 'normal'
+        };
+
+        let sb=null, user=null, chartInstance=null, fileData=null;
+        let filterMode = 'all';
+
+        const App = {
+            init: () => {
+                sb = supabase.createClient(CONFIG.url, CONFIG.key);
+                AuthController.check();
+                document.getElementById('date-input').valueAsDate = new Date();
+            },
+            nav: (id) => {
+                document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+                document.getElementById(`view-${id}`).classList.add('active');
+                const nav = document.getElementById('nav-bar');
+                id === 'login' ? nav.classList.remove('active') : nav.classList.add('active');
+                if(id !== 'login') {
+                    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+                    const btn = document.getElementById(`nav-${id}`);
+                    if(btn) btn.classList.add('active');
+                }
+            },
+            toast: (msg, type='info') => {
+                const t = document.getElementById('toast');
+                document.getElementById('toast-msg').innerText = msg;
+                document.getElementById('toast-icon').className = type==='error'?"fa-solid fa-circle-exclamation text-red-400":"fa-solid fa-circle-check text-emerald-400";
+                t.classList.remove('opacity-0', '-translate-y-10');
+                setTimeout(()=>t.classList.add('opacity-0', '-translate-y-10'), 3000);
+            },
+            getMsg: (key) => I18N[CONFIG.lang][key] || key,
+            reset: () => { if(confirm("¿Reset?")) { localStorage.clear(); location.reload(); } },
+            // SOPORTE VIA BASE DE DATOS (SOLO INSERT)
+            sendSupport: async (e) => {
+                e.preventDefault();
+                const btn = e.target.querySelector('button');
+                const originalText = btn.innerHTML;
+                const subject = document.getElementById('contact-subject').value;
+                const rawMessage = document.getElementById('contact-message').value;
+
+                // Preparamos el mensaje incluyendo el email del usuario para que puedas responderle
+                // Esto evita errores si la columna 'email' no existe en la tabla
+                const userEmail = user?.email || 'Anonimo';
+                const finalMessage = `[Enviado por: ${userEmail}]\n\n${rawMessage}`;
+
+                btn.disabled = true;
+                btn.innerHTML = `<div class="spinner"></div>`;
+
+                try {
+                    // 1. GUARDAR EN BASE DE DATOS
+                    const { error } = await sb.from('support_messages').insert([{
+                        user_id: user.id,
+                        // email: user.email,  <-- ELIMINADO para evitar error de columna inexistente
+                        subject: subject,
+                        message: finalMessage // El email va aquí dentro ahora
+                    }]);
+
+                    if(error) throw new Error("DB Error: " + error.message);
+
+                    App.toast(App.getMsg('msg_sent'));
+                    e.target.reset();
+
+                } catch (error) {
+                    console.error(error);
+                    App.toast(App.getMsg('msg_error') + ": " + error.message, 'error');
+                } finally {
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                }
+            },
+        };
+
+        const Config = {
+            load: async () => {
+                if(!user) return;
+                const { data } = await sb.from('profiles').select('*').eq('id', user.id).maybeSingle();
+                if(data) {
+                    CONFIG.theme = data.theme || 'indigo';
+                    CONFIG.currency = data.currency || '$';
+                    CONFIG.lang = data.language || 'es';
+                    CONFIG.mode = data.mode || 'light';
+                    CONFIG.density = data.density || 'normal';
+                } else { await Config.save(); }
+                Config.apply();
+            },
+            save: async () => {
+                if(!user) return;
+                await sb.from('profiles').upsert({
+                    id: user.id, theme: CONFIG.theme, currency: CONFIG.currency,
+                    language: CONFIG.lang, mode: CONFIG.mode, density: CONFIG.density,
+                    updated_at: new Date().toISOString()
+                });
+            },
+            apply: () => {
+                document.body.className = `theme-${CONFIG.theme} mode-${CONFIG.mode} density-${CONFIG.density}`;
+                const texts = I18N[CONFIG.lang];
+                if(texts) document.querySelectorAll('[data-i18n]').forEach(el => el.innerText = texts[el.getAttribute('data-i18n')] || el.innerText);
+                document.querySelectorAll('.currency-symbol').forEach(el => el.innerText = CONFIG.currency);
+                FinanceController.renderChart();
+                
+                // Highlight active buttons
+                document.getElementById('btn-mode-light').className = `flex-1 py-2 rounded-lg font-bold text-xs transition-all ${CONFIG.mode === 'light' ? 'bg-white shadow text-primary' : 'text-slate-400 hover:bg-white/50'}`;
+                document.getElementById('btn-mode-dark').className = `flex-1 py-2 rounded-lg font-bold text-xs transition-all ${CONFIG.mode === 'dark' ? 'bg-slate-700 shadow text-white' : 'text-slate-400 hover:bg-white/50'}`;
+            },
+            setMode: (m) => { CONFIG.mode = m; Config.save(); Config.apply(); App.toast(App.getMsg('mode_updated')); },
+            setDensity: (d) => { CONFIG.density = d; Config.save(); Config.apply(); App.toast("Densidad OK"); },
+            setTheme: (t) => { CONFIG.theme = t; Config.save(); Config.apply(); App.toast(App.getMsg('theme_updated')); },
+            setCurr: (c) => { CONFIG.currency = c; Config.save(); FinanceController.renderList(); Config.apply(); App.toast(App.getMsg('curr_updated') + c); },
+            setLang: (l) => { CONFIG.lang = l; Config.save(); Config.apply(); App.toast(App.getMsg('lang_changed')); }
+        };
+
+        const AuthController = {
+            check: async () => {
+                const { data } = await sb.auth.getSession();
+                if(data.session) { user = data.session.user; AuthController.postLogin(); }
+                else App.nav('login');
+            },
+            setMode: (m) => {
+                const btnL = document.getElementById('tab-login');
+                const btnS = document.getElementById('tab-signup');
+                const btnMain = document.getElementById('btn-auth');
+                const active = "bg-white dark:bg-slate-700 shadow-sm text-primary";
+                const inactive = "text-slate-400 hover:text-slate-500";
+                
+                if(m==='login') {
+                    btnL.className = `flex-1 py-3 rounded-lg text-sm font-bold transition-all ${active}`;
+                    btnS.className = `flex-1 py-3 rounded-lg text-sm font-bold transition-all ${inactive}`;
+                    btnMain.innerText = I18N[CONFIG.lang].login_btn;
+                    AuthController.mode = 'login';
+                } else {
+                    btnL.className = `flex-1 py-3 rounded-lg text-sm font-bold transition-all ${inactive}`;
+                    btnS.className = `flex-1 py-3 rounded-lg text-sm font-bold transition-all ${active}`;
+                    btnMain.innerText = "Crear Cuenta"; // Fallback text, updated by Config.apply later
+                    AuthController.mode = 'signup';
+                }
+                // Refresh texts immediately
+                Config.apply();
+            },
+            submit: async (e) => {
+                e.preventDefault();
+                const u = document.getElementById('username').value.trim().toLowerCase();
+                const p = document.getElementById('password').value.trim();
+                const btn = document.getElementById('btn-auth');
+                if(u.length<3) return App.toast("User too short", 'error');
+                const email = `${u}@pocketmanager.local`;
+                btn.disabled = true; btn.innerHTML = `<div class="spinner"></div>`;
+
+                try {
+                    let res;
+                    if(AuthController.mode === 'signup') res = await sb.auth.signUp({ email, password: p, options: { data: { username: u } } });
+                    else res = await sb.auth.signInWithPassword({ email, password: p });
+                    if(res.error) throw res.error;
+                    if(res.data.user) { user = res.data.user; AuthController.postLogin(); App.toast(App.getMsg(AuthController.mode === 'signup'?'created':'welcome_msg')); }
+                } catch(err) {
+                    App.toast(err.message.includes("Invalid") ? "Credenciales Error" : "Error de conexión", 'error');
+                } finally {
+                    btn.disabled = false; btn.innerText = AuthController.mode==='login'? I18N[CONFIG.lang].login_btn : "Crear";
+                    Config.apply();
+                }
+            },
+            
+            // FUNCIÓN DE ELIMINACIÓN DE CUENTA
+            deleteAccount: async () => {
+                const msg = I18N[CONFIG.lang].confirm_delete_msg;
+                if(!confirm(msg)) return;
+                if(!confirm(I18N[CONFIG.lang].confirm_delete_msg_2)) return;
+
+                const btn = document.querySelector('button[onclick="AuthController.deleteAccount()"]');
+                const originalText = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = `<div class="spinner"></div>`;
+
+                try {
+                    let { error } = await sb.rpc('delete_account_complete');
+                    
+                    if (error) {
+                        console.warn("RPC 'delete_account_complete' falló. Intentando 'delete_user'...");
+                        await sb.from('transactions').delete().eq('user_id', user.id);
+                        await sb.from('profiles').delete().eq('id', user.id);
+                        
+                        let rpc2 = await sb.rpc('delete_user');
+                        if(rpc2.error) {
+                             console.error("Ambos RPC fallaron.");
+                             alert("Datos borrados. Para borrar el login, contacta al admin.");
+                        } else {
+                             alert(App.getMsg('acct_deleted'));
+                        }
+                    } else {
+                        alert(App.getMsg('acct_deleted'));
+                    }
+                    
+                    await sb.auth.signOut();
+                    location.reload();
+                    
+                } catch (e) {
+                    console.error(e);
+                    App.toast("Error: " + e.message, 'error');
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                }
+            },
+            
+            postLogin: async () => {
+                document.getElementById('user-display').innerText = user.user_metadata?.username || "Usuario";
+                await Config.load();
+                App.nav('dashboard'); FinanceController.load();
+            },
+            logout: async () => { await sb.auth.signOut(); location.reload(); }
+        };
+
+        const FinanceController = {
+            data: [],
+            load: async () => {
+                if(!user) return;
+                const { data } = await sb.from('transactions').select('*').eq('user_id', user.id).order('date', {ascending: false});
+                if(data) { FinanceController.data = data; FinanceController.renderList(); FinanceController.renderChart(); }
+            },
+            setFilter: (val) => { filterMode = val; FinanceController.renderList(); FinanceController.renderChart(); },
+            handleFile: (e) => {
+                const f = e.target.files[0];
+                if(f) {
+                    const r = new FileReader();
+                    r.onload = (ev) => { fileData = ev.target.result; document.getElementById('file-preview').src = fileData; document.getElementById('file-preview').classList.remove('hidden'); };
+                    r.readAsDataURL(f);
+                }
+            },
+            add: async (e) => {
+                e.preventDefault();
+                const f = new FormData(e.target);
+                const btn = document.getElementById('btn-save');
+                const dateVal = f.get('date') ? new Date(f.get('date')).toISOString() : new Date().toISOString();
+                
+                btn.disabled=true; btn.innerHTML=`<div class="spinner"></div>`;
+                
+                const { error } = await sb.from('transactions').insert([{
+                    user_id: user.id, type: f.get('type'), amount: parseFloat(f.get('amount')),
+                    category: f.get('category'), description: f.get('description'),
+                    date: dateVal, image_data: fileData
+                }]);
+
+                if(!error) {
+                    App.toast(App.getMsg('saved')); e.target.reset(); fileData=null;
+                    document.getElementById('file-preview').classList.add('hidden');
+                    document.getElementById('date-input').valueAsDate = new Date();
+                    App.nav('dashboard'); FinanceController.load();
+                } else App.toast(App.getMsg('error'), 'error');
+                btn.disabled=false; btn.innerText=I18N[CONFIG.lang].save;
+            },
+            deleteAll: async () => {
+                if(confirm("DELETE HISTORY?")) {
+                    const { error } = await sb.from('transactions').delete().eq('user_id', user.id);
+                    if(!error) { App.toast(App.getMsg('data_deleted')); FinanceController.load(); } 
+                    else App.toast(App.getMsg('error'), 'error');
+                }
+            },
+            getFilteredData: () => {
+                if (filterMode === 'all') return FinanceController.data;
+                const now = new Date();
+                return FinanceController.data.filter(tx => {
+                    const d = new Date(tx.date);
+                    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+                });
+            },
+            renderList: () => {
+                const visibleData = FinanceController.getFilteredData();
+                let t=0, i=0, e=0;
+                const list = document.getElementById('list-container'); list.innerHTML="";
+                if(!visibleData.length) list.innerHTML = `<div class="text-center py-12 opacity-40"><i class="fa-solid fa-ghost text-4xl mb-2"></i><p>...</p></div>`;
+                
+                visibleData.forEach(tx => {
+                    const v = parseFloat(tx.amount);
+                    if(tx.type==='income') { t+=v; i+=v; } else { t-=v; e+=v; }
+                    
+                    const el = document.createElement('div');
+                    el.className = "glass-card flex justify-between items-center transition active:scale-[0.98]";
+                    const icons = { food:'utensils', transport:'car', home:'house', entertainment:'film', shopping:'bag-shopping', health:'pills', salary:'money-bill', other:'box', education:'graduation-cap', travel:'plane', gifts:'gift', savings:'piggy-bank', investment:'chart-line' };
+                    const ic = icons[tx.category] || 'circle';
+                    
+                    el.innerHTML = `
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-2xl ${tx.type==='income'?'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400':'bg-rose-100 text-rose-500 dark:bg-rose-900/30 dark:text-rose-400'} flex items-center justify-center text-lg shadow-sm"><i class="fa-solid fa-${ic}"></i></div>
+                            <div>
+                                <p class="font-bold text-sm text-main">${tx.description||tx.category}</p>
+                                <p class="text-xs text-muted font-medium">${new Date(tx.date).toLocaleDateString()}</p>
+                            </div>
+                        </div>
+                        <p class="font-bold ${tx.type==='income'?'text-emerald-600 dark:text-emerald-400':'text-rose-600 dark:text-rose-400'} text-lg">${tx.type==='income'?'+':'-'}${CONFIG.currency}${v.toFixed(2)}</p>
+                    `;
+                    list.appendChild(el);
+                });
+                document.getElementById('total-balance').innerText = `${CONFIG.currency}${t.toFixed(2)}`;
+                document.getElementById('total-income').innerText = `${CONFIG.currency}${i.toFixed(2)}`;
+                document.getElementById('total-expense').innerText = `${CONFIG.currency}${e.toFixed(2)}`;
+            },
+            renderChart: () => {
+                const ctx = document.getElementById('chart-canvas').getContext('2d');
+                if(chartInstance) chartInstance.destroy();
+                const visibleData = FinanceController.getFilteredData();
+                const d = visibleData.filter(x=>x.type==='expense').slice(0,30).reverse();
+                const c = { indigo:'#4f46e5', emerald:'#059669', rose:'#be123c', amber:'#d97706' }[CONFIG.theme]||'#4f46e5';
+                
+                chartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: d.map(x=>new Date(x.date).getDate()),
+                        datasets: [{ data: d.map(x=>x.amount), borderColor: c, backgroundColor: c+'20', fill:true, tension:0.4, pointRadius:2 }]
+                    },
+                    options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{display:false}, y:{display:false}} }
+                });
+            },
+            export: () => {
+                let csv = "Fecha,Tipo,Monto\n" + FinanceController.data.map(r=>`${new Date(r.date).toLocaleDateString()},${r.type},${r.amount}`).join("\n");
+                const a = document.createElement("a"); a.href="data:text/csv;charset=utf-8,"+encodeURI(csv); a.download="data.csv"; a.click();
+            }
+        };
+
+        window.onload = App.init;
+    </script>
+</body>
+</html>
