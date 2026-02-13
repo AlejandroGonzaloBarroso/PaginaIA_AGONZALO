@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PocketManager - Asesoría Virtual</title>
+    <title>PocketManager - Cloud Support</title>
     
     <!-- LIBRERÍAS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -83,6 +83,7 @@
         }
         .input-std:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(var(--primary), 0.1); }
 
+        /* FIX VISUAL: Forzar colores en las opciones del select */
         select.input-std {
             background-color: var(--bg-input) !important;
             color: var(--text-main) !important;
@@ -96,11 +97,13 @@
             padding-right: 2.5rem;
         }
         
+        /* Regla muy específica para opciones */
         select.input-std option {
             background-color: #ffffff !important;
             color: #1e293b !important;
         }
         
+        /* Regla para modo oscuro */
         body.mode-dark select.input-std option {
             background-color: #1e293b !important;
             color: #f8fafc !important;
@@ -184,11 +187,21 @@
                 <form onsubmit="AuthController.submit(event)" class="space-y-5">
                     <div>
                         <label class="text-xs font-bold text-muted uppercase ml-1 mb-1 block" data-i18n="username">Usuario</label>
-                        <input type="text" id="username" class="input-std" placeholder="juan123" required oninput="this.value = this.value.replace(/[^a-zA-Z0-9]/g, '').toLowerCase()">
+                        <!-- CORRECCIÓN 1: Desactivar mayúsculas y corrección automática -->
+                        <input type="text" id="username" class="input-std" placeholder="juan123" required 
+                               autocapitalize="none" autocorrect="off" spellcheck="false"
+                               oninput="this.value = this.value.replace(/[^a-zA-Z0-9]/g, '').toLowerCase()">
                     </div>
                     <div>
                         <label class="text-xs font-bold text-muted uppercase ml-1 mb-1 block" data-i18n="password">Contraseña</label>
-                        <input type="password" id="password" class="input-std" placeholder="••••••••" required>
+                        <div class="relative">
+                            <!-- CORRECCIÓN 2: Atributos móviles y botón de ver contraseña -->
+                            <input type="password" id="password" class="input-std pr-10" placeholder="••••••••" required
+                                   autocapitalize="none" autocorrect="off" spellcheck="false">
+                            <button type="button" onclick="AuthController.togglePassword()" class="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-primary">
+                                <i class="fa-solid fa-eye" id="eye-icon"></i>
+                            </button>
+                        </div>
                     </div>
                     <button type="submit" id="btn-auth" class="btn-primary mt-6" data-i18n="login_btn">Iniciar Sesión</button>
                 </form>
@@ -521,8 +534,6 @@
                 sb = supabase.createClient(CONFIG.url, CONFIG.key);
                 AuthController.check();
                 document.getElementById('date-input').valueAsDate = new Date();
-                
-                // Configurar listener para videollamadas
                 VideoController.init();
             },
             nav: (id) => {
@@ -630,21 +641,16 @@
                 VideoController.subscribe(data.id);
             },
             subscribe: (id) => {
-                console.log("Subscribiendo a cambios para ID:", id);
-                sb.channel(`video-updates-${id}`)
+                sb.channel('video-updates')
                 .on(
                     'postgres_changes',
                     { event: 'UPDATE', schema: 'public', table: 'video_requests', filter: `id=eq.${id}` },
                     (payload) => {
-                        console.log('¡Cambio detectado!', payload);
+                        console.log('Cambio detectado:', payload);
                         VideoController.updateUI(payload.new.status, payload.new.meet_link);
                     }
                 )
                 .subscribe();
-            },
-            reset: () => {
-                VideoController.updateUI('idle');
-                // Opcional: Marcar como finished en DB si quisiéramos ser estrictos
             },
             updateUI: (status, link = null) => {
                 const idle = document.getElementById('video-state-idle');
@@ -661,23 +667,13 @@
                     ready.classList.remove('hidden');
                     const btn = document.getElementById('video-join-link');
                     btn.href = link;
-                    // Intento de notificación sonora suave
-                    try {
-                        // Un beep simple usando AudioContext para no depender de archivos externos
-                        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                        const oscillator = audioCtx.createOscillator();
-                        const gainNode = audioCtx.createGain();
-                        oscillator.connect(gainNode);
-                        gainNode.connect(audioCtx.destination);
-                        oscillator.type = 'sine';
-                        oscillator.frequency.value = 800;
-                        gainNode.gain.value = 0.1;
-                        oscillator.start();
-                        setTimeout(() => oscillator.stop(), 200);
-                    } catch(e) {}
                 } else {
                     idle.classList.remove('hidden');
                 }
+            },
+            reset: () => {
+                // Opción para resetear la UI manualmente
+                VideoController.updateUI('idle');
             }
         };
 
@@ -726,6 +722,18 @@
                 if(data.session) { user = data.session.user; AuthController.postLogin(); }
                 else App.nav('login');
             },
+            // CORRECCIÓN 3: Toggle para ver contraseña
+            togglePassword: () => {
+                const p = document.getElementById('password');
+                const icon = document.getElementById('eye-icon');
+                if (p.type === 'password') {
+                    p.type = 'text';
+                    icon.className = "fa-solid fa-eye-slash";
+                } else {
+                    p.type = 'password';
+                    icon.className = "fa-solid fa-eye";
+                }
+            },
             setMode: (m) => {
                 const btnL = document.getElementById('tab-login');
                 const btnS = document.getElementById('tab-signup');
@@ -763,7 +771,16 @@
                     if(res.error) throw res.error;
                     if(res.data.user) { user = res.data.user; AuthController.postLogin(); App.toast(App.getMsg(AuthController.mode === 'signup'?'created':'welcome_msg')); }
                 } catch(err) {
-                    App.toast(err.message.includes("Invalid") ? "Credenciales Error" : "Error de conexión", 'error');
+                    // CORRECCIÓN 4: Mensajes de error específicos para depurar
+                    console.error("Auth Error Full:", err);
+                    let msg = "Error desconocido";
+                    
+                    if (err.message.includes("Invalid login")) msg = "Contraseña incorrecta o usuario no existe";
+                    else if (err.message.includes("Email not confirmed")) msg = "Verifica tu correo (si aplica)";
+                    else if (err.message.includes("network")) msg = "Error de red";
+                    else msg = err.message; // Mostrar error real si no es común
+                    
+                    App.toast(msg, 'error');
                 } finally {
                     btn.disabled = false; btn.innerText = AuthController.mode==='login'? I18N[CONFIG.lang].login_btn : "Crear";
                     Config.apply();
