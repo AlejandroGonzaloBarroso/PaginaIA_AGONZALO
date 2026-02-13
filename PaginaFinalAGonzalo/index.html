@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PocketManager - Cloud Support</title>
+    <title>PocketManager - Asesoría Virtual</title>
     
     <!-- LIBRERÍAS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -83,7 +83,6 @@
         }
         .input-std:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(var(--primary), 0.1); }
 
-        /* FIX VISUAL: Forzar colores en las opciones del select */
         select.input-std {
             background-color: var(--bg-input) !important;
             color: var(--text-main) !important;
@@ -137,6 +136,17 @@
 
         .text-main { color: var(--text-main); }
         .text-muted { color: var(--text-muted); }
+        
+        /* Animación para el botón de llamada */
+        .pulse-ring {
+            box-shadow: 0 0 0 0 rgba(var(--primary), 0.7);
+            animation: pulse-ring 2s infinite;
+        }
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 15px rgba(79, 70, 229, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); }
+        }
         
         .spinner {
             width: 20px; height: 20px; border: 3px solid #fff; 
@@ -233,6 +243,50 @@
 
         <h4 class="text-sm font-bold text-muted mb-3 ml-1 uppercase tracking-wide" data-i18n="recent">Movimientos</h4>
         <div id="list-container" class="space-y-3 pb-24"></div>
+    </section>
+
+    <!-- VIDEO CALL -->
+    <section id="view-video" class="view-section pt-10 px-5">
+        <h2 class="text-2xl font-bold text-main mb-2 text-center">Asesoría en Vivo</h2>
+        <p class="text-muted text-center text-sm mb-8">Conecta con un experto financiero</p>
+        
+        <div class="glass-card flex flex-col items-center justify-center py-10 space-y-6 text-center" id="video-content">
+            <!-- Estado Inicial -->
+            <div id="video-state-idle" class="w-full flex flex-col items-center">
+                <div class="w-32 h-32 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center mb-6 relative">
+                    <i class="fa-solid fa-headset text-5xl text-primary"></i>
+                    <div class="absolute w-full h-full rounded-full border-4 border-primary opacity-20 animate-ping"></div>
+                </div>
+                <p class="text-main font-bold text-lg mb-2">¿Necesitas ayuda?</p>
+                <p class="text-muted text-sm mb-6 max-w-[250px]">Solicita una videollamada y un asesor se unirá contigo en breves instantes.</p>
+                <button onclick="VideoController.request()" class="btn-primary pulse-ring w-full max-w-xs flex items-center justify-center gap-3">
+                    <i class="fa-solid fa-video"></i> Solicitar Ahora
+                </button>
+            </div>
+
+            <!-- Estado Esperando -->
+            <div id="video-state-waiting" class="hidden w-full flex flex-col items-center animate-fadeIn">
+                <div class="w-24 h-24 border-4 border-primary border-t-transparent rounded-full animate-spin mb-6"></div>
+                <h3 class="text-xl font-bold text-main mb-2">Conectando...</h3>
+                <p class="text-muted text-sm max-w-[250px] mb-6">Estamos notificando a tu asesor. Por favor espera, recibirás el enlace aquí mismo.</p>
+                <div class="bg-yellow-50 dark:bg-yellow-900/20 text-yellow-600 dark:text-yellow-400 px-4 py-2 rounded-lg text-xs font-bold border border-yellow-200 dark:border-yellow-700/30">
+                    <i class="fa-solid fa-triangle-exclamation mr-1"></i> No cierres esta pestaña
+                </div>
+            </div>
+
+            <!-- Estado Listo -->
+            <div id="video-state-ready" class="hidden w-full flex flex-col items-center animate-fadeIn">
+                <div class="w-24 h-24 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-6 text-green-500 shadow-xl shadow-green-200">
+                    <i class="fa-solid fa-video text-4xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-main mb-2">¡Asesor Listo!</h3>
+                <p class="text-muted text-sm mb-6">Tu sala privada ha sido creada.</p>
+                <a id="video-join-link" href="#" target="_blank" class="w-full max-w-xs py-4 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700 transition shadow-lg shadow-green-200 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i> Unirse a la Llamada
+                </a>
+                <button onclick="VideoController.reset()" class="mt-4 text-xs text-muted underline">Cerrar y volver</button>
+            </div>
+        </div>
     </section>
 
     <!-- AGREGAR -->
@@ -368,9 +422,14 @@
                 <p class="text-xs font-bold text-muted uppercase mb-3" data-i18n="support">Soporte</p>
                 <form onsubmit="App.sendSupport(event)" class="space-y-3">
                     <input type="text" id="contact-subject" class="input-std text-sm" placeholder="Asunto" required>
+                    <select id="contact-priority" class="input-std text-sm" style="margin-bottom: 0;">
+                        <option value="normal">Prioridad Normal</option>
+                        <option value="high">🔥 Prioridad Alta</option>
+                    </select>
                     <textarea id="contact-message" class="input-std text-sm" rows="3" placeholder="Describe tu duda..." required></textarea>
-                    <button type="submit" class="w-full py-3 bg-slate-800 text-white rounded-xl font-bold hover:bg-slate-700 transition flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-paper-plane"></i> <span data-i18n="send_msg">Enviar Mensaje</span>
+                    
+                    <button type="submit" class="w-full py-3 bg-slate-800 text-white rounded-xl font-bold hover:bg-slate-700 transition flex items-center justify-center gap-2 shadow-lg shadow-slate-200">
+                        <i class="fa-solid fa-ticket"></i> <span data-i18n="send_msg">Registrar Ticket</span>
                     </button>
                 </form>
                 <div class="text-center mt-3">
@@ -400,6 +459,9 @@
     <!-- NAV -->
     <nav id="nav-bar" class="nav-bar">
         <button onclick="App.nav('dashboard')" class="nav-item active" id="nav-dashboard"><i class="fa-solid fa-house"></i></button>
+        <!-- NUEVO BOTÓN DE VIDEO -->
+        <button onclick="App.nav('video')" class="nav-item" id="nav-video"><i class="fa-solid fa-video"></i></button>
+        
         <button onclick="App.nav('add')" class="w-14 h-14 rounded-full bg-primary text-white flex items-center justify-center -mt-10 shadow-lg shadow-indigo-500/30 transition transform active:scale-95">
             <i class="fa-solid fa-plus text-xl"></i>
         </button>
@@ -416,7 +478,7 @@
                 cancel: "Cancelar", settings: "Ajustes", theme: "Apariencia", color: "Color Principal", currency: "Moneda", language: "Idioma",
                 export: "Exportar CSV", logout: "Cerrar Sesión", date: "Fecha", danger_zone: "Zona de Peligro", delete_data: "Borrar Historial",
                 delete_account: "Eliminar Cuenta", light: "☀️ Claro", dark: "🌙 Oscuro",
-                filter_all: "Todo", filter_month: "Mes Actual", support: "Soporte", send_msg: "Enviar Mensaje", contact_hint: "O escribe a:",
+                filter_all: "Todo", filter_month: "Mes Actual", support: "Soporte", send_msg: "Registrar Ticket", contact_hint: "O escribe a:",
                 // Toasts & Mensajes
                 lang_changed: "Idioma cambiado", theme_updated: "Tema actualizado", mode_updated: "Modo actualizado",
                 curr_updated: "Moneda: ", saved: "Guardado", error: "Error", welcome_msg: "¡Bienvenido!", created: "¡Cuenta creada!",
@@ -424,7 +486,7 @@
                 confirm_delete_title: "⚠️ ¿ELIMINAR CUENTA?",
                 confirm_delete_msg: "Esta acción es irreversible. Se borrará tu usuario y todos tus datos para siempre. ¿Estás seguro?",
                 confirm_delete_msg_2: "Última advertencia: Perderás el acceso y los datos inmediatamente.",
-                msg_sent: "Mensaje enviado al soporte", msg_error: "Error al enviar mensaje"
+                msg_sent: "Ticket creado. Procesando...", msg_error: "Error al enviar mensaje"
             },
             en: {
                 app_slogan: "Your money, under control", username: "Username", password: "Password", login_btn: "Login",
@@ -433,7 +495,7 @@
                 cancel: "Cancel", settings: "Settings", theme: "Appearance", color: "Main Color", currency: "Currency", language: "Language",
                 export: "Export CSV", logout: "Log Out", date: "Date", danger_zone: "Danger Zone", delete_data: "Clear History",
                 delete_account: "Delete Account", light: "☀️ Light", dark: "🌙 Dark",
-                filter_all: "All Time", filter_month: "Current Month", support: "Support", send_msg: "Send Message", contact_hint: "Or write to:",
+                filter_all: "All Time", filter_month: "Current Month", support: "Support", send_msg: "Submit Ticket", contact_hint: "Or write to:",
                 // Toasts & Messages
                 lang_changed: "Language changed", theme_updated: "Theme updated", mode_updated: "Mode updated",
                 curr_updated: "Currency: ", saved: "Saved", error: "Error", welcome_msg: "Welcome!", created: "Account created!",
@@ -441,7 +503,7 @@
                 confirm_delete_title: "⚠️ DELETE ACCOUNT?",
                 confirm_delete_msg: "This action is irreversible. Your user and all data will be deleted forever. Are you sure?",
                 confirm_delete_msg_2: "Final warning: You will lose access and data immediately.",
-                msg_sent: "Message sent to support", msg_error: "Error sending message"
+                msg_sent: "Ticket created. Processing...", msg_error: "Error sending message"
             }
         };
 
@@ -459,6 +521,9 @@
                 sb = supabase.createClient(CONFIG.url, CONFIG.key);
                 AuthController.check();
                 document.getElementById('date-input').valueAsDate = new Date();
+                
+                // Configurar listener para videollamadas
+                VideoController.init();
             },
             nav: (id) => {
                 document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
@@ -475,6 +540,8 @@
                 const t = document.getElementById('toast');
                 document.getElementById('toast-msg').innerText = msg;
                 document.getElementById('toast-icon').className = type==='error'?"fa-solid fa-circle-exclamation text-red-400":"fa-solid fa-circle-check text-emerald-400";
+                if(type === 'cloud') document.getElementById('toast-icon').className = "fa-solid fa-cloud-arrow-up text-blue-400";
+                
                 t.classList.remove('opacity-0', '-translate-y-10');
                 setTimeout(()=>t.classList.add('opacity-0', '-translate-y-10'), 3000);
             },
@@ -486,28 +553,28 @@
                 const btn = e.target.querySelector('button');
                 const originalText = btn.innerHTML;
                 const subject = document.getElementById('contact-subject').value;
+                const priority = document.getElementById('contact-priority').value;
                 const rawMessage = document.getElementById('contact-message').value;
 
-                // Preparamos el mensaje incluyendo el email del usuario para que puedas responderle
-                // Esto evita errores si la columna 'email' no existe en la tabla
+                // Preparamos el mensaje para el Worker
                 const userEmail = user?.email || 'Anonimo';
-                const finalMessage = `[Enviado por: ${userEmail}]\n\n${rawMessage}`;
+                const finalMessage = `[De: ${userEmail}] [Prioridad: ${priority}]\n\n${rawMessage}`;
 
                 btn.disabled = true;
                 btn.innerHTML = `<div class="spinner"></div>`;
 
                 try {
                     // 1. GUARDAR EN BASE DE DATOS
+                    // El campo 'status' se pondrá en 'pending' por defecto gracias al SQL que ejecutaste
                     const { error } = await sb.from('support_messages').insert([{
                         user_id: user.id,
-                        // email: user.email,  <-- ELIMINADO para evitar error de columna inexistente
                         subject: subject,
-                        message: finalMessage // El email va aquí dentro ahora
+                        message: finalMessage 
                     }]);
 
                     if(error) throw new Error("DB Error: " + error.message);
 
-                    App.toast(App.getMsg('msg_sent'));
+                    App.toast(App.getMsg('msg_sent'), 'cloud');
                     e.target.reset();
 
                 } catch (error) {
@@ -518,6 +585,100 @@
                     btn.innerHTML = originalText;
                 }
             },
+        };
+
+        const VideoController = {
+            currentRequestId: null,
+            init: () => {
+                // Verificar si hay solicitudes pendientes al cargar
+                // Esto se activará en AuthController.postLogin
+            },
+            // Se llama al entrar en la app para ver si ya estaba esperando
+            checkActiveRequest: async () => {
+                if (!user) return;
+                const { data } = await sb.from('video_requests')
+                    .select('*')
+                    .eq('user_id', user.id)
+                    .neq('status', 'finished')
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                    .maybeSingle();
+                
+                if (data) {
+                    VideoController.currentRequestId = data.id;
+                    VideoController.updateUI(data.status, data.meet_link);
+                    VideoController.subscribe(data.id);
+                }
+            },
+            request: async () => {
+                if (!user) return;
+                VideoController.updateUI('waiting');
+                
+                const { data, error } = await sb.from('video_requests').insert([{
+                    user_id: user.id,
+                    status: 'pending'
+                }]).select().single();
+                
+                if (error) {
+                    console.error(error);
+                    App.toast("Error al solicitar video", 'error');
+                    VideoController.updateUI('idle');
+                    return;
+                }
+                
+                VideoController.currentRequestId = data.id;
+                VideoController.subscribe(data.id);
+            },
+            subscribe: (id) => {
+                console.log("Subscribiendo a cambios para ID:", id);
+                sb.channel(`video-updates-${id}`)
+                .on(
+                    'postgres_changes',
+                    { event: 'UPDATE', schema: 'public', table: 'video_requests', filter: `id=eq.${id}` },
+                    (payload) => {
+                        console.log('¡Cambio detectado!', payload);
+                        VideoController.updateUI(payload.new.status, payload.new.meet_link);
+                    }
+                )
+                .subscribe();
+            },
+            reset: () => {
+                VideoController.updateUI('idle');
+                // Opcional: Marcar como finished en DB si quisiéramos ser estrictos
+            },
+            updateUI: (status, link = null) => {
+                const idle = document.getElementById('video-state-idle');
+                const waiting = document.getElementById('video-state-waiting');
+                const ready = document.getElementById('video-state-ready');
+                
+                idle.classList.add('hidden');
+                waiting.classList.add('hidden');
+                ready.classList.add('hidden');
+                
+                if (status === 'pending' || status === 'waiting') {
+                    waiting.classList.remove('hidden');
+                } else if (status === 'ready') {
+                    ready.classList.remove('hidden');
+                    const btn = document.getElementById('video-join-link');
+                    btn.href = link;
+                    // Intento de notificación sonora suave
+                    try {
+                        // Un beep simple usando AudioContext para no depender de archivos externos
+                        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                        const oscillator = audioCtx.createOscillator();
+                        const gainNode = audioCtx.createGain();
+                        oscillator.connect(gainNode);
+                        gainNode.connect(audioCtx.destination);
+                        oscillator.type = 'sine';
+                        oscillator.frequency.value = 800;
+                        gainNode.gain.value = 0.1;
+                        oscillator.start();
+                        setTimeout(() => oscillator.stop(), 200);
+                    } catch(e) {}
+                } else {
+                    idle.classList.remove('hidden');
+                }
+            }
         };
 
         const Config = {
@@ -653,6 +814,7 @@
             postLogin: async () => {
                 document.getElementById('user-display').innerText = user.user_metadata?.username || "Usuario";
                 await Config.load();
+                VideoController.checkActiveRequest(); // CHEQUEAR VIDEOLLAMADAS
                 App.nav('dashboard'); FinanceController.load();
             },
             logout: async () => { await sb.auth.signOut(); location.reload(); }
