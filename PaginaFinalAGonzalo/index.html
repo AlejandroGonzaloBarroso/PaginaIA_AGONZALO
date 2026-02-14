@@ -165,6 +165,55 @@
         <span id="toast-msg">Notificación</span>
     </div>
 
+    <!-- MODAL DETALLES (NUEVO) -->
+    <div id="modal-detail" class="fixed inset-0 z-[60] hidden flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 opacity-0 transition-opacity duration-300" onclick="if(event.target === this) FinanceController.closeDetail()">
+        <div class="glass-card w-full max-w-md transform scale-95 transition-transform duration-300 relative overflow-hidden flex flex-col max-h-[90vh]" id="modal-content">
+            <!-- Botón Cerrar -->
+            <button onclick="FinanceController.closeDetail()" class="absolute top-4 right-4 text-muted hover:text-main z-10 w-8 h-8 flex items-center justify-center bg-slate-100 dark:bg-slate-800 rounded-full">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            
+            <div class="overflow-y-auto pr-1 -mr-2">
+                <!-- Cabecera del Modal -->
+                <div class="flex flex-col items-center mb-6 pt-2">
+                    <div id="detail-icon-bg" class="w-20 h-20 rounded-3xl flex items-center justify-center text-3xl mb-4 shadow-lg transition-colors">
+                        <i id="detail-icon" class="fa-solid fa-circle"></i>
+                    </div>
+                    <h3 id="detail-amount" class="text-4xl font-black text-main tracking-tight mb-1">$0.00</h3>
+                    <p id="detail-date" class="text-xs text-muted font-bold uppercase tracking-wider bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full">Fecha</p>
+                </div>
+
+                <!-- Detalles -->
+                <div class="space-y-4">
+                    <div class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-700/50">
+                        <p class="text-[10px] text-slate-400 font-bold uppercase mb-1 tracking-widest">Categoría</p>
+                        <p id="detail-category" class="font-bold text-main text-lg capitalize flex items-center gap-2">
+                            <span>General</span>
+                        </p>
+                    </div>
+                    
+                    <div class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-700/50">
+                        <p class="text-[10px] text-slate-400 font-bold uppercase mb-1 tracking-widest">Nota / Descripción</p>
+                        <p id="detail-desc" class="font-medium text-main italic">Sin descripción</p>
+                    </div>
+
+                    <div id="detail-image-container" class="hidden">
+                        <p class="text-[10px] text-slate-400 font-bold uppercase mb-2 tracking-widest">Comprobante Adjunto</p>
+                        <div class="rounded-xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-700">
+                            <img id="detail-image" src="" class="w-full h-auto object-cover block" onclick="window.open(this.src)">
+                        </div>
+                        <p class="text-center text-[10px] text-muted mt-1">(Toca la imagen para ampliar)</p>
+                    </div>
+                </div>
+                
+                <!-- Acciones -->
+                <button id="btn-delete-detail" onclick="FinanceController.deleteCurrent()" class="w-full mt-8 py-3.5 text-red-500 font-bold bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/30 rounded-xl hover:bg-red-100 dark:hover:bg-red-900/30 transition flex items-center justify-center gap-2 active:scale-95">
+                    <i class="fa-solid fa-trash-can"></i> Eliminar esta operación
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- LOGIN -->
     <section id="view-login" class="view-section view-auth active">
         <div class="w-full max-w-sm mx-auto px-6">
@@ -185,11 +234,19 @@
                 <form onsubmit="AuthController.submit(event)" class="space-y-5">
                     <div>
                         <label class="text-xs font-bold text-muted uppercase ml-1 mb-1 block" data-i18n="username">Usuario</label>
-                        <input type="text" id="username" class="input-std" placeholder="juan123" required oninput="this.value = this.value.replace(/[^a-zA-Z0-9]/g, '').toLowerCase()">
+                        <input type="text" id="username" class="input-std" placeholder="juan123" required 
+                               autocapitalize="none" autocorrect="off" spellcheck="false"
+                               oninput="this.value = this.value.replace(/[^a-zA-Z0-9]/g, '').toLowerCase()">
                     </div>
                     <div>
                         <label class="text-xs font-bold text-muted uppercase ml-1 mb-1 block" data-i18n="password">Contraseña</label>
-                        <input type="password" id="password" class="input-std" placeholder="••••••••" required>
+                        <div class="relative">
+                            <input type="password" id="password" class="input-std pr-10" placeholder="••••••••" required
+                                   autocapitalize="none" autocorrect="off" spellcheck="false">
+                            <button type="button" onclick="AuthController.togglePassword()" class="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-primary">
+                                <i class="fa-solid fa-eye" id="eye-icon"></i>
+                            </button>
+                        </div>
                     </div>
                     <button type="submit" id="btn-auth" class="btn-primary mt-6" data-i18n="login_btn">Iniciar Sesión</button>
                 </form>
@@ -266,7 +323,7 @@
             </div>
 
             <!-- Estado Esperando -->
-            <div id="video-state-waiting" class="hidden w-full flex flex-col items-center">
+            <div id="video-state-waiting" class="hidden w-full flex flex-col items-center animate-fadeIn">
                 <div class="w-24 h-24 border-4 border-primary border-t-transparent rounded-full animate-spin mb-6"></div>
                 <h3 class="text-xl font-bold text-main mb-2">Conectando...</h3>
                 <p class="text-muted text-sm max-w-[250px] mb-6">Estamos notificando a tu asesor. Por favor espera, recibirás el enlace aquí mismo.</p>
@@ -276,15 +333,16 @@
             </div>
 
             <!-- Estado Listo -->
-            <div id="video-state-ready" class="hidden w-full flex flex-col items-center">
-                <div class="w-24 h-24 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-6 text-green-500">
-                    <i class="fa-solid fa-check text-4xl"></i>
+            <div id="video-state-ready" class="hidden w-full flex flex-col items-center animate-fadeIn">
+                <div class="w-24 h-24 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-6 text-green-500 shadow-xl shadow-green-200">
+                    <i class="fa-solid fa-video text-4xl"></i>
                 </div>
                 <h3 class="text-2xl font-bold text-main mb-2">¡Asesor Listo!</h3>
                 <p class="text-muted text-sm mb-6">Tu sala privada ha sido creada.</p>
                 <a id="video-join-link" href="#" target="_blank" class="w-full max-w-xs py-4 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700 transition shadow-lg shadow-green-200 flex items-center justify-center gap-2">
                     <i class="fa-solid fa-arrow-up-right-from-square"></i> Unirse a la Llamada
                 </a>
+                <button onclick="VideoController.reset()" class="mt-4 text-xs text-muted underline">Cerrar y volver</button>
             </div>
         </div>
     </section>
@@ -709,6 +767,18 @@
                 if(data.session) { user = data.session.user; AuthController.postLogin(); }
                 else App.nav('login');
             },
+            // CORRECCIÓN 3: Toggle para ver contraseña
+            togglePassword: () => {
+                const p = document.getElementById('password');
+                const icon = document.getElementById('eye-icon');
+                if (p.type === 'password') {
+                    p.type = 'text';
+                    icon.className = "fa-solid fa-eye-slash";
+                } else {
+                    p.type = 'password';
+                    icon.className = "fa-solid fa-eye";
+                }
+            },
             setMode: (m) => {
                 const btnL = document.getElementById('tab-login');
                 const btnS = document.getElementById('tab-signup');
@@ -746,7 +816,16 @@
                     if(res.error) throw res.error;
                     if(res.data.user) { user = res.data.user; AuthController.postLogin(); App.toast(App.getMsg(AuthController.mode === 'signup'?'created':'welcome_msg')); }
                 } catch(err) {
-                    App.toast(err.message.includes("Invalid") ? "Credenciales Error" : "Error de conexión", 'error');
+                    // CORRECCIÓN 4: Mensajes de error específicos para depurar
+                    console.error("Auth Error Full:", err);
+                    let msg = "Error desconocido";
+                    
+                    if (err.message.includes("Invalid login")) msg = "Contraseña incorrecta o usuario no existe";
+                    else if (err.message.includes("Email not confirmed")) msg = "Verifica tu correo (si aplica)";
+                    else if (err.message.includes("network")) msg = "Error de red";
+                    else msg = err.message; // Mostrar error real si no es común
+                    
+                    App.toast(msg, 'error');
                 } finally {
                     btn.disabled = false; btn.innerText = AuthController.mode==='login'? I18N[CONFIG.lang].login_btn : "Crear";
                     Config.apply();
@@ -805,6 +884,7 @@
 
         const FinanceController = {
             data: [],
+            currentDetailId: null, // Nuevo estado para el modal
             load: async () => {
                 if(!user) return;
                 const { data } = await sb.from('transactions').select('*').eq('user_id', user.id).order('date', {ascending: false});
@@ -866,6 +946,78 @@
                     else App.toast(App.getMsg('error'), 'error');
                 }
             },
+            // NUEVO: Mostrar Modal de Detalle
+            showDetail: (id) => {
+                const tx = FinanceController.data.find(t => t.id === id);
+                if(!tx) return;
+                
+                FinanceController.currentDetailId = id;
+                
+                // Populate fields
+                const amount = parseFloat(tx.amount);
+                const isIncome = tx.type === 'income';
+                const elAmt = document.getElementById('detail-amount');
+                const elIconBg = document.getElementById('detail-icon-bg');
+                const elIcon = document.getElementById('detail-icon');
+                
+                elAmt.innerText = `${isIncome ? '+' : '-'}${CONFIG.currency}${amount.toFixed(2)}`;
+                elAmt.className = `text-4xl font-black mb-1 ${isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`;
+                
+                elIconBg.className = `w-20 h-20 rounded-3xl flex items-center justify-center text-3xl mb-4 shadow-xl ${isIncome ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30' : 'bg-rose-100 text-rose-500 dark:bg-rose-900/30'}`;
+                
+                // Icon mapping
+                const icons = { food:'utensils', transport:'car', home:'house', entertainment:'film', shopping:'bag-shopping', health:'pills', salary:'money-bill', other:'box', education:'graduation-cap', travel:'plane', gifts:'gift', savings:'piggy-bank', investment:'chart-line', freelance: 'laptop-code', sales: 'tags', rental: 'building-user', refund: 'rotate-left', lottery: 'ticket' };
+                elIcon.className = `fa-solid fa-${icons[tx.category] || 'circle'}`;
+                
+                document.getElementById('detail-date').innerText = new Date(tx.date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                document.getElementById('detail-category').innerText = document.querySelector(`option[value="${tx.category}"]`)?.innerText || tx.category;
+                document.getElementById('detail-desc').innerText = tx.description || "Sin notas";
+                
+                // Image
+                const imgContainer = document.getElementById('detail-image-container');
+                const img = document.getElementById('detail-image');
+                if(tx.image_data) {
+                    img.src = tx.image_data;
+                    imgContainer.classList.remove('hidden');
+                } else {
+                    imgContainer.classList.add('hidden');
+                }
+                
+                // Show Modal
+                const modal = document.getElementById('modal-detail');
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    modal.classList.remove('opacity-0');
+                    document.getElementById('modal-content').classList.remove('scale-95');
+                    document.getElementById('modal-content').classList.add('scale-100');
+                }, 10);
+            },
+            closeDetail: () => {
+                const modal = document.getElementById('modal-detail');
+                modal.classList.add('opacity-0');
+                document.getElementById('modal-content').classList.add('scale-95');
+                document.getElementById('modal-content').classList.remove('scale-100');
+                setTimeout(() => modal.classList.add('hidden'), 300);
+            },
+            deleteCurrent: async () => {
+                if(!FinanceController.currentDetailId) return;
+                if(!confirm("¿Borrar esta transacción permanentemente?")) return;
+                
+                const btn = document.getElementById('btn-delete-detail');
+                const oldText = btn.innerHTML;
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+                
+                const { error } = await sb.from('transactions').delete().eq('id', FinanceController.currentDetailId);
+                
+                if(!error) {
+                    FinanceController.closeDetail();
+                    FinanceController.load();
+                    App.toast("Transacción eliminada");
+                } else {
+                    App.toast("Error al borrar", "error");
+                }
+                btn.innerHTML = oldText;
+            },
             getFilteredData: () => {
                 if (filterMode === 'all') return FinanceController.data;
                 const now = new Date();
@@ -885,7 +1037,10 @@
                     if(tx.type==='income') { t+=v; i+=v; } else { t-=v; e+=v; }
                     
                     const el = document.createElement('div');
-                    el.className = "glass-card flex justify-between items-center transition active:scale-[0.98]";
+                    // Add pointer cursor and click handler
+                    el.className = "glass-card flex justify-between items-center transition active:scale-[0.98] cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50";
+                    el.onclick = () => FinanceController.showDetail(tx.id);
+                    
                     // MAPA DE ICONOS ACTUALIZADO
                     const icons = { 
                         food:'utensils', transport:'car', home:'house', entertainment:'film', shopping:'bag-shopping', 
