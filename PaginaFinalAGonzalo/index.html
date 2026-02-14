@@ -97,13 +97,11 @@
             padding-right: 2.5rem;
         }
         
-        /* Regla muy específica para opciones */
         select.input-std option {
             background-color: #ffffff !important;
             color: #1e293b !important;
         }
         
-        /* Regla para modo oscuro */
         body.mode-dark select.input-std option {
             background-color: #1e293b !important;
             color: #f8fafc !important;
@@ -187,21 +185,11 @@
                 <form onsubmit="AuthController.submit(event)" class="space-y-5">
                     <div>
                         <label class="text-xs font-bold text-muted uppercase ml-1 mb-1 block" data-i18n="username">Usuario</label>
-                        <!-- CORRECCIÓN 1: Desactivar mayúsculas y corrección automática -->
-                        <input type="text" id="username" class="input-std" placeholder="juan123" required 
-                               autocapitalize="none" autocorrect="off" spellcheck="false"
-                               oninput="this.value = this.value.replace(/[^a-zA-Z0-9]/g, '').toLowerCase()">
+                        <input type="text" id="username" class="input-std" placeholder="juan123" required oninput="this.value = this.value.replace(/[^a-zA-Z0-9]/g, '').toLowerCase()">
                     </div>
                     <div>
                         <label class="text-xs font-bold text-muted uppercase ml-1 mb-1 block" data-i18n="password">Contraseña</label>
-                        <div class="relative">
-                            <!-- CORRECCIÓN 2: Atributos móviles y botón de ver contraseña -->
-                            <input type="password" id="password" class="input-std pr-10" placeholder="••••••••" required
-                                   autocapitalize="none" autocorrect="off" spellcheck="false">
-                            <button type="button" onclick="AuthController.togglePassword()" class="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-primary">
-                                <i class="fa-solid fa-eye" id="eye-icon"></i>
-                            </button>
-                        </div>
+                        <input type="password" id="password" class="input-std" placeholder="••••••••" required>
                     </div>
                     <button type="submit" id="btn-auth" class="btn-primary mt-6" data-i18n="login_btn">Iniciar Sesión</button>
                 </form>
@@ -278,7 +266,7 @@
             </div>
 
             <!-- Estado Esperando -->
-            <div id="video-state-waiting" class="hidden w-full flex flex-col items-center animate-fadeIn">
+            <div id="video-state-waiting" class="hidden w-full flex flex-col items-center">
                 <div class="w-24 h-24 border-4 border-primary border-t-transparent rounded-full animate-spin mb-6"></div>
                 <h3 class="text-xl font-bold text-main mb-2">Conectando...</h3>
                 <p class="text-muted text-sm max-w-[250px] mb-6">Estamos notificando a tu asesor. Por favor espera, recibirás el enlace aquí mismo.</p>
@@ -288,16 +276,15 @@
             </div>
 
             <!-- Estado Listo -->
-            <div id="video-state-ready" class="hidden w-full flex flex-col items-center animate-fadeIn">
-                <div class="w-24 h-24 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-6 text-green-500 shadow-xl shadow-green-200">
-                    <i class="fa-solid fa-video text-4xl"></i>
+            <div id="video-state-ready" class="hidden w-full flex flex-col items-center">
+                <div class="w-24 h-24 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-6 text-green-500">
+                    <i class="fa-solid fa-check text-4xl"></i>
                 </div>
                 <h3 class="text-2xl font-bold text-main mb-2">¡Asesor Listo!</h3>
                 <p class="text-muted text-sm mb-6">Tu sala privada ha sido creada.</p>
                 <a id="video-join-link" href="#" target="_blank" class="w-full max-w-xs py-4 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700 transition shadow-lg shadow-green-200 flex items-center justify-center gap-2">
                     <i class="fa-solid fa-arrow-up-right-from-square"></i> Unirse a la Llamada
                 </a>
-                <button onclick="VideoController.reset()" class="mt-4 text-xs text-muted underline">Cerrar y volver</button>
             </div>
         </div>
     </section>
@@ -534,6 +521,8 @@
                 sb = supabase.createClient(CONFIG.url, CONFIG.key);
                 AuthController.check();
                 document.getElementById('date-input').valueAsDate = new Date();
+                
+                // Configurar listener para videollamadas
                 VideoController.init();
             },
             nav: (id) => {
@@ -667,13 +656,11 @@
                     ready.classList.remove('hidden');
                     const btn = document.getElementById('video-join-link');
                     btn.href = link;
+                    // Sonido de notificación opcional
+                    // new Audio('notification.mp3').play().catch(()=>{});
                 } else {
                     idle.classList.remove('hidden');
                 }
-            },
-            reset: () => {
-                // Opción para resetear la UI manualmente
-                VideoController.updateUI('idle');
             }
         };
 
@@ -722,18 +709,6 @@
                 if(data.session) { user = data.session.user; AuthController.postLogin(); }
                 else App.nav('login');
             },
-            // CORRECCIÓN 3: Toggle para ver contraseña
-            togglePassword: () => {
-                const p = document.getElementById('password');
-                const icon = document.getElementById('eye-icon');
-                if (p.type === 'password') {
-                    p.type = 'text';
-                    icon.className = "fa-solid fa-eye-slash";
-                } else {
-                    p.type = 'password';
-                    icon.className = "fa-solid fa-eye";
-                }
-            },
             setMode: (m) => {
                 const btnL = document.getElementById('tab-login');
                 const btnS = document.getElementById('tab-signup');
@@ -771,16 +746,7 @@
                     if(res.error) throw res.error;
                     if(res.data.user) { user = res.data.user; AuthController.postLogin(); App.toast(App.getMsg(AuthController.mode === 'signup'?'created':'welcome_msg')); }
                 } catch(err) {
-                    // CORRECCIÓN 4: Mensajes de error específicos para depurar
-                    console.error("Auth Error Full:", err);
-                    let msg = "Error desconocido";
-                    
-                    if (err.message.includes("Invalid login")) msg = "Contraseña incorrecta o usuario no existe";
-                    else if (err.message.includes("Email not confirmed")) msg = "Verifica tu correo (si aplica)";
-                    else if (err.message.includes("network")) msg = "Error de red";
-                    else msg = err.message; // Mostrar error real si no es común
-                    
-                    App.toast(msg, 'error');
+                    App.toast(err.message.includes("Invalid") ? "Credenciales Error" : "Error de conexión", 'error');
                 } finally {
                     btn.disabled = false; btn.innerText = AuthController.mode==='login'? I18N[CONFIG.lang].login_btn : "Crear";
                     Config.apply();
@@ -963,8 +929,44 @@
                 });
             },
             export: () => {
-                let csv = "Fecha,Tipo,Monto\n" + FinanceController.data.map(r=>`${new Date(r.date).toLocaleDateString()},${r.type},${r.amount}`).join("\n");
-                const a = document.createElement("a"); a.href="data:text/csv;charset=utf-8,"+encodeURI(csv); a.download="data.csv"; a.click();
+                if (!FinanceController.data || FinanceController.data.length === 0) {
+                    App.toast("No hay datos para exportar", "error");
+                    return;
+                }
+
+                // 1. Definir cabeceras
+                const headers = ["Fecha", "Tipo", "Categoría", "Monto", "Descripción"];
+                
+                // 2. Procesar filas
+                const rows = FinanceController.data.map(r => {
+                    // Escapar comas en la descripción para mantener formato CSV válido
+                    const cleanDesc = (r.description || "").replace(/,/g, " ").replace(/\n/g, " "); 
+                    const typeLabel = r.type === 'income' ? 'Ingreso' : 'Gasto';
+                    
+                    return [
+                        new Date(r.date).toLocaleDateString(),
+                        typeLabel,
+                        r.category,
+                        r.amount,
+                        cleanDesc
+                    ].join(",");
+                });
+
+                // 3. Unir todo con salto de línea
+                const csvContent = [headers.join(","), ...rows].join("\n");
+
+                // 4. Crear Blob con BOM (\ufeff) para que Excel reconozca tildes/ñ
+                const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
+                
+                // 5. Crear enlace de descarga temporal
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.setAttribute("href", url);
+                link.setAttribute("download", `pocketmanager_export_${new Date().toISOString().slice(0,10)}.csv`);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
             }
         };
 
