@@ -1,0 +1,588 @@
+<!-- 
+     PocketManager Docs v3.1
+     Created by: Alejandro Gonzalo
+     Powered by: Gemini 3 Pro
+-->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PocketManager | Docs Técnicos</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* Scrollbar personalizado */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Estilos de código */
+        .code-block {
+            background-color: #0f172a;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            overflow-x: auto;
+            white-space: pre;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            border: 1px solid #1e293b;
+        }
+        .code-keyword { color: #c678dd; } 
+        .code-string { color: #98c379; } 
+        .code-comment { color: #5c6370; font-style: italic; } 
+        .code-func { color: #61afef; }
+
+        .active-nav {
+            background-color: #eff6ff;
+            color: #2563eb;
+            border-right: 3px solid #2563eb;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            height: 300px;
+        }
+        
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; opacity: 0; transform: translateY(10px); }
+        @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
+        
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 h-screen overflow-hidden flex flex-col md:flex-row">
+
+    <!-- Sidebar Navigation -->
+    <aside class="w-full md:w-72 bg-white border-b md:border-b-0 md:border-r border-slate-200 flex-shrink-0 flex flex-col z-20 shadow-sm">
+        <div class="p-6 border-b border-slate-100 flex items-center gap-4">
+            <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-blue-200">
+                <i class="fa-solid fa-wallet"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-slate-900 text-lg tracking-tight">PocketManager</h1>
+                <p class="text-xs text-slate-500 font-medium bg-slate-100 px-2 py-0.5 rounded-full inline-block">Docs v3.0</p>
+            </div>
+        </div>
+        
+        <nav class="flex-1 overflow-y-auto p-4 space-y-1">
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 px-4 mt-2">Plataforma</div>
+            <button onclick="navTo('dashboard')" id="nav-dashboard" class="w-full text-left px-4 py-3 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors active-nav flex items-center gap-3">
+                <i class="fa-solid fa-chart-pie w-5 text-center opacity-70"></i> Visión General
+            </button>
+            <button onclick="navTo('architecture')" id="nav-architecture" class="w-full text-left px-4 py-3 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors flex items-center gap-3">
+                <i class="fa-solid fa-sitemap w-5 text-center opacity-70"></i> Arquitectura Híbrida
+            </button>
+            <button onclick="navTo('techstack')" id="nav-techstack" class="w-full text-left px-4 py-3 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors flex items-center gap-3">
+                <i class="fa-solid fa-layer-group w-5 text-center opacity-70"></i> Stack Tecnológico
+            </button>
+            
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 px-4 mt-6">Desarrollo</div>
+            <button onclick="navTo('code')" id="nav-code" class="w-full text-left px-4 py-3 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors flex items-center gap-3">
+                <i class="fa-solid fa-code w-5 text-center opacity-70"></i> Mini Webs (Código)
+            </button>
+            <button onclick="navTo('deployment')" id="nav-deployment" class="w-full text-left px-4 py-3 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors flex items-center gap-3">
+                <i class="fa-solid fa-rocket w-5 text-center opacity-70"></i> Pipeline CI/CD
+            </button>
+            <button onclick="navTo('credits')" id="nav-credits" class="w-full text-left px-4 py-3 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors flex items-center gap-3">
+                <i class="fa-solid fa-award w-5 text-center opacity-70"></i> Créditos IA
+            </button>
+        </nav>
+
+        <div class="p-6 border-t border-slate-100 bg-slate-50/50">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold">
+                    AG
+                </div>
+                <div>
+                    <p class="text-sm font-bold text-slate-800">Alejandro Gonzalo</p>
+                    <p class="text-xs text-slate-500">Lead Developer</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 h-full overflow-y-auto bg-slate-50 relative scroll-smooth">
+        <div class="max-w-5xl mx-auto p-6 md:p-10 pb-20">
+            
+            <!-- SECTION: DASHBOARD -->
+            <section id="dashboard" class="fade-in" style="animation-delay: 0.1s">
+                <header class="mb-10">
+                    <span class="text-blue-600 font-bold text-xs uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-full border border-blue-100">Documentación Oficial</span>
+                    <h2 class="text-4xl font-bold text-slate-900 mt-4 mb-2">Ecosistema PocketManager</h2>
+                    <p class="text-slate-600 text-lg max-w-2xl">Plataforma financiera integral con arquitectura distribuida y automatización inteligente.</p>
+                </header>
+
+                <!-- Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow group">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 text-xl group-hover:scale-110 transition-transform"><i class="fa-solid fa-mobile-screen"></i></div>
+                            <span class="bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded">V1.0</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-800">App Híbrida</h3>
+                        <p class="text-sm text-slate-500 mt-1">Web Wrapper Android</p>
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow group">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600 text-xl group-hover:scale-110 transition-transform"><i class="fa-solid fa-database"></i></div>
+                            <span class="bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded">Activo</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-800">Supabase BaaS</h3>
+                        <p class="text-sm text-slate-500 mt-1">Realtime DB & Auth</p>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow group">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center text-orange-600 text-xl group-hover:scale-110 transition-transform"><i class="fa-solid fa-robot"></i></div>
+                            <span class="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-1 rounded">Gemini 3 Pro</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-800">AI Worker</h3>
+                        <p class="text-sm text-slate-500 mt-1">Automatización Python</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
+                        <h3 class="text-xl font-bold text-slate-800 mb-4">Resumen Técnico</h3>
+                        <p class="text-slate-600 mb-4 leading-relaxed text-sm">
+                            El sistema implementa una arquitectura <strong>Hub-and-Spoke</strong> donde Supabase actúa como el núcleo central de datos.
+                        </p>
+                        <ul class="space-y-3 text-sm text-slate-600">
+                            <li class="flex items-start gap-3">
+                                <i class="fa-solid fa-check text-green-500 mt-1"></i>
+                                <span><strong>Frontend:</strong> PWA en GitHub Pages (Zero-Config deploy).</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <i class="fa-solid fa-check text-green-500 mt-1"></i>
+                                <span><strong>Mobile:</strong> Contenedor nativo Android (Cordova v13) con WebView optimizado.</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <i class="fa-solid fa-check text-green-500 mt-1"></i>
+                                <span><strong>Backend:</strong> Lógica de servidor desacoplada en Worker Python (Lubuntu VM).</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center justify-center">
+                        <h3 class="text-lg font-bold text-slate-800 mb-4 w-full">Métricas de Calidad</h3>
+                        <div class="chart-container">
+                            <canvas id="capabilitiesChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION: ARCHITECTURE -->
+            <section id="architecture" class="fade-in hidden">
+                <header class="mb-10">
+                    <h2 class="text-3xl font-bold text-slate-900 mb-2">Arquitectura Distribuida</h2>
+                    <p class="text-slate-600">Interacción entre los 4 componentes principales del sistema.</p>
+                </header>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                    <div onclick="showArchDetail('frontend')" class="cursor-pointer bg-white hover:bg-blue-50 border-2 border-transparent hover:border-blue-500 p-6 rounded-xl shadow-sm transition-all group">
+                        <div class="text-3xl text-blue-600 mb-4"><i class="fa-solid fa-laptop-code"></i></div>
+                        <h3 class="font-bold text-slate-800">1. Frontend Web</h3>
+                        <p class="text-xs text-slate-500 mt-1">GitHub Pages</p>
+                    </div>
+                    <div onclick="showArchDetail('mobile')" class="cursor-pointer bg-white hover:bg-purple-50 border-2 border-transparent hover:border-purple-500 p-6 rounded-xl shadow-sm transition-all group">
+                        <div class="text-3xl text-purple-600 mb-4"><i class="fa-brands fa-android"></i></div>
+                        <h3 class="font-bold text-slate-800">2. Mobile APK</h3>
+                        <p class="text-xs text-slate-500 mt-1">Nativo (Cordova)</p>
+                    </div>
+                    <div onclick="showArchDetail('backend')" class="cursor-pointer bg-white hover:bg-emerald-50 border-2 border-transparent hover:border-emerald-500 p-6 rounded-xl shadow-sm transition-all group">
+                        <div class="text-3xl text-emerald-600 mb-4"><i class="fa-solid fa-database"></i></div>
+                        <h3 class="font-bold text-slate-800">3. Backend DB</h3>
+                        <p class="text-xs text-slate-500 mt-1">Supabase Cloud</p>
+                    </div>
+                    <div onclick="showArchDetail('worker')" class="cursor-pointer bg-white hover:bg-orange-50 border-2 border-transparent hover:border-orange-500 p-6 rounded-xl shadow-sm transition-all group">
+                        <div class="text-3xl text-orange-600 mb-4"><i class="fa-solid fa-microchip"></i></div>
+                        <h3 class="font-bold text-slate-800">4. Worker Bot</h3>
+                        <p class="text-xs text-slate-500 mt-1">Python Service</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-lg border border-slate-200 p-8 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-slate-50 rounded-bl-full -mr-10 -mt-10 z-0"></div>
+                    <div class="relative z-10">
+                        <h3 id="arch-title" class="font-bold text-2xl text-slate-800 mb-4">Selecciona un componente</h3>
+                        <p id="arch-desc" class="text-slate-600 leading-relaxed text-lg">Haz clic en las tarjetas de arriba para ver los detalles técnicos, responsabilidades y flujo de datos de cada módulo.</p>
+                        <div id="arch-tags" class="flex gap-2 mt-8 hidden"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION: TECH STACK -->
+            <section id="techstack" class="fade-in hidden">
+                <header class="mb-10">
+                    <h2 class="text-3xl font-bold text-slate-900 mb-2">Stack Tecnológico</h2>
+                    <p class="text-slate-600">Herramientas y versiones utilizadas en producción.</p>
+                </header>
+                
+                <div class="bg-white rounded-2xl shadow-sm overflow-hidden border border-slate-200">
+                    <table class="w-full text-sm text-left">
+                        <thead class="bg-slate-50 text-slate-500 uppercase text-xs">
+                            <tr>
+                                <th class="px-6 py-4">Módulo</th>
+                                <th class="px-6 py-4">Tecnología</th>
+                                <th class="px-6 py-4">Versión</th>
+                                <th class="px-6 py-4">Función</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            <!-- Frontend -->
+                            <tr class="hover:bg-slate-50 bg-blue-50/10"><td class="px-6 py-4 font-bold text-blue-700">Frontend</td><td>HTML5 + JS</td><td>ES6</td><td>Core Logic</td></tr>
+                            <tr class="hover:bg-slate-50 bg-blue-50/10"><td class="px-6 py-4 font-bold text-blue-700">Frontend</td><td>Tailwind CSS</td><td>v3.4</td><td>UI Framework</td></tr>
+                            <tr class="hover:bg-slate-50 bg-blue-50/10"><td class="px-6 py-4 font-bold text-blue-700">Frontend</td><td>Supabase JS</td><td>v2.x</td><td>DB Client</td></tr>
+                            <!-- Mobile -->
+                            <tr class="hover:bg-slate-50 bg-purple-50/10"><td class="px-6 py-4 font-bold text-purple-700">Mobile</td><td>Cordova Android</td><td class="text-indigo-600 font-bold">v13.0.0</td><td>Native Engine</td></tr>
+                            <tr class="hover:bg-slate-50 bg-purple-50/10"><td class="px-6 py-4 font-bold text-purple-700">Mobile</td><td>Java JDK</td><td>v17</td><td>Compiler</td></tr>
+                            <!-- Worker -->
+                            <tr class="hover:bg-slate-50 bg-orange-50/10"><td class="px-6 py-4 font-bold text-orange-700">Worker</td><td>Python</td><td>v3.10+</td><td>Server Logic</td></tr>
+                            <tr class="hover:bg-slate-50 bg-orange-50/10"><td class="px-6 py-4 font-bold text-orange-700">Worker</td><td>Lubuntu</td><td>22.04 LTS</td><td>Host OS</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- SECTION: CODE REPOSITORY -->
+            <section id="code" class="fade-in hidden">
+                <header class="mb-8">
+                    <h2 class="text-3xl font-bold text-slate-900 mb-2">Mini Webs (Código Fuente)</h2>
+                    <p class="text-slate-600">Explora los fragmentos clave que hacen funcionar el sistema.</p>
+                </header>
+
+                <div class="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
+                    <div class="flex border-b border-slate-200 bg-slate-50 overflow-x-auto">
+                        <button onclick="CodeViewer.show('html', this)" class="code-tab px-6 py-4 text-sm font-bold text-blue-600 border-b-2 border-blue-600 bg-white transition-colors"><i class="fa-solid fa-code mr-2"></i>Frontend</button>
+                        <button onclick="CodeViewer.show('cordova', this)" class="code-tab px-6 py-4 text-sm font-bold text-slate-500 hover:text-slate-700 transition-colors"><i class="fa-brands fa-android mr-2"></i>APK Launcher</button>
+                        <button onclick="CodeViewer.show('python', this)" class="code-tab px-6 py-4 text-sm font-bold text-slate-500 hover:text-slate-700 transition-colors"><i class="fa-brands fa-python mr-2"></i>Worker Python</button>
+                        <button onclick="CodeViewer.show('js', this)" class="code-tab px-6 py-4 text-sm font-bold text-slate-500 hover:text-slate-700 transition-colors"><i class="fa-brands fa-js mr-2"></i>Realtime JS</button>
+                    </div>
+
+                    <div class="p-0 bg-slate-900">
+                        <div id="code-content" class="code-block rounded-none text-sm h-[500px] overflow-y-auto font-mono border-0">
+                            <!-- Injected JS -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION: DEPLOYMENT -->
+            <section id="deployment" class="fade-in hidden">
+                <header class="mb-10">
+                    <h2 class="text-3xl font-bold text-slate-900 mb-2">Pipeline CI/CD</h2>
+                    <p class="text-slate-600">Flujo de automatización en GitHub Actions.</p>
+                </header>
+
+                <div class="relative space-y-8 pl-10 before:content-[''] before:absolute before:left-4 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200">
+                    <div class="relative">
+                        <div class="absolute -left-[33px] top-1 w-4 h-4 rounded-full bg-slate-800 ring-4 ring-white"></div>
+                        <h3 class="font-bold text-lg text-slate-800">1. Git Push</h3>
+                        <p class="text-sm text-slate-500 mt-1">El desarrollador sube cambios a la rama <code>main</code>.</p>
+                    </div>
+                    <div class="relative">
+                        <div class="absolute -left-[33px] top-1 w-4 h-4 rounded-full bg-blue-500 ring-4 ring-white"></div>
+                        <h3 class="font-bold text-lg text-slate-800">2. Build Environment</h3>
+                        <p class="text-sm text-slate-500 mt-1">GitHub levanta contenedor Ubuntu con <strong>Java 17</strong> y <strong>Node 18</strong>.</p>
+                    </div>
+                    <div class="relative">
+                        <div class="absolute -left-[33px] top-1 w-4 h-4 rounded-full bg-purple-500 ring-4 ring-white"></div>
+                        <h3 class="font-bold text-lg text-slate-800">3. Cordova Compilation</h3>
+                        <div class="bg-slate-100 p-3 rounded-lg mt-2 font-mono text-xs text-slate-600 inline-block border border-slate-200">
+                            npm install cordova<br>
+                            cordova platform add android@13.0.0<br>
+                            cordova build android --release
+                        </div>
+                    </div>
+                    <div class="relative">
+                        <div class="absolute -left-[33px] top-1 w-4 h-4 rounded-full bg-green-500 ring-4 ring-white"></div>
+                        <h3 class="font-bold text-lg text-slate-800">4. Artifact Ready</h3>
+                        <p class="text-sm text-slate-500 mt-1">El archivo <code>.apk</code> se publica automáticamente para descarga.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION: CREDITS -->
+            <section id="credits" class="fade-in hidden">
+                <header class="mb-10 text-center">
+                    <div class="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-3xl font-bold mx-auto mb-6 shadow-xl shadow-blue-200">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    </div>
+                    <h2 class="text-3xl font-bold text-slate-900 mb-2">Créditos del Proyecto</h2>
+                    <p class="text-slate-600 text-lg">La inteligencia detrás de la arquitectura.</p>
+                </header>
+
+                <div class="max-w-2xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Creator -->
+                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 text-center hover:-translate-y-1 transition-transform duration-300">
+                        <div class="w-16 h-16 bg-slate-100 rounded-full mx-auto mb-4 flex items-center justify-center text-2xl text-slate-700">
+                            <i class="fa-solid fa-user"></i>
+                        </div>
+                        <h3 class="font-bold text-xl text-slate-900">Alejandro Gonzalo</h3>
+                        <p class="text-blue-600 font-medium text-sm mt-1">Arquitecto & Desarrollador</p>
+                        <p class="text-slate-500 text-sm mt-4 italic">"Diseño, implementación y despliegue del ecosistema completo."</p>
+                    </div>
+
+                    <!-- AI -->
+                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 text-center hover:-translate-y-1 transition-transform duration-300 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 bg-blue-600 text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl">AI POWERED</div>
+                        <div class="w-16 h-16 bg-blue-50 rounded-full mx-auto mb-4 flex items-center justify-center text-2xl text-blue-600">
+                            <i class="fa-solid fa-brain"></i>
+                        </div>
+                        <h3 class="font-bold text-xl text-slate-900">Gemini 3 Pro</h3>
+                        <p class="text-purple-600 font-medium text-sm mt-1">Modelo de Inteligencia Artificial</p>
+                        <p class="text-slate-500 text-sm mt-4 italic">"Generación de código, optimización de algoritmos y documentación."</p>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- JS Logic -->
+    <script>
+        // --- DATA ---
+        const ArchitectureData = {
+            frontend: {
+                title: "Frontend Web App",
+                desc: "Aplicación de Página Única (SPA) construida con HTML5 y JavaScript moderno (ES6+). Diseño responsivo mediante Tailwind CSS. Se conecta directamente a Supabase para operaciones CRUD y Auth.",
+                tags: ["GitHub Pages", "Tailwind v3", "Chart.js"],
+                color: "text-blue-600"
+            },
+            mobile: {
+                title: "Mobile Wrapper",
+                desc: "Aplicación Android generada con Cordova v13. Funciona como un navegador dedicado (WebView) que carga el frontend remoto, añadiendo persistencia y acceso a hardware.",
+                tags: ["Cordova 13", "Android SDK 33", "Java 17"],
+                color: "text-purple-600"
+            },
+            backend: {
+                title: "Backend BaaS",
+                desc: "Base de datos PostgreSQL en la nube. Gestiona la identidad de usuarios (Row Level Security) y emite eventos Websocket en tiempo real para sincronizar estados (ej. videollamadas).",
+                tags: ["PostgreSQL", "RLS Policies", "Realtime"],
+                color: "text-emerald-600"
+            },
+            worker: {
+                title: "Worker Automatizado",
+                desc: "Servicio Python ejecutándose 24/7 en una máquina virtual Linux. Utiliza la 'Service Role Key' para operaciones administrativas como enviar correos SMTP y crear salas Jitsi.",
+                tags: ["Python 3.10", "SMTP Lib", "Systemd"],
+                color: "text-orange-600"
+            }
+        };
+
+        const CodeSnippets = {
+            html: `<!-- 1. FRONTEND: Estructura Base HTML5 -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"><\/script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"><\/script>
+</head>
+<body class="bg-slate-50">
+    <div class="glass-card p-5 max-w-md mx-auto mt-10">
+        <h1 class="text-2xl font-bold text-slate-800">PocketManager</h1>
+        <div id="app-content">
+            <!-- El contenido se inyecta dinámicamente -->
+        </div>
+    </div>
+</body>
+</html>`,
+            
+            cordova: `<!-- 2. MOBILE: Launcher Nativo (config.xml + index.html) -->
+<!-- config.xml -->
+<widget id="com.pocketmanager.app" version="1.0.0">
+    <preference name="AndroidInsecureFileModeEnabled" value="true" />
+    <allow-navigation href="https://*.supabase.co/*" />
+</widget>
+
+<!-- index.html (Local en el teléfono) -->
+<script>
+    document.addEventListener('deviceready', function() {
+        // Redirigir a la nube inmediatamente
+        window.location.href = "https://usuario.github.io/app";
+    }, false);
+<\/script>`,
+
+            python: `# 3. WORKER: Script Python (Lubuntu VM)
+import time
+import uuid
+from supabase import create_client
+
+# Conexión privilegiada (Service Role)
+ADMIN_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI..." 
+db = create_client(URL, ADMIN_KEY)
+
+def process_tasks():
+    # Buscar solicitudes de video pendientes
+    reqs = db.table('video_requests').select("*").eq('status', 'pending').execute()
+    
+    for req in reqs.data:
+        # Generar sala única
+        link = f"https://meet.jit.si/Asesoria-{uuid.uuid4()}"
+        
+        # Guardar link y avisar al usuario (Realtime lo detectará)
+        db.table('video_requests').update({
+            'status': 'ready',
+            'meet_link': link
+        }).eq('id', req['id']).execute()
+
+while True:
+    process_tasks()
+    time.sleep(5)`,
+
+            js: `// 4. CLIENTE JS: Lógica Realtime
+const sb = supabase.createClient(URL, KEY);
+
+function watchVideoCall(requestId) {
+    // Suscribirse a cambios en la base de datos
+    sb.channel('video-room')
+      .on(
+          'postgres_changes', 
+          { 
+              event: 'UPDATE', 
+              schema: 'public', 
+              table: 'video_requests',
+              filter: 'id=eq.' + requestId 
+          }, 
+          (payload) => {
+              if (payload.new.status === 'ready') {
+                  alert("¡Tu asesor está listo! Uniéndose...");
+                  window.open(payload.new.meet_link);
+              }
+          }
+      )
+      .subscribe();
+}`
+        };
+
+        // --- NAVIGATION ---
+        function navTo(sectionId) {
+            document.querySelectorAll('main > div > section').forEach(el => el.classList.add('hidden'));
+            document.getElementById(sectionId).classList.remove('hidden');
+            
+            document.querySelectorAll('aside nav button').forEach(el => {
+                el.classList.remove('active-nav', 'text-blue-600');
+                el.classList.add('text-slate-600');
+                el.querySelector('i').classList.add('opacity-70');
+            });
+            
+            const btn = document.getElementById(`nav-${sectionId}`);
+            if(btn) {
+                btn.classList.add('active-nav', 'text-blue-600');
+                btn.classList.remove('text-slate-600');
+                btn.querySelector('i').classList.remove('opacity-70');
+            }
+        }
+
+        // --- ARCHITECTURE DETAILS ---
+        function showArchDetail(key) {
+            const data = ArchitectureData[key];
+            document.getElementById('arch-title').innerText = data.title;
+            document.getElementById('arch-title').className = `font-bold text-2xl ${data.color} mb-4`;
+            document.getElementById('arch-desc').innerText = data.desc;
+            
+            const tags = document.getElementById('arch-tags');
+            tags.innerHTML = '';
+            tags.classList.remove('hidden');
+            data.tags.forEach(tag => {
+                tags.innerHTML += `<span class="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-xs font-bold border border-slate-200">${tag}</span>`;
+            });
+        }
+
+        // --- CODE VIEWER ---
+        const CodeViewer = {
+            show: (lang, tabElement) => {
+                // If a tab element is provided (user click), update styles
+                if (tabElement) {
+                    document.querySelectorAll('.code-tab').forEach(el => {
+                        el.classList.remove('border-b-2', 'border-blue-600', 'text-blue-600', 'bg-white');
+                        el.classList.add('text-slate-500', 'hover:text-slate-700');
+                    });
+                    tabElement.classList.add('border-b-2', 'border-blue-600', 'text-blue-600', 'bg-white');
+                    tabElement.classList.remove('text-slate-500', 'hover:text-slate-700');
+                } else if (window.event && window.event.currentTarget) {
+                     // Fallback for legacy calls if window.event is available
+                     const target = window.event.currentTarget;
+                     if(target.classList.contains('code-tab')) {
+                        document.querySelectorAll('.code-tab').forEach(el => {
+                            el.classList.remove('border-b-2', 'border-blue-600', 'text-blue-600', 'bg-white');
+                            el.classList.add('text-slate-500', 'hover:text-slate-700');
+                        });
+                        target.classList.add('border-b-2', 'border-blue-600', 'text-blue-600', 'bg-white');
+                        target.classList.remove('text-slate-500', 'hover:text-slate-700');
+                     }
+                }
+                
+                // Content update with simple fade effect
+                const content = document.getElementById('code-content');
+                content.style.opacity = '0';
+                setTimeout(() => {
+                    content.innerText = CodeSnippets[lang];
+                    content.style.opacity = '1';
+                }, 150);
+            }
+        };
+
+        // --- INIT ---
+        window.onload = function() {
+            // Chart
+            const ctx = document.getElementById('capabilitiesChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Seguridad', 'Automatización', 'UX Móvil', 'Tiempo Real', 'Escalabilidad'],
+                    datasets: [{
+                        label: 'PocketManager V1',
+                        data: [90, 85, 95, 90, 80],
+                        fill: true,
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                        borderColor: 'rgb(37, 99, 235)',
+                        pointBackgroundColor: 'rgb(37, 99, 235)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgb(37, 99, 235)'
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: { r: { suggestedMin: 0, suggestedMax: 100, ticks: { display: false } } },
+                    plugins: { legend: { display: false } }
+                }
+            });
+
+            // Defaults
+            showArchDetail('frontend');
+            
+            // Initialize code viewer with the first tab
+            const firstTab = document.querySelector('.code-tab');
+            CodeViewer.show('html', firstTab);
+        };
+    </script>
+</body>
+</html>
